@@ -37,8 +37,8 @@ export default function CartPage() {
       });
 
       showToast("✅ 訂單已送出！");
-      setCartItems([]); // 清空購物車
-      navigate("/orders"); // 跳到訂單頁
+      setCartItems([]);
+      navigate("/orders");
     } catch (err) {
       console.error("送出訂單錯誤:", err);
       showToast("❌ 送出訂單失敗：" + err.message);
@@ -46,47 +46,125 @@ export default function CartPage() {
   };
 
   return (
-    <div>
-      <h1>購物車</h1>
-      {cartItems.length === 0 && <p>購物車是空的</p>}
-      {cartItems.map((item) => (
-        <div key={item.id} style={{ marginBottom: "10px" }}>
-          <span>{item.name} - ${item.price} x {item.quantity}</span>
-          <button style={{ marginLeft: "5px" }} onClick={() => updateQuantity(item.id, 1)}>+</button>
-          <button style={{ marginLeft: "5px" }} onClick={() => updateQuantity(item.id, -1)}>-</button>
-          <button style={{ marginLeft: "5px" }} onClick={() => removeFromCart(item.id)}>❌</button>
-        </div>
-      ))}
+    <div style={{
+      minHeight: "100vh",
+      padding: "40px 20px",
+      display: "flex",
+      justifyContent: "center"
+    }}>
+      <div style={{
+        width: "100%",
+        maxWidth: "800px",
+        background: "white",
+        borderRadius: "12px",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
+        padding: "30px"
+      }}>
+        <h1 style={{ textAlign: "center", marginBottom: "24px", color: "#333" }}>購物車</h1>
 
-      {cartItems.length > 0 && (
-        <div style={{ marginTop: "20px" }}>
-          <p>總金額: ${total}</p>
-          <button onClick={() => setShowQR(true)}>生成 QR code</button>
-          <button onClick={placeOrder} style={{ marginLeft: "10px" }} disabled={!user}>送出訂單</button>
+        {cartItems.length === 0 ? (
+          <p style={{ textAlign: "center", color: "#555" }}>購物車是空的</p>
+        ) : (
+          <>
+            <div style={{ display: "flex", flexDirection: "column", gap: "16px" }}>
+              {cartItems.map(item => (
+                <div key={item.id} style={{
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "space-between",
+                  padding: "12px",
+                  borderRadius: "10px",
+                  border: "1px solid #e0e0e0",
+                  boxShadow: "0 2px 6px rgba(0,0,0,0.05)"
+                }}>
+                  <div style={{ flex: 1 }}>
+                    <p style={{ fontWeight: "bold", marginBottom: "4px" }}>{item.name}</p>
+                    <p style={{ color: "#888" }}>NT$ {item.price}</p>
+                  </div>
 
-          {showQR && (
-            <div style={{ marginTop: "20px", border: "1px solid black", display: "inline-block", padding: "10px" }}>
-              <QRCodeCanvas value={JSON.stringify(cartItems)} />
-              <button style={{ display: "block", marginTop: "10px" }} onClick={() => setShowQR(false)}>關閉</button>
+                  <div style={{ display: "flex", alignItems: "center", gap: "8px" }}>
+                    <button onClick={() => updateQuantity(item.id, -1)} style={qtyBtnStyle}>-</button>
+                    <span>{item.quantity}</span>
+                    <button onClick={() => updateQuantity(item.id, 1)} style={qtyBtnStyle}>+</button>
+                  </div>
+
+                  <button onClick={() => removeFromCart(item.id)} style={removeBtnStyle}>✕</button>
+                </div>
+              ))}
             </div>
-          )}
-        </div>
-      )}
 
-      <button
-        onClick={() => navigate("/")}
-        style={{
-          marginTop: "20px",
-          padding: "10px 20px",
-          background: "#007bff",
-          color: "white",
-          border: "none",
-          borderRadius: "5px",
-          cursor: "pointer",
-        }}
-      >
-        回到首頁
-      </button>
+            <div style={{
+              marginTop: "24px",
+              display: "flex",
+              justifyContent: "space-between",
+              alignItems: "center"
+            }}>
+              <strong style={{ fontSize: "1.2rem" }}>總金額: NT$ {total}</strong>
+              <div>
+                <button onClick={() => setShowQR(true)} style={gradientBtnStyle}>生成 QR code</button>
+                <button onClick={placeOrder} style={{ ...gradientBtnStyle, marginLeft: "10px" }} disabled={!user}>送出訂單</button>
+              </div>
+            </div>
+
+            {showQR && (
+              <div style={{
+                marginTop: "20px",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                padding: "20px",
+                border: "1px solid #ccc",
+                borderRadius: "12px",
+                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
+              }}>
+                <QRCodeCanvas value={JSON.stringify(cartItems)} size={180} />
+                <button onClick={() => setShowQR(false)} style={{ ...gradientBtnStyle, marginTop: "12px" }}>關閉 QR code</button>
+              </div>
+            )}
+          </>
+        )}
+
+        <button
+          onClick={() => navigate("/")}
+          style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%" }}
+        >
+          回到首頁
+        </button>
+      </div>
     </div>
   );
 }
+
+const qtyBtnStyle = {
+  padding: "6px 12px",
+  borderRadius: "6px",
+  border: "none",
+  background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)",
+  color: "white",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+};
+
+const removeBtnStyle = {
+  padding: "6px 12px",
+  borderRadius: "6px",
+  border: "none",
+  background: "#ff6b6b",
+  color: "white",
+  fontWeight: "bold",
+  cursor: "pointer",
+  transition: "all 0.2s",
+};
+
+const gradientBtnStyle = {
+  padding: "10px 20px",
+  borderRadius: "8px",
+  border: "none",
+  background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+  color: "white",
+  fontWeight: "bold",
+  cursor: "pointer",
+  boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
+  transition: "all 0.2s",
+};
