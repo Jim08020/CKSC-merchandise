@@ -12,7 +12,7 @@ export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState(""); // 新增確認密碼
+  const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState(""); 
   const [phone, setPhone] = useState("");
   const navigate = useNavigate();
@@ -28,11 +28,9 @@ export default function AuthPage() {
 
     try {
       if (isSignUp) {
-        // 註冊
         const userCredential = await createUserWithEmailAndPassword(auth, email, password);
         const user = userCredential.user;
 
-        // 存額外資訊到 Firestore
         await setDoc(doc(db, "users", user.uid), {
           name,
           phone,
@@ -44,7 +42,6 @@ export default function AuthPage() {
         showToast("✅ 註冊成功！");
         navigate("/"); 
       } else {
-        // 登入
         await signInWithEmailAndPassword(auth, email, password);
         showToast("✅ 登入成功！");
         navigate("/"); 
@@ -56,66 +53,121 @@ export default function AuthPage() {
   };
 
   return (
-    <div style={{ maxWidth: "400px", margin: "50px auto", textAlign: "center" }}>
-      <h2>{isSignUp ? "註冊" : "登入"}</h2>
-      <form onSubmit={handleSubmit}>
-        {isSignUp && (
-          <>
-            <input
-              type="text"
-              placeholder="姓名"
-              value={name}
-              onChange={(e) => setName(e.target.value)}
-              required
-              style={{ display: "block", margin: "10px auto", padding: "8px" }}
-            />
-            <input
-              type="text"
-              placeholder="電話"
-              value={phone}
-              onChange={(e) => setPhone(e.target.value)}
-              required
-              style={{ display: "block", margin: "10px auto", padding: "8px" }}
-            />
-          </>
-        )}
-        <input
-          type="email"
-          placeholder="電子郵件"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          style={{ display: "block", margin: "10px auto", padding: "8px" }}
-        />
-        <input
-          type="password"
-          placeholder="密碼"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          style={{ display: "block", margin: "10px auto", padding: "8px" }}
-        />
-        {isSignUp && (
+    <div style={{
+      minHeight: "100vh",
+      display: "flex",
+      justifyContent: "center",
+      alignItems: "center",
+      padding: "20px"
+    }}>
+      <div style={{
+        background: "white",
+        borderRadius: "12px",
+        padding: "40px 30px",
+        maxWidth: "400px",
+        width: "100%",
+        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+        textAlign: "center"
+      }}>
+        <h2 style={{ marginBottom: "24px", color: "#333" }}>
+          {isSignUp ? "註冊" : "登入"}
+        </h2>
+
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
+          {isSignUp && (
+            <>
+              <input
+                type="text"
+                placeholder="姓名"
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                required
+                style={inputStyle}
+              />
+              <input
+                type="text"
+                placeholder="電話"
+                value={phone}
+                onChange={(e) => setPhone(e.target.value)}
+                required
+                style={inputStyle}
+              />
+            </>
+          )}
+
+          <input
+            type="email"
+            placeholder="電子郵件"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            required
+            style={inputStyle}
+          />
           <input
             type="password"
-            placeholder="確認密碼"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
+            placeholder="密碼"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
             required
-            style={{ display: "block", margin: "10px auto", padding: "8px" }}
+            style={inputStyle}
           />
-        )}
-        <button type="submit" style={{ margin: "10px auto", padding: "10px 20px" }}>
-          {isSignUp ? "註冊" : "登入"}
-        </button>
-      </form>
+          {isSignUp && (
+            <input
+              type="password"
+              placeholder="確認密碼"
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              required
+              style={inputStyle}
+            />
+          )}
 
-      <p>
-        {isSignUp ? "已經有帳號？" : "還沒有帳號？"}{" "}
-        <button onClick={() => setIsSignUp(!isSignUp)}>
-          {isSignUp ? "去登入" : "去註冊"}
-        </button>
-      </p>
+          <button type="submit" style={submitBtnStyle}>
+            {isSignUp ? "註冊" : "登入"}
+          </button>
+        </form>
+
+        <p style={{ marginTop: "20px", color: "#555" }}>
+          {isSignUp ? "已經有帳號？" : "還沒有帳號？"}{" "}
+          <button 
+            onClick={() => setIsSignUp(!isSignUp)} 
+            style={{
+              background: "none",
+              border: "none",
+              color: "#667eea",
+              fontWeight: "bold",
+              cursor: "pointer",
+            }}
+          >
+            {isSignUp ? "去登入" : "去註冊"}
+          </button>
+        </p>
+      </div>
     </div>
   );
 }
+
+// 可重複使用的 input style
+const inputStyle = {
+  padding: "10px 14px",
+  margin: "8px 0",
+  borderRadius: "8px",
+  border: "1px solid #ccc",
+  fontSize: "1rem",
+  outline: "none",
+  transition: "border 0.2s",
+};
+
+const submitBtnStyle = {
+  padding: "12px 20px",
+  marginTop: "16px",
+  borderRadius: "8px",
+  border: "none",
+  background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+  color: "white",
+  fontWeight: "bold",
+  fontSize: "1rem",
+  cursor: "pointer",
+  boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
+  transition: "all 0.2s ease-in-out",
+};

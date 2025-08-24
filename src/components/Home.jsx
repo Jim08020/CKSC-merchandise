@@ -21,38 +21,64 @@ export default function Home() {
   };
 
   return (
-    <div>
-      <h1>CKSC Shop</h1>
+    <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
       {products.map((product) => (
-        <div key={product.id} style={{ marginBottom: "10px" }}>
-          <span>{product.name} - ${product.price}</span>
-          <button
-            style={{ marginLeft: "10px" }}
-            onClick={() => navigate(`/product/${product.id}`)}
-          >
-            查看商品
-          </button>
-          <button
-            style={{ marginLeft: "10px" }}
-            onClick={() => handleAddToCart(product)}
-          >
-            加入購物車
-          </button>
+        <div
+          key={product.id}
+          style={{
+            width: "220px",
+            padding: "16px",
+            borderRadius: "12px",
+            background: "white",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            transition: "transform 0.2s, box-shadow 0.2s",
+            cursor: "pointer",
+          }}
+          onMouseEnter={(e) => {
+            e.currentTarget.style.transform = "translateY(-4px)";
+            e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.15)";
+          }}
+          onMouseLeave={(e) => {
+            e.currentTarget.style.transform = "translateY(0)";
+            e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
+          }}
+        >
+          <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "8px" }}>
+            {product.name}
+          </div>
+          <div style={{ color: "#555", marginBottom: "12px" }}>${product.price}</div>
+          <div style={{ display: "flex", gap: "8px" }}>
+            <button
+              style={{
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "none",
+                background: "#4CAF50",
+                color: "white",
+                cursor: "pointer",
+              }}
+              onClick={() => handleAddToCart(product)}
+            >
+              加入購物車
+            </button>
+            <button
+              style={{
+                padding: "6px 12px",
+                borderRadius: "6px",
+                border: "1px solid #ccc",
+                background: "white",
+                cursor: "pointer",
+              }}
+              onClick={() => navigate(`/product/${product.id}`)}
+            >
+              查看
+            </button>
+          </div>
         </div>
       ))}
-
-      <div style={{ marginTop: "20px" }}>
-        <button onClick={() => navigate("/auth")}>登入 / 註冊</button>
-        <button onClick={() => navigate("/cart")} style={{ marginLeft: "10px" }}>
-          購物車
-        </button>
-        <button onClick={() => navigate("/admin")} style={{ marginLeft: "10px" }}>
-          後台管理
-        </button>
-        <button onClick={() => navigate("/orders")} style={{ marginLeft: "10px" }}>
-          我的訂單
-        </button>
-      </div>
     </div>
   );
 }
