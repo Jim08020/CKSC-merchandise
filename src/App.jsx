@@ -24,7 +24,7 @@ function App() {
       if (currentUser) {
         const tokenResult = await currentUser.getIdTokenResult();
         const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
-        
+           
         //const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
       } else {
