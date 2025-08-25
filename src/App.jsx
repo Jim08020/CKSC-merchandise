@@ -8,7 +8,7 @@ import HomePage from "./components/Home";
 import CartPage from "./components/Cartpage";
 import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/Productpage"; 
-import AdminPage from "./components/AdminPage"; // 後台頁面
+import AdminPage from "./components/Adminpage"; // 後台頁面
 import ToastProvider, { useToast } from "./components/ToastContext";
 
 function App() {
@@ -22,7 +22,6 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // 判斷是否管理員，這裡使用 custom claim，或用 email 白名單
         const tokenResult = await currentUser.getIdTokenResult();
         const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
@@ -135,7 +134,7 @@ function App() {
         )}
       </header>
 
-      {/* Drawer 左側滑出 */}
+      {/* Drawer */}
       <div
         style={{
           position: "fixed",
@@ -178,14 +177,13 @@ function App() {
         )}
       </div>
 
-      {/* Overlay */}
       {drawerOpen && (
         <div
           onClick={() => setDrawerOpen(false)}
           style={{
             position: "fixed",
             top: 0,
-            left: drawerOpen ? 0 : "-260px",
+            left: 0,
             width: "100%",
             height: "100%",
             background: "rgba(0,0,0,0.3)",
@@ -202,11 +200,12 @@ function App() {
           ) : (
             <>
               <Route path="/" element={<HomePage />} />
+              {/* ✅ Only one ProductPage route */}
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
 
-              {/* Admin 路由限制 */}
+              {/* Admin only */}
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 

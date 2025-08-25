@@ -10,9 +10,10 @@ export default function Home() {
   const { showToast } = useToast();
 
   const products = [
-    { id: 1, name: "商品 A", price: 100 },
-    { id: 2, name: "商品 B", price: 200 },
-    { id: 3, name: "商品 C", price: 300 },
+    { id: 1, name: "商品 1", price: 100 },
+    { id: 2, name: "商品 2", price: 200 },
+    { id: 3, name: "商品 3", price: 300 },
+
   ];
 
   const handleAddToCart = (product) => {

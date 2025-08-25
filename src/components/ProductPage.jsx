@@ -1,69 +1,53 @@
 import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 
+// 個別商品頁面，可以放在 ./products 資料夾
+import Product1 from "./products/Product1";
+import Product2 from "./products/Product2";
+import Product3 from "./products/Product3";
+
+// id → 對應的商品 component
+const productMap = {
+  1: Product1,
+  2: Product2,
+  3: Product3,
+};
+
 export default function ProductPage() {
   const { id } = useParams();
   const navigate = useNavigate();
 
-  return (
-    <div style={{
-      minHeight: "100vh",
-      padding: "40px 20px",
-      display: "flex",
-      justifyContent: "center"
-    }}>
+  const SpecificProduct = productMap[id]; // 根據 id 找對應的頁面
+
+  if (!SpecificProduct) {
+    return (
       <div style={{
-        width: "100%",
-        maxWidth: "600px",
-        background: "white",
-        borderRadius: "12px",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.1)",
-        padding: "30px",
+        minHeight: "100vh",
         display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
         flexDirection: "column",
-        alignItems: "center"
+        color: "#555"
       }}>
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>商品 {id}</h1>
-        <p style={{ textAlign: "center", color: "#555", marginBottom: "24px" }}>
-          這裡會顯示商品詳細資訊，包括圖片、描述、價格等等。
-        </p>
-
-        {/* 商品圖片示意 */}
-        <div style={{
-          width: "100%",
-          maxWidth: "300px",
-          height: "300px",
-          background: "#e0e0e0",
-          borderRadius: "12px",
-          marginBottom: "24px",
-          display: "flex",
-          alignItems: "center",
-          justifyContent: "center",
-          fontSize: "1.2rem",
-          color: "#888"
-        }}>
-          商品圖片
-        </div>
-
-        {/* 回首頁按鈕 */}
+        <h2>❌ 找不到商品</h2>
         <button
           onClick={() => navigate("/")}
           style={{
+            marginTop: "20px",
             padding: "12px 28px",
             background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
             color: "white",
             border: "none",
             borderRadius: "10px",
             fontWeight: "bold",
-            fontSize: "1rem",
-            cursor: "pointer",
-            boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
-            transition: "all 0.2s",
+            cursor: "pointer"
           }}
         >
-          回到首頁
+          回首頁
         </button>
       </div>
-    </div>
-  );
+    );
+  }
+
+  return <SpecificProduct />; // 渲染對應的商品詳細頁
 }
