@@ -24,7 +24,9 @@ function App() {
       if (currentUser) {
         // 判斷是否管理員，這裡使用 custom claim，或用 email 白名單
         const tokenResult = await currentUser.getIdTokenResult();
-        const isAdmin = tokenResult.claims.admin === true;
+        const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
+
+        //const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
       } else {
         setUser(null);
