@@ -23,7 +23,9 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const tokenResult = await currentUser.getIdTokenResult();
-        const isAdmin = tokenResult.claims.admin === true;
+        const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
+        
+        //const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
       } else {
         setUser(null);
