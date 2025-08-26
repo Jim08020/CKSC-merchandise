@@ -82,13 +82,14 @@ function App() {
           alignItems: "center",
           justifyContent: "space-between",
           boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
+          height: "25px",
         }}
       >
         {/* 左側漢堡菜單 */}
         <button
           onClick={() => setDrawerOpen(true)}
           style={{
-            padding: "6px 12px",
+            padding: "1px 1px",
             borderRadius: "8px",
             border: "none",
             background: "transparent",
@@ -100,8 +101,8 @@ function App() {
           &#9776;
         </button>
 
-        <span style={{ fontSize: "1.2rem", fontWeight: "bold", letterSpacing: "2px" }}>
-          建國中學校慶紀念品訂購系統
+        <span style={{ fontSize: "1.0rem", fontWeight: "bold", letterSpacing: "2px" }}>
+          建中校慶紀念品訂購系統
         </span>
 
         {/* 右側登入/登出 */}

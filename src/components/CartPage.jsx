@@ -87,7 +87,7 @@ export default function CartPage() {
                     <span>{item.quantity}</span>
                     <button onClick={() => updateQuantity(item.id, 1)} style={qtyBtnStyle}>+</button>
                   </div>
-
+                    &emsp;
                   <button onClick={() => removeFromCart(item.id)} style={removeBtnStyle}>✕</button>
                 </div>
               ))}
@@ -97,14 +97,14 @@ export default function CartPage() {
               marginTop: "24px",
               display: "flex",
               justifyContent: "space-between",
-              alignItems: "center"
+              alignItems: "center",
             }}>
-              <strong style={{ fontSize: "1.2rem" }}>總金額: NT$ {total}</strong>
-              <div>
-                <button onClick={() => setShowQR(true)} style={gradientBtnStyle}>生成 QR code</button>
-                <button onClick={placeOrder} style={{ ...gradientBtnStyle, marginLeft: "10px" }} disabled={!user}>送出訂單</button>
-              </div>
+              <strong style={{ fontSize: "1.2rem" }}>總金額： NT$ {total}</strong>
             </div>
+              <div>
+                <button style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%" }} onClick={() => setShowQR(true)} >生成 QR code</button>
+                <button style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%" }} onClick={placeOrder}  disabled={!user}>送出訂單</button>
+              </div>
 
             {showQR && (
               <div style={{

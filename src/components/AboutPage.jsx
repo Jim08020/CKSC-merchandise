@@ -23,13 +23,13 @@ export default function ProductPage() {
       }}>
         <h1 style={{ textAlign: "center", marginBottom: "16px", color: "#333" }}>關於本系統</h1>
         <p style={{ color: "#000000ff", marginBottom: "24px" }}>
-            此平台係由建國中學班聯會80屆上行政部門資訊股股長唐盛鈞主要製作，班聯會八十屆上主席暨班級代表大會79屆下副議長孫逢邦協助製作。
+            此系統係由建國中學班聯會八十屆上行政部門資訊股股長唐盛鈞主要製作，班聯會八十屆上主席暨班級代表大會79屆下副議長孫逢邦協助製作。
         </p>
         <p style={{ color: "#000000ff", marginBottom: "24px" }}>
             本系統主要用於臺北市立建國高級中學班聯會校慶紀念品之訂購，旨在提供各界一個便捷的線上訂購平台，購買本校校慶紀念品。
         </p>
         <p style={{ color: "#000000ff", marginBottom: "24px" }}>
-            然此平台仍於開發階段，尚有不足之處，希望各界能提供意見與建議，以利改進。
+            然此系統仍於開發階段，尚有不足之處，希望各界能提供意見與建議，以利改進。
         </p>
         <br />
         <div style={{ color: "#000000ff", marginBottom: "24px" }}>
@@ -39,7 +39,7 @@ export default function ProductPage() {
             <br />
             <li>主席孫逢邦：chris20090731@gmail.com</li>
             <br />
-            <li>建中班聯會公務信箱：khssc@gl.ck.tp.edu.tw</li>
+            <li>建中班聯會公務信箱：ckhssc@gl.ck.tp.edu.tw</li>
             </ul>
         </div>
         <br />
