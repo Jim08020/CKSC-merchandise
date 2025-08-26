@@ -8,8 +8,8 @@ import HomePage from "./components/Home";
 import CartPage from "./components/Cartpage";
 import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/Productpage"; 
-import RulePage from "./components/RulePage"; // 使用者條款頁面
-import AbputPage from "./components/AboutPage"; // 關於頁面
+import RulePage from "./components/RulePage";   // 使用者條款頁面
+import AboutPage from "./components/AboutPage"; // 關於頁面 (修正 AbputPage 拼字)
 import AdminPage from "./components/AdminPage"; // 後台頁面
 import ToastProvider, { useToast } from "./components/ToastContext";
 
@@ -24,10 +24,10 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-
+        // 如果之後要用 claims，可以加回 tokenResult
+        // const tokenResult = await currentUser.getIdTokenResult();
         const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
-
-        //const isAdmin = tokenResult.claims.admin === true;
+        // const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
       } else {
         setUser(null);
@@ -138,7 +138,7 @@ function App() {
         )}
       </header>
 
-      {/* Drawer 左側滑出 */}
+      {/* Drawer */}
       <div
         style={{
           position: "fixed",
@@ -188,14 +188,13 @@ function App() {
         )}
       </div>
 
-      {/* Overlay */}
       {drawerOpen && (
         <div
           onClick={() => setDrawerOpen(false)}
           style={{
             position: "fixed",
             top: 0,
-            left: drawerOpen ? 0 : "-260px",
+            left: 0,
             width: "100%",
             height: "100%",
             background: "rgba(0,0,0,0.3)",
@@ -216,13 +215,11 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/rule" element={<RulePage />} />
-              <Route path="/about" element={<AbputPage />} />
-              {/* Admin 路由限制 */}
+              <Route path="/about" element={<AboutPage />} />
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 
               />
-
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}
