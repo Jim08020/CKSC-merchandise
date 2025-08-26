@@ -8,7 +8,9 @@ import HomePage from "./components/Home";
 import CartPage from "./components/Cartpage";
 import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/Productpage"; 
-import AdminPage from "./components/Adminpage"; // 後台頁面
+import RulePage from "./components/RulePage";   // 使用者條款頁面
+import AboutPage from "./components/AboutPage"; // 關於頁面 (修正 AbputPage 拼字)
+import AdminPage from "./components/AdminPage"; // 後台頁面
 import ToastProvider, { useToast } from "./components/ToastContext";
 
 function App() {
@@ -22,10 +24,10 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        const tokenResult = await currentUser.getIdTokenResult();
+        // 如果之後要用 claims，可以加回 tokenResult
+        // const tokenResult = await currentUser.getIdTokenResult();
         const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
-           
-        //const isAdmin = tokenResult.claims.admin === true;
+        // const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
       } else {
         setUser(null);
@@ -168,14 +170,21 @@ function App() {
 
         {user ? (
           <>
+            <button onClick={() => { navigate("/"); setDrawerOpen(false); }} style={drawerBtnStyle}>首頁</button>
             <button onClick={() => { navigate("/cart"); setDrawerOpen(false); }} style={drawerBtnStyle}>購物車</button>
             <button onClick={() => { navigate("/orders"); setDrawerOpen(false); }} style={drawerBtnStyle}>我的訂單</button>
+            <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
             {user.isAdmin && (
               <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
             )}
           </>
         ) : (
-          <button onClick={() => { navigate("/auth"); setDrawerOpen(false); }} style={drawerBtnStyle}>登入 / 註冊</button>
+          <>
+            <button onClick={() => { navigate("/auth"); setDrawerOpen(false); }} style={drawerBtnStyle}>登入 / 註冊</button>
+            <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
+          </>
         )}
       </div>
 
@@ -200,19 +209,17 @@ function App() {
           {!user ? (
             <Route path="*" element={<AuthPage />} />
           ) : (
-            <>
+            <>  
               <Route path="/" element={<HomePage />} />
-              {/* ✅ Only one ProductPage route */}
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
-
-              {/* Admin only */}
+              <Route path="/rule" element={<RulePage />} />
+              <Route path="/about" element={<AboutPage />} />
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 
               />
-
               <Route path="*" element={<Navigate to="/" replace />} />
             </>
           )}

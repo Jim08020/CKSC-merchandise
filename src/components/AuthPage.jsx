@@ -72,7 +72,7 @@ export default function AuthPage() {
         <h2 style={{ marginBottom: "24px", color: "#333" }}>
           {isSignUp ? "註冊" : "登入"}
         </h2>
-
+        <h5 style={{ marginTop: "20px", color: "#555" }}>使用本平台即視同同意使用者條款</h5>
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
           {isSignUp && (
             <>
