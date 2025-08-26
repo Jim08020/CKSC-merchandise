@@ -53,22 +53,29 @@ export default function AuthPage() {
   };
 
   return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      justifyContent: "center",
-      alignItems: "center",
-      padding: "20px"
-    }}>
-      <div style={{
-        background: "white",
-        borderRadius: "12px",
-        padding: "40px 30px",
-        maxWidth: "400px",
-        width: "100%",
-        boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
-        textAlign: "center"
-      }}>
+    <div
+      style={{
+        minHeight: "100vh",
+        display: "flex",
+        justifyContent: "center",
+        padding: "20px",
+        flexDirection: "initial",
+        alignItems: "flex-start",
+      }}
+    >
+      <div
+        style={{
+          background: "white",
+          display: "initial",
+          borderRadius: "12px",
+          padding: "24px 20px",
+          maxWidth: "360px",
+          width: "100%",
+          boxShadow: "0 8px 24px rgba(0,0,0,0.15)",
+          textAlign: "center",
+        }}
+        className="auth-card"
+      >
         <h2 style={{ marginBottom: "24px", color: "#333" }}>
           {isSignUp ? "註冊" : "登入"}
         </h2>
@@ -171,3 +178,4 @@ const submitBtnStyle = {
   boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
   transition: "all 0.2s ease-in-out",
 };
+

@@ -62,7 +62,8 @@ export default function CartPage() {
       minHeight: "100vh",
       padding: "40px 20px",
       display: "flex",
-      justifyContent: "center"
+      justifyContent: "center",
+      alignItems: "flex-start",
     }}>
       <div style={{
         width: "100%",
