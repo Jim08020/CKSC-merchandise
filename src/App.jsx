@@ -8,6 +8,8 @@ import HomePage from "./components/Home";
 import CartPage from "./components/Cartpage";
 import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/Productpage"; 
+import RulePage from "./components/RulePage"; // 使用者條款頁面
+import AbputPage from "./components/AboutPage"; // 關於頁面
 import AdminPage from "./components/AdminPage"; // 後台頁面
 import ToastProvider, { useToast } from "./components/ToastContext";
 
@@ -22,8 +24,7 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // 判斷是否管理員，這裡使用 custom claim，或用 email 白名單
-        const tokenResult = await currentUser.getIdTokenResult();
+
         const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
 
         //const isAdmin = tokenResult.claims.admin === true;
@@ -169,14 +170,21 @@ function App() {
 
         {user ? (
           <>
+            <button onClick={() => { navigate("/"); setDrawerOpen(false); }} style={drawerBtnStyle}>首頁</button>
             <button onClick={() => { navigate("/cart"); setDrawerOpen(false); }} style={drawerBtnStyle}>購物車</button>
             <button onClick={() => { navigate("/orders"); setDrawerOpen(false); }} style={drawerBtnStyle}>我的訂單</button>
+            <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
             {user.isAdmin && (
               <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
             )}
           </>
         ) : (
-          <button onClick={() => { navigate("/auth"); setDrawerOpen(false); }} style={drawerBtnStyle}>登入 / 註冊</button>
+          <>
+            <button onClick={() => { navigate("/auth"); setDrawerOpen(false); }} style={drawerBtnStyle}>登入 / 註冊</button>
+            <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
+          </>
         )}
       </div>
 
@@ -202,12 +210,13 @@ function App() {
           {!user ? (
             <Route path="*" element={<AuthPage />} />
           ) : (
-            <>
+            <>  
               <Route path="/" element={<HomePage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
-
+              <Route path="/rule" element={<RulePage />} />
+              <Route path="/about" element={<AbputPage />} />
               {/* Admin 路由限制 */}
               <Route 
                 path="/admin" 
