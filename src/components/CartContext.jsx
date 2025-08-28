@@ -1,6 +1,6 @@
 import React, { createContext, useState, useContext, useEffect } from "react";
 import { auth, db } from "../firebase.js";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 
 const CartContext = createContext();
@@ -8,15 +8,43 @@ const CartContext = createContext();
 export function CartProvider({ children }) {
   const [cartItems, setCartItems] = useState([]);
   const [user] = useAuthState(auth);
+  const [hasLoaded, setHasLoaded] = useState(false); // ✅ 防止覆蓋
 
+  // 讀取 Firestore 購物車
   useEffect(() => {
-    if (!user || !user.uid) return; // 確保 user 有值再存
+    const loadCart = async () => {
+      if (!user || !user.uid) {
+        setCartItems([]);
+        setHasLoaded(false);
+        return;
+      }
+
+      const cartRef = doc(db, "carts", user.uid);
+      const snap = await getDoc(cartRef);
+
+      if (snap.exists()) {
+        setCartItems(snap.data().items || []);
+      } else {
+        setCartItems([]);
+      }
+
+      setHasLoaded(true); // ✅ 表示讀完了
+    };
+
+    loadCart();
+  }, [user]);
+
+  // 存 Firestore（但只在讀取完成後才存）
+  useEffect(() => {
+    if (!user || !user.uid || !hasLoaded) return;
+
     const cartRef = doc(db, "carts", user.uid);
     const saveCart = async () => {
       await setDoc(cartRef, { items: cartItems });
     };
+
     saveCart();
-  }, [cartItems, user]);
+  }, [cartItems, user, hasLoaded]);
 
   const addToCart = (product) => {
     setCartItems((prev) => {

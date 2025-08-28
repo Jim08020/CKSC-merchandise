@@ -1,9 +1,8 @@
 import React, { useState } from "react";
 import { useCart } from "./CartContext";
 import { useNavigate } from "react-router-dom";
-import { QRCodeCanvas } from "qrcode.react";
 import { auth, db } from "../firebase";
-import { collection, addDoc, serverTimestamp } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useToast } from "./ToastContext";
 
@@ -11,7 +10,6 @@ export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, setCartItems } = useCart();
   const [user] = useAuthState(auth);
   const navigate = useNavigate();
-  const [showQR, setShowQR] = useState(false);
   const { showToast } = useToast();
 
   const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
@@ -29,11 +27,25 @@ export default function CartPage() {
 
     try {
       const ordersRef = collection(db, "orders");
+
+      // 讀取使用者資料，帶入訂單（若不存在則以空字串代替）
+      let profile = {};
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userSnap = await getDoc(userRef);
+        if (userSnap.exists()) profile = userSnap.data();
+      } catch {}
+
       await addDoc(ordersRef, {
         userId: user.uid,
         items: cartItems,
         total,
         createdAt: serverTimestamp(),
+        customerName: profile.name || "",
+        customerPhone: profile.phone || "",
+        customerEmail: user.email || profile.email || "",
+        school: profile.school || "",
+        classNumber: profile.classNumber || "",
       });
 
       showToast("✅ 訂單已送出！");
@@ -101,26 +113,9 @@ export default function CartPage() {
             }}>
               <strong style={{ fontSize: "1.2rem" }}>總金額： NT$ {total}</strong>
             </div>
-              <div>
-                <button style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%" }} onClick={() => setShowQR(true)} >生成 QR code</button>
-                <button style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%" }} onClick={placeOrder}  disabled={!user}>送出訂單</button>
-              </div>
-
-            {showQR && (
-              <div style={{
-                marginTop: "20px",
-                display: "flex",
-                flexDirection: "column",
-                alignItems: "center",
-                padding: "20px",
-                border: "1px solid #ccc",
-                borderRadius: "12px",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.1)"
-              }}>
-                <QRCodeCanvas value={JSON.stringify(cartItems)} size={180} />
-                <button onClick={() => setShowQR(false)} style={{ ...gradientBtnStyle, marginTop: "12px" }}>關閉 QR code</button>
-              </div>
-            )}
+            <div>
+              <button style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%" }} onClick={placeOrder} disabled={!user}>送出訂單</button>
+            </div>
           </>
         )}
 

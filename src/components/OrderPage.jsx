@@ -77,13 +77,36 @@ export default function OrderPage() {
               </ul>
             </div>
 
-            <div style={{
-              marginTop: "10px",
-              display: "flex",
-              justifyContent: "center",
-            }}>
-              <QRCodeCanvas value={JSON.stringify(order.items)} size={150} />
-            </div>
+            {(() => {
+              const baseUrl = (import.meta && import.meta.env && import.meta.env.VITE_PUBLIC_BASE_URL) || window.location.origin;
+              const url = `${baseUrl}/orders/${order.id}`;
+              return (
+                <div style={{
+                  marginTop: "10px",
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: "8px"
+                }}>
+                  <QRCodeCanvas value={url} size={150} />
+                  <a href={url} target="_blank" rel="noreferrer" style={{ color: "#2563eb", wordBreak: "break-all" }}>{url}</a>
+                  <button
+                    onClick={() => { navigator.clipboard.writeText(url); }}
+                    style={{
+                      padding: "8px 16px",
+                      background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "8px",
+                      fontWeight: "bold",
+                      cursor: "pointer",
+                    }}
+                  >
+                    複製連結
+                  </button>
+                </div>
+              );
+            })()}
           </div>
         ))}
       </div>

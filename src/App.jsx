@@ -10,7 +10,8 @@ import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/Productpage"; 
 import RulePage from "./components/RulePage";   // 使用者條款頁面
 import AboutPage from "./components/AboutPage"; // 關於頁面 (修正 AbputPage 拼字)
-import AdminPage from "./components/AdminPage"; // 後台頁面
+import AdminPage from "./components/Adminpage"; // 後台頁面
+import OrderdetailPage from "./components/OrderdetailPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 
 function App() {
@@ -217,6 +218,7 @@ function App() {
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/rule" element={<RulePage />} />
               <Route path="/about" element={<AboutPage />} />
+              <Route path="/orders/:id" element={<OrderdetailPage />} />
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 
