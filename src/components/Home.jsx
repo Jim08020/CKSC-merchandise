@@ -10,10 +10,13 @@ export default function Home() {
   const { showToast } = useToast();
 
   const products = [
-    { id: 1, name: "商品 1", price: 100 },
-    { id: 2, name: "商品 2", price: 200 },
-    { id: 3, name: "商品 3", price: 300 },
-
+    { id: 1, name: "棒球外套", price: 100 },
+    { id: 2, name: "棉踢", price: 200 },
+    { id: 3, name: "排汗衫", price: 300 },
+    { id: 4, name: "座墊", price: 100 },
+    { id: 5, name: "證件套", price: 200 },
+    { id: 6, name: "鑰匙圈", price: 300 },
+    { id: 7, name: "帽踢", price: 300 },
   ];
 
   const handleAddToCart = (product) => {

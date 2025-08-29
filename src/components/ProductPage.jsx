@@ -5,12 +5,21 @@ import { useParams, useNavigate } from "react-router-dom";
 import Product1 from "./products/Product1";
 import Product2 from "./products/Product2";
 import Product3 from "./products/Product3";
+import Product4 from "./products/Product4";
+import Product5 from "./products/Product5";
+import Product6 from "./products/Product6";
+import Product7 from "./products/Product7";
+
 
 // id → 對應的商品 component
 const productMap = {
   1: Product1,
   2: Product2,
   3: Product3,
+  4: Product4,
+  5: Product5,
+  6: Product6,
+  7: Product7,
 };
 
 export default function ProductPage() {

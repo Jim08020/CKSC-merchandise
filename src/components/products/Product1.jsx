@@ -27,7 +27,7 @@ export default function ProductPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>商品 {id}</h1>
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>棒球外套</h1>
         <p
           style={{
             textAlign: "center",
