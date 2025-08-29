@@ -58,9 +58,9 @@ export default function OrderPage() {
             flexDirection: "column",
             gap: "12px"
           }}>
-            <p><strong>訂單ID:</strong> {order.id}</p>
-            <p><strong>總金額:</strong> NT$ {order.total}</p>
-            <p><strong>購買時間:</strong> {order.createdAt?.toDate().toLocaleString()}</p>
+            <p><strong>訂單ID：</strong> {order.id}</p>
+            <p><strong>總金額：</strong> NT$ {order.total}</p>
+            <p><strong>購買時間：</strong> {order.createdAt?.toDate().toLocaleString()}</p>
 
             <div style={{
               background: "#f9f9f9",

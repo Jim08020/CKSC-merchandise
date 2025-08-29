@@ -27,7 +27,7 @@ export default function ProductPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>棉踢</h1>
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>座墊</h1>
         <p
           style={{
             textAlign: "center",
@@ -44,21 +44,18 @@ export default function ProductPage() {
             width: "100%",
             maxWidth: "300px",
             height: "300px",
+            background: "#e0e0e0",
+            borderRadius: "12px",
             marginBottom: "24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            borderRadius: "12px",
-            overflow: "hidden", // 確保圖片不會超出邊框
+            fontSize: "1.2rem",
+            color: "#888",
           }}
         >
-          <img
-            src={`/images/product-${id}.png`} // 這裡放圖片路徑，可以依 id 來決定
-            alt={`商品 ${id}`}
-            style={{ width: "100%", height: "100%", objectFit: "cover" }}
-          />
+          商品圖片
         </div>
-
 
         {/* 回首頁按鈕 */}
         <button

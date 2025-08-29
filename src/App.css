@@ -269,3 +269,27 @@ button{
     box-shadow: "0 2px 8px rgba(221,36,118,0.15)";
     transition: "background 0.2s, transform 0.2s";
 }
+
+@media (max-width: 480px) {
+  .auth-card {
+    padding: 24px 16px; /* 縮小內距 */
+  }
+
+  .auth-card input {
+    font-size: 0.9rem; /* 小一點字體 */
+    padding: 8px 12px;
+  }
+
+  .auth-card button {
+    font-size: 0.95rem;
+    padding: 10px 16px;
+  }
+
+  .auth-card h2 {
+    font-size: 1.25rem;
+  }
+
+  .auth-card h5 {
+    font-size: 0.75rem;
+  }
+}

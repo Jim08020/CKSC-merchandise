@@ -75,7 +75,7 @@ function App() {
       {/* Header */}
       <header
         style={{
-          padding: "18px 36px",
+          padding: "12px 20px",
           marginBottom: "32px",
           background: "linear-gradient(90deg, #232526 0%, #414345 100%)",
           color: "white",
@@ -83,7 +83,6 @@ function App() {
           alignItems: "center",
           justifyContent: "space-between",
           boxShadow: "0 4px 16px rgba(0,0,0,0.10)",
-          height: "25px",
         }}
       >
         {/* 左側漢堡菜單 */}
@@ -206,7 +205,7 @@ function App() {
       )}
 
       {/* Main Content */}
-      <main style={{ maxWidth: "900px", margin: "0 auto", padding: "0 16px" }}>
+      <main style={{ maxWidth: "900px", margin: "16px auto 0", padding: "0 12px" }}>
         <Routes>
           {!user ? (
             <Route path="*" element={<AuthPage />} />
