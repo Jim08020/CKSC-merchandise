@@ -82,7 +82,7 @@ export default function Home() {
       </div>
 
       {/* 商品列表 */}
-      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" }}>
+      <div style={{ display: "flex", flexWrap: "wrap", gap: "20px", justifyContent: "center" , paddingBottom: "40px"}}>
         {products.map((product) => {
           const isSelected = selectedItems.has(product.no);
           return (
