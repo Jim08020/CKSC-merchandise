@@ -119,7 +119,7 @@ function App() {
         {/* 右側登入/登出 */}
         {user ? (
           <button
-            onClick={handleSignOut}
+            onClick={() => navigate("/cart")}
             style={{
               padding: "6px 14px",
               borderRadius: "8px",
@@ -130,7 +130,7 @@ function App() {
               cursor: "pointer",
             }}
           >
-            登出
+            購物車
           </button>
         ) : (
           <button
@@ -190,6 +190,17 @@ function App() {
             {user.isAdmin && (
               <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
             )}
+            <button
+              onClick={handleSignOut}
+              style={{
+                ...drawerBtnStyle,
+                marginTop: "auto", 
+                background: "linear-gradient(90deg, #232526 0%, #414345 100%)",
+                marginBottom: 40,
+              }}
+            >
+              登出
+            </button>
           </>
         ) : (
           <>
