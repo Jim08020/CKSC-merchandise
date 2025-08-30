@@ -3,14 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "r
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 
-import AuthPage from "./components/Authpage";
+import AuthPage from "./components/AuthPage";
 import HomePage from "./components/Home";
-import CartPage from "./components/Cartpage";
+import CartPage from "./components/CartPage";
 import OrdersPage from "./components/OrderPage";
-import ProductPage from "./components/Productpage"; 
+import ProductPage from "./components/ProductPage"; 
 import RulePage from "./components/RulePage";
 import AboutPage from "./components/AboutPage"; 
-import AdminPage from "./components/Adminpage";
+import AdminPage from "./components/AdminPage";
 import OrderdetailPage from "./components/OrderdetailPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 
@@ -26,13 +26,15 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const adminEmails = [
-          "ckhssc@gl.ck.tp.edu.tw",
-          "ck11300333@gl.ck.tp.edu.tw",
-          "chris20090731@gmail.com",
-          "ck11300329@gl.ck.tp.edu.tw",
-          "ck11300569@gl.ck.tp.edu.tw",
-          "ck11300110@gl.ck.tp.edu.tw",
-          "ck11300044@gl.ck.tp.edu.tw",
+        "ckhssc@gl.ck.tp.edu.tw", //班聯公務信箱
+        "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
+        "chris20090731@gmail.com", //同上
+        "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
+        "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
+        "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
+        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
+        "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
+        "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
         ].map(email => email.toLowerCase());
 
         const isAdmin = adminEmails.includes(currentUser.email.toLowerCase());
@@ -216,11 +218,13 @@ function App() {
       {/* Main Content */}
       <main style={{ maxWidth: "900px", margin: "16px auto 0", padding: "0 12px" }}>
         <Routes>
+          <>
+            <Route path="/rule" element={<RulePage />} />
+            <Route path="/about" element={<AboutPage />} />
+          </>
           {!user ? (
             <>
               <Route path="*" element={<AuthPage />} />
-              <Route path="/rule" element={<RulePage />} />
-              <Route path="/about" element={<AboutPage />} />
             </>
           ) : (
             <>  
@@ -229,8 +233,6 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/orders/:id" element={<OrderdetailPage />} />
-              <Route path="/rule" element={<RulePage />} />
-              <Route path="/about" element={<AboutPage />} />
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 
