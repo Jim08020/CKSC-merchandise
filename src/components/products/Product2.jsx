@@ -19,11 +19,11 @@ export default function ProductPage() {
 
   // 尺碼資料，包含對應的產品 ID
   const sizeData = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 1_1 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 1_2 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 1_3 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 1_4 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 1_5 },
+    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 2_1 },
+    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 2_2 },
+    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 2_3 },
+    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 2_4 },
+    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 2_5 },
   ];
 
   const handleAddToCart = (product) => {

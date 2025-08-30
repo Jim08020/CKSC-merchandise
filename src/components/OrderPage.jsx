@@ -59,7 +59,9 @@ export default function OrderPage() {
             gap: "12px"
           }}>
             <p><strong>訂單ID：</strong> {order.id}</p>
-            <p><strong>總金額：</strong> NT$ {order.total}</p>
+            <p><strong>原始金額：</strong> NT$ {order.originalTotal}</p>
+            <p><strong>總金額：</strong> NT$ {order.finalTotal}</p>
+            <p><strong>訂單狀態：</strong>{order.delivered ? "已交貨" : "未交貨"}</p>
             <p><strong>購買時間：</strong> {order.createdAt?.toDate().toLocaleString()}</p>
 
             <div style={{
@@ -77,6 +79,25 @@ export default function OrderPage() {
               </ul>
             </div>
 
+            <div>
+              {/* 套餐折扣明細 */}
+              {order.appliedCombos && order.appliedCombos.length > 0 && (
+                <div style={{ background: "#fff0f6", border: "1px solid #f9c2d3", borderRadius: "10px", padding: "16px", marginTop: "16px" }}>
+                  <strong>套餐折扣明細：</strong>
+                  <ul style={{ marginTop: "8px" }}>
+                    {order.appliedCombos.map(combo => (
+                      <li key={combo.id} style={{ marginBottom: "4px" }}>
+                        {combo.name} x {combo.applicableCount} → 折扣 NT$ {combo.totalDiscount}
+                      </li>
+                    ))}
+                  </ul>
+                  <div style={{ marginTop: "8px", fontWeight: "bold", color: "#d63384" }}>
+                    總共節省 NT$ {order.totalDiscount}
+                  </div>
+                </div>
+              )}
+            </div>
+
             {(() => {
               const baseUrl = (import.meta && import.meta.env && import.meta.env.VITE_PUBLIC_BASE_URL) || window.location.origin;
               const url = `${baseUrl}/orders/${order.id}`;
@@ -89,21 +110,7 @@ export default function OrderPage() {
                   gap: "8px"
                 }}>
                   <QRCodeCanvas value={url} size={150} />
-                  <a href={url} target="_blank" rel="noreferrer" style={{ color: "#2563eb", wordBreak: "break-all" }}>{url}</a>
-                  <button
-                    onClick={() => { navigator.clipboard.writeText(url); }}
-                    style={{
-                      padding: "8px 16px",
-                      background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
-                      color: "white",
-                      border: "none",
-                      borderRadius: "8px",
-                      fontWeight: "bold",
-                      cursor: "pointer",
-                    }}
-                  >
-                    複製連結
-                  </button>
+                  <br />
                 </div>
               );
             })()}
