@@ -17,7 +17,7 @@ export default function AuthPage() {
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState(""); 
   const [phone, setPhone] = useState("");
-  const [agree, setAgree] = useState(false); // ✅ 同意條款
+  const [agree, setAgree] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
 
@@ -153,7 +153,6 @@ export default function AuthPage() {
             />
           )}
 
-          {/* ✅ 同意使用者條款 */}
           <label style={{ marginTop: "10px", fontSize: "0.9rem", color: "#555", textAlign: "center" }}>
             <input 
               type="checkbox" 
@@ -189,7 +188,6 @@ export default function AuthPage() {
   );
 }
 
-// 共用的 input style
 const inputStyle = {
   padding: "10px 14px",
   margin: "8px 0",
