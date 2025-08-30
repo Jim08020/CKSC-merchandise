@@ -11,7 +11,8 @@ export default function ProductPage() {
   
   // 座墊產品資料
   const product = {
-    id: parseInt(id), // 根據 URL 參數設定 ID
+    no: 5,
+    id: 5,
     name: "座墊",
     price: 100,
     specifications: {

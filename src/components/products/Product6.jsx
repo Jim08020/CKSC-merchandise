@@ -10,9 +10,10 @@ export default function ProductPage() {
   const { showToast } = useToast();
   
   const product = {
-    id: parseInt(id), // 根據 URL 參數設定 ID
+    no: 6,
+    id: 6,    
     name: "證件套",
-    price: 100,
+    price: 200,
     specifications: {
       material: "牛皮"
     }

@@ -5,21 +5,29 @@ import {
   signInWithEmailAndPassword 
 } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "./ToastContext";
 
 export default function AuthPage() {
   const [isSignUp, setIsSignUp] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [classandnumber, setclassandnumber] = useState("");
+  const [school, setschool] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [name, setName] = useState(""); 
   const [phone, setPhone] = useState("");
+  const [agree, setAgree] = useState(false); // ✅ 同意條款
   const navigate = useNavigate();
   const { showToast } = useToast();
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    if (!agree) {
+      showToast("❌ 請先閱讀並同意使用者條款");
+      return;
+    }
 
     if (isSignUp && password !== confirmPassword) {
       showToast("❌ 密碼與確認密碼不一致！");
@@ -36,6 +44,8 @@ export default function AuthPage() {
           phone,
           email,
           password, 
+          school,
+          classandnumber,
           createdAt: new Date()
         });
 
@@ -79,7 +89,7 @@ export default function AuthPage() {
         <h2 style={{ marginBottom: "24px", color: "#333" }}>
           {isSignUp ? "註冊" : "登入"}
         </h2>
-        <h5 style={{ marginTop: "20px", color: "#555" }}>使用本平台即視同同意使用者條款</h5>
+
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
           {isSignUp && (
             <>
@@ -97,6 +107,20 @@ export default function AuthPage() {
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
                 required
+                style={inputStyle}
+              />
+              <input
+                type="text"
+                placeholder="學校(如為友校或本校學生請填寫)"
+                value={school}
+                onChange={(e) => setschool(e.target.value)}
+                style={inputStyle}
+              />
+              <input
+                type="text"
+                placeholder="班級座號(如為友校或本校學生請填寫)"
+                value={classandnumber}
+                onChange={(e) => setclassandnumber(e.target.value)}
                 style={inputStyle}
               />
             </>
@@ -129,6 +153,17 @@ export default function AuthPage() {
             />
           )}
 
+          {/* ✅ 同意使用者條款 */}
+          <label style={{ marginTop: "10px", fontSize: "0.9rem", color: "#555", textAlign: "center" }}>
+            <input 
+              type="checkbox" 
+              checked={agree} 
+              onChange={() => setAgree(!agree)} 
+              style={{ marginRight: "6px" }}
+            />
+            我已閱讀並同意 <Link to="/rule" style={{ color: "#667eea", fontWeight: "bold" }}>使用者條款</Link>
+          </label>
+
           <button type="submit" style={submitBtnStyle}>
             {isSignUp ? "註冊" : "登入"}
           </button>
@@ -154,7 +189,7 @@ export default function AuthPage() {
   );
 }
 
-// 可重複使用的 input style
+// 共用的 input style
 const inputStyle = {
   padding: "10px 14px",
   margin: "8px 0",
@@ -178,4 +213,3 @@ const submitBtnStyle = {
   boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
   transition: "all 0.2s ease-in-out",
 };
-

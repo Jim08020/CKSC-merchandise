@@ -8,9 +8,9 @@ import HomePage from "./components/Home";
 import CartPage from "./components/Cartpage";
 import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/Productpage"; 
-import RulePage from "./components/RulePage";   // 使用者條款頁面
-import AboutPage from "./components/AboutPage"; // 關於頁面 (修正 AbputPage 拼字)
-import AdminPage from "./components/Adminpage"; // 後台頁面
+import RulePage from "./components/RulePage";
+import AboutPage from "./components/AboutPage"; 
+import AdminPage from "./components/Adminpage";
 import OrderdetailPage from "./components/OrderdetailPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 
@@ -25,9 +25,18 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        // 如果之後要用 claims，可以加回 tokenResult
-        // const tokenResult = await currentUser.getIdTokenResult();
-        const isAdmin = currentUser.email === "ckhssc@gl.ck.tp.edu.tw";
+        const adminEmails = [
+          "ckhssc@gl.ck.tp.edu.tw",
+          "ck11300333@gl.ck.tp.edu.tw",
+          "chris20090731@gmail.com",
+          "ck11300329@gl.ck.tp.edu.tw",
+          "ck11300569@gl.ck.tp.edu.tw",
+          "ck11300110@gl.ck.tp.edu.tw",
+          "ck11300044@gl.ck.tp.edu.tw",
+        ].map(email => email.toLowerCase());
+
+        const isAdmin = adminEmails.includes(currentUser.email.toLowerCase());
+
         // const isAdmin = tokenResult.claims.admin === true;
         setUser({ ...currentUser, isAdmin });
       } else {
@@ -208,16 +217,20 @@ function App() {
       <main style={{ maxWidth: "900px", margin: "16px auto 0", padding: "0 12px" }}>
         <Routes>
           {!user ? (
-            <Route path="*" element={<AuthPage />} />
+            <>
+              <Route path="*" element={<AuthPage />} />
+              <Route path="/rule" element={<RulePage />} />
+              <Route path="/about" element={<AboutPage />} />
+            </>
           ) : (
             <>  
               <Route path="/" element={<HomePage />} />
               <Route path="/product/:id" element={<ProductPage />} />
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
+              <Route path="/orders/:id" element={<OrderdetailPage />} />
               <Route path="/rule" element={<RulePage />} />
               <Route path="/about" element={<AboutPage />} />
-              <Route path="/orders/:id" element={<OrderdetailPage />} />
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 
