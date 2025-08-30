@@ -19,6 +19,24 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(true);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [displayName, setDisplayName] = useState("");
+
+  useEffect(() => {
+    if (!user) return;
+    const fetchName = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setDisplayName(userDoc.data().name || user.displayName || user.email);
+        } else {
+          setDisplayName(user.displayName || user.email);
+        }
+      } catch {
+        setDisplayName(user.displayName || user.email);
+      }
+    };
+    fetchName();
+  }, [user]);
 
   // 檢查管理員權限
   useEffect(() => {
@@ -35,7 +53,9 @@ export default function AdminPage() {
         "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
         "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
         "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
-        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行
+        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
+        "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
+        "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
       ];
       
       if (adminEmails.includes(user.email)) {
@@ -249,7 +269,7 @@ export default function AdminPage() {
   return (
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
       <div style={{ background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)", color: "white", padding: "8px 16px", borderRadius: "6px", marginBottom: "20px", fontSize: "0.9rem", fontWeight: "bold" }}>
-        🔐 管理員模式 - {user.email}
+        🔐 管理員模式 - {displayName}
       </div>
       <h1 style={{ marginBottom: "30px", color: "#333" }}>後台管理 - 訂單統計</h1>
       <div style={{ width: "100%", maxWidth: "1000px", display: "flex", flexDirection: "column", gap: "20px" }}>

@@ -31,7 +31,9 @@ export default function OrderdetailPage() {
         "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
         "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
         "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
-        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行
+        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
+        "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
+        "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
       ];
         
       if (adminEmails.includes(user.email)) {
