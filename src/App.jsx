@@ -3,14 +3,14 @@ import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "r
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
 
-import AuthPage from "./components/Authpage";
+import AuthPage from "./components/AuthPage";
 import HomePage from "./components/Home";
-import CartPage from "./components/Cartpage";
+import CartPage from "./components/CartPage";
 import OrdersPage from "./components/OrderPage";
-import ProductPage from "./components/Productpage"; 
+import ProductPage from "./components/ProductPage"; 
 import RulePage from "./components/RulePage";
 import AboutPage from "./components/AboutPage"; 
-import AdminPage from "./components/Adminpage";
+import AdminPage from "./components/AdminPage";
 import OrderdetailPage from "./components/OrderdetailPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 
@@ -216,11 +216,13 @@ function App() {
       {/* Main Content */}
       <main style={{ maxWidth: "900px", margin: "16px auto 0", padding: "0 12px" }}>
         <Routes>
+          <>
+            <Route path="/rule" element={<RulePage />} />
+            <Route path="/about" element={<AboutPage />} />
+          </>
           {!user ? (
             <>
               <Route path="*" element={<AuthPage />} />
-              <Route path="/rule" element={<RulePage />} />
-              <Route path="/about" element={<AboutPage />} />
             </>
           ) : (
             <>  
@@ -229,8 +231,6 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/orders/:id" element={<OrderdetailPage />} />
-              <Route path="/rule" element={<RulePage />} />
-              <Route path="/about" element={<AboutPage />} />
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 

@@ -1,10 +1,9 @@
 import React from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useToast } from "../ToastContext";
 
 export default function ProductPage() {
-  const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { showToast } = useToast();
