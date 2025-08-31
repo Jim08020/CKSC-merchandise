@@ -12,8 +12,10 @@ import RulePage from "./components/RulePage";
 import AboutPage from "./components/AboutPage"; 
 import AdminPage from "./components/AdminPage";
 import OrderdetailPage from "./components/OrderdetailPage";
+import InformationPage from "./components/InformationPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 
+const InfoPage = InformationPage;
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,7 @@ function App() {
         "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
         "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
         "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
+        "stud2@gl.ck.tp.edu.tw"//社團活動組楊蕙瑜組長
         ].map(email => email.toLowerCase());
 
         const isAdmin = adminEmails.includes(currentUser.email.toLowerCase());
@@ -231,6 +234,7 @@ function App() {
           <>
             <Route path="/rule" element={<RulePage />} />
             <Route path="/about" element={<AboutPage />} />
+            <Route path="/info" element={<InfoPage />} />
           </>
           {!user ? (
             <>
