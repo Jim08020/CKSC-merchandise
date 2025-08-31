@@ -58,6 +58,9 @@ export default function Home() {
         boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)"
       }}>
         <h2 style={{ margin: "0 0 15px 0", textAlign: "center" }}>🎁 組合包優惠</h2>
+        <p style={{ textAlign: "center", marginBottom: "20px", color: "#0000009f" }}>
+          各品項加入購物車後將會自動計算最佳組合並折扣
+        </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", justifyContent: "center" }}>
           {comboDeals.map(combo => (
             <div key={combo.id} style={{

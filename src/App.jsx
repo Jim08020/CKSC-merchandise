@@ -116,21 +116,20 @@ function App() {
           建中校慶紀念品訂購系統
         </span>
 
-        {/* 右側登入/登出 */}
         {user ? (
           <button
             onClick={() => navigate("/cart")}
             style={{
-              padding: "6px 14px",
-              borderRadius: "8px",
-              border: "none",
-              background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
-              color: "white",
-              fontWeight: "bold",
-              cursor: "pointer",
-            }}
+            padding: "1px 1px",
+            borderRadius: "8px",
+            border: "none",
+            background: "transparent",
+            color: "white",
+            fontSize: "1.5rem",
+            cursor: "pointer",
+          }}
           >
-            購物車
+            &#x1f6d2;
           </button>
         ) : (
           <button

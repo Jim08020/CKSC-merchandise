@@ -76,15 +76,33 @@ export default function AuthPage() {
     }
   };
 
-  // 手動連結 Email/密碼認證方式
-  const linkEmailPassword = async (user, email, password) => {
+  // 自動連結 Google 帳號
+  const autoLinkGoogleAccount = async (user) => {
     try {
-      const credential = EmailAuthProvider.credential(email, password);
-      const result = await linkWithCredential(user, credential);
-      return result;
-    } catch (error) {
-      console.error("Link email/password error:", error);
-      throw error;
+      setIsLinking(true);
+      showToast("🔗 正在自動連結 Google 帳號...");
+      
+      const provider = new GoogleAuthProvider();
+      const result = await linkWithPopup(user, provider);
+      
+      await saveUserData(result.user);
+      showToast("🎉 Google 帳號連結成功！您現在可以使用兩種方式登入");
+      
+      return true;
+    } catch (linkError) {
+      console.error("Auto link error:", linkError);
+      
+      if (linkError.code === 'auth/credential-already-in-use') {
+        showToast("⚠️ 該 Google 帳號已被其他使用者使用，但Email註冊成功");
+      } else if (linkError.code === 'auth/popup-closed-by-user') {
+        showToast("⚠️ Google 連結被取消，但Email註冊成功");
+      } else {
+        showToast("⚠️ Google 帳號自動連結失敗，但Email註冊成功");
+      }
+      
+      return false;
+    } finally {
+      setIsLinking(false);
     }
   };
 
@@ -155,34 +173,14 @@ export default function AuthPage() {
 
         showToast("✅ Email 註冊成功！");
 
-        // 詢問是否要連結 Google 帳號
-        const shouldLinkGoogle = window.confirm(
-          "註冊成功！是否要同時連結 Google 帳號？\n這樣您就可以使用兩種方式登入。"
-        );
+        // 自動嘗試連結 Google 帳號（不詢問使用者）
+        const linkSuccess = await autoLinkGoogleAccount(user);
+        
+        // 等待一下讓使用者看到連結結果訊息
+        setTimeout(() => {
+          navigate("/");
+        }, linkSuccess ? 1500 : 1000);
 
-        if (shouldLinkGoogle) {
-          try {
-            setIsLinking(true);
-            const provider = new GoogleAuthProvider();
-            const result = await linkWithPopup(user, provider);
-            
-            await saveUserData(result.user);
-            showToast("🎉 Google 帳號連結成功！您現在可以使用兩種方式登入");
-          } catch (linkError) {
-            console.error("Link error:", linkError);
-            if (linkError.code === 'auth/credential-already-in-use') {
-              showToast("⚠️ 該 Google 帳號已被其他使用者使用");
-            } else if (linkError.code === 'auth/popup-closed-by-user') {
-              showToast("⚠️ Google 連結被取消，您仍可稍後連結");
-            } else {
-              showToast("⚠️ Google 帳號連結失敗，您仍可稍後連結");
-            }
-          } finally {
-            setIsLinking(false);
-          }
-        }
-
-        navigate("/"); 
       } else {
         // Email 登入
         try {
@@ -390,7 +388,7 @@ export default function AuthPage() {
         {/* 註冊時的說明 */}
         {isSignUp && (
           <div style={{ marginTop: "16px", fontSize: "0.9rem", color: "#666", lineHeight: "1.4" }}>
-            <p>🔗 註冊完成後，系統會詢問是否連結 Google 帳號</p>
+            <p>註冊完成將導向google登入介面，請使用與註冊時相同的email連結</p>
             <p>連結後您可以使用 Email 或 Google 兩種方式登入</p>
           </div>
         )}
