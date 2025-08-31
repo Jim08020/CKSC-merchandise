@@ -145,8 +145,8 @@ export default function AdminPage() {
       const updateData = {
         delivered,
         deliveryUpdatedAt: serverTimestamp(),
-        deliveryUpdatedBy: user.uid,
-        deliveryUpdatedByName: user.displayName || user.email || "管理員"
+        deliveryUpdatedBy: displayName,
+        deliveryUpdatedByName: displayName || user.email || "管理員"
       };
       await updateDoc(orderRef, updateData);
       setOrders(prev => prev.map(order => 
@@ -269,8 +269,34 @@ export default function AdminPage() {
 
   return (
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
-      <div style={{ background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)", color: "white", padding: "8px 16px", borderRadius: "6px", marginBottom: "20px", fontSize: "0.9rem", fontWeight: "bold" }}>
-        🔐 管理員模式 - {displayName}
+      <div style={{
+        display: "flex",
+        alignItems: "center",
+        gap: "12px",
+        padding: "12px",
+        borderRadius: "12px",
+        boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+        marginBottom: 0,
+      }}>
+        <img 
+          src={user.photoURL || "https://via.placeholder.com/48?text=👤"} 
+          alt="User Avatar"
+          style={{
+            width: "48px",
+            height: "48px",
+            borderRadius: "50%",
+            objectFit: "cover",
+            border: "2px solid #ddd"
+          }}
+        />
+        <div>
+          <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
+            Admin-{displayName || "未命名用戶"}
+          </p>
+          <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>
+            {user.email}
+          </p>
+        </div>
       </div>
       <h1 style={{ marginBottom: "30px", color: "#333" }}>後台管理 - 訂單統計</h1>
       <div style={{ width: "100%", maxWidth: "1000px", display: "flex", flexDirection: "column", gap: "20px" }}>

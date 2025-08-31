@@ -14,6 +14,24 @@ export default function OrderdetailPage() {
   const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [displayName, setDisplayName] = useState("");
+
+  useEffect(() => {
+      if (!user) return;
+      const fetchName = async () => {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setDisplayName(userDoc.data().name || user.displayName || user.email);
+          } else {
+            setDisplayName(user.displayName || user.email);
+          }
+        } catch {
+          setDisplayName(user.displayName || user.email);
+        }
+      };
+      fetchName();
+    }, [user]);
 
   // 檢查管理員權限
   useEffect(() => {
@@ -84,8 +102,8 @@ export default function OrderdetailPage() {
       const updateData = {
         delivered,
         deliveryUpdatedAt: serverTimestamp(),
-        deliveryUpdatedBy: user.uid,
-        deliveryUpdatedByName: user.displayName || user.email || "管理員"
+        deliveryUpdatedBy: displayName,
+        deliveryUpdatedByName: displayName || user.email || "管理員"
       };
 
       await updateDoc(orderRef, updateData);
@@ -148,15 +166,33 @@ export default function OrderdetailPage() {
       >
         {/* 管理員標識 */}
         <div style={{
-          background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
-          color: "white",
-          padding: "8px 16px",
-          borderRadius: "6px",
-          textAlign: "center",
-          fontSize: "0.9rem",
-          fontWeight: "bold"
+          display: "flex",
+          alignItems: "center",
+          gap: "12px",
+          padding: "12px",
+          borderRadius: "12px",
+          boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+          marginBottom: 0,
         }}>
-          🔐 管理員模式
+          <img 
+            src={user.photoURL || "https://via.placeholder.com/48?text=👤"} 
+            alt="User Avatar"
+            style={{
+              width: "48px",
+              height: "48px",
+              borderRadius: "50%",
+              objectFit: "cover",
+              border: "2px solid #ddd"
+            }}
+          />
+          <div>
+            <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
+              Admin-{displayName || "未命名用戶"}
+            </p>
+            <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>
+              {user.email}
+            </p>
+          </div>
         </div>
 
         {/* 訂單標題 */}

@@ -192,11 +192,42 @@ function App() {
             {user.isAdmin && (
               <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
             )}
+            <div style={{
+              display: "flex",
+              alignItems: "center",
+              gap: "12px",
+              marginTop: "auto",
+              padding: "12px",
+              borderRadius: "12px",
+              background: "linear-gradient(120deg, #fdfbfb 0%, #ebedee 100%)",
+              boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+              marginBottom: 0,
+            }}>
+              <img 
+                src={user.photoURL || "https://via.placeholder.com/48?text=👤"} 
+                alt="User Avatar"
+                style={{
+                  width: "48px",
+                  height: "48px",
+                  borderRadius: "50%",
+                  objectFit: "cover",
+                  border: "2px solid #ddd"
+                }}
+              />
+              <div>
+                <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
+                  {user.displayName || "未命名用戶"}
+                </p>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>
+                  {user.email}
+                </p>
+              </div>
+            </div>
             <button
               onClick={handleSignOut}
               style={{
                 ...drawerBtnStyle,
-                marginTop: "auto", 
+                marginTop: 20,
                 background: "linear-gradient(90deg, #232526 0%, #414345 100%)",
                 marginBottom: 40,
               }}
