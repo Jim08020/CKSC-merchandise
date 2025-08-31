@@ -152,7 +152,7 @@ export default function AuthPage() {
               fill="#EA4335"
             />
           </svg>
-          {isLoading ? "Loading" : "Sign up or Log in wirh Google"}
+          {isLoading ? "Loading" : "Sign in with Google"}
         </button>
 
         {/* 同意使用者條款 */}
