@@ -47,7 +47,6 @@ export default function AdminPage() {
         return;
       }                   
       const adminEmails = [
-        "ckhssc@gl.ck.tp.edu.tw", //班聯公務信箱
         "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
         "chris20090731@gmail.com", //同上
         "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
