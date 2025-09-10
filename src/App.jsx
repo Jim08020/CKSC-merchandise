@@ -28,7 +28,7 @@ function App() {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
         const adminEmails = [
-        "ckhssc@gl.ck.tp.edu.tw", //班聯公務信箱
+
         "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
         "chris20090731@gmail.com", //同上
         "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
@@ -187,6 +187,7 @@ function App() {
             <button onClick={() => { navigate("/"); setDrawerOpen(false); }} style={drawerBtnStyle}>首頁</button>
             <button onClick={() => { navigate("/cart"); setDrawerOpen(false); }} style={drawerBtnStyle}>購物車</button>
             <button onClick={() => { navigate("/orders"); setDrawerOpen(false); }} style={drawerBtnStyle}>我的訂單</button>
+            <button onClick={() => { navigate("/info"); setDrawerOpen(false); }} style={drawerBtnStyle}>修改資料</button>
             <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
             <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
             {user.isAdmin && (

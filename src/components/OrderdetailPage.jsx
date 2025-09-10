@@ -43,7 +43,6 @@ export default function OrderdetailPage() {
       }
 
       const adminEmails = [
-        "ckhssc@gl.ck.tp.edu.tw", //班聯公務信箱
         "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
         "chris20090731@gmail.com", //同上
         "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
@@ -298,7 +297,7 @@ export default function OrderdetailPage() {
           </div>
 
         {/* 折扣 */}
-        <div style={{ background: "#fff0f6", border: "1px solid #f9c2d3", borderRadius: "10px", padding: "12px", marginTop: "16px" }}>
+        <div style={{ background: "#fff0f6", border: "1px solid #ffffffff", borderRadius: "10px", padding: "12px"}}>
         <div style={{ color: "#d63384", fontSize: "0.9rem", marginBottom: "6px", fontWeight: "bold" }}>折扣資訊</div>
 
           {/* 使用的套組 */}
@@ -344,15 +343,92 @@ export default function OrderdetailPage() {
         </div>
 
         {/* 商品清單 */}
-        <div style={{ background: "#f9f9f9", borderRadius: "10px", padding: "16px", overflowX: "auto" }}>
-          <strong>商品清單：</strong>
-          <ul style={{ marginTop: "8px" }}>
-            {order.items.map(item => (
-              <li key={item.id} style={{ marginBottom: "4px" }}>
-                {item.name} x {item.quantity}（NT$ {item.price * item.quantity}）
-              </li>
-            ))}
-          </ul>
+        <div style={{
+          background: "#f9f9f9",
+          borderRadius: "8px",
+          padding: "16px",
+          flex: "1",
+          overflow: "auto"
+        }}>
+          <div style={{
+            fontWeight: "600",
+            marginBottom: "12px",
+            fontSize: "1rem",
+            color: "#333"
+          }}>
+            購買商品
+          </div>
+          <table style={{
+            width: "100%",
+            borderCollapse: "collapse",
+            fontSize: "0.9rem",
+            backgroundColor: "white",
+            borderRadius: "4px",
+            overflow: "hidden",
+            boxShadow: "0 1px 3px rgba(0,0,0,0.1)"
+          }}>
+            <thead>
+              <tr style={{
+                backgroundColor: "#f3f4f6",
+                borderBottom: "1px solid #e5e7eb"
+              }}>
+                <th style={{
+                  padding: "12px 16px",
+                  textAlign: "left",
+                  fontWeight: "600",
+                  color: "#374151"
+                }}>
+                  商品名稱
+                </th>
+                <th style={{
+                  padding: "12px 16px",
+                  textAlign: "center",
+                  fontWeight: "600",
+                  color: "#374151"
+                }}>
+                  數量
+                </th>
+                <th style={{
+                  padding: "12px 16px",
+                  textAlign: "right",
+                  fontWeight: "600",
+                  color: "#374151"
+                }}>
+                  價格
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              {order.items.map(item => (
+                <tr key={item.id} style={{
+                  borderBottom: "1px solid #f3f4f6",
+                  transition: "background-color 0.2s"
+                }}>
+                  <td style={{
+                    padding: "12px 16px",
+                    color: "#374151"
+                  }}>
+                    {item.name}
+                  </td>
+                  <td style={{
+                    padding: "12px 16px",
+                    textAlign: "center",
+                    color: "#6b7280"
+                  }}>
+                    {item.quantity}
+                  </td>
+                  <td style={{
+                    padding: "12px 16px",
+                    textAlign: "right",
+                    color: "#059669",
+                    fontWeight: "500"
+                  }}>
+                    NT$ {item.price}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
 
         {/* 返回按鈕 */}

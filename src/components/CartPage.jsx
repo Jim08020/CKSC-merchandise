@@ -1,16 +1,77 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useCart } from "./CartContext";
 import { useNavigate } from "react-router-dom";
 import { auth, db } from "../firebase";
-import { collection, addDoc, serverTimestamp, doc, getDoc } from "firebase/firestore";
+import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useToast } from "./ToastContext";
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, setCartItems } = useCart();
   const [user] = useAuthState(auth);
+  const [isLoading, setIsLoading] = useState(false);
+  const [isSyncing, setIsSyncing] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
+
+  // 從 Firebase 載入用戶的購物車
+  const loadUserCart = async (userId) => {
+    if (!userId) return;
+    
+    try {
+      setIsLoading(true);
+      const cartRef = doc(db, "carts", userId);
+      const cartSnap = await getDoc(cartRef);
+      
+      if (cartSnap.exists()) {
+        const cartData = cartSnap.data();
+        if (cartData.items && Array.isArray(cartData.items)) {
+          setCartItems(cartData.items);
+        }
+      }
+    } catch (error) {
+      console.error("載入購物車失敗:", error);
+      showToast("載入購物車失敗，請重新整理頁面");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // 儲存購物車到 Firebase
+  const saveUserCart = async (userId, items) => {
+    if (!userId || isSyncing) return;
+    
+    try {
+      setIsSyncing(true);
+      const cartRef = doc(db, "carts", userId);
+      await setDoc(cartRef, {
+        items: items,
+        updatedAt: serverTimestamp()
+      }, { merge: true });
+    } catch (error) {
+      console.error("儲存購物車失敗:", error);
+    } finally {
+      setIsSyncing(false);
+    }
+  };
+
+  // 用戶登入時載入購物車
+  useEffect(() => {
+    if (user?.uid) {
+      loadUserCart(user.uid);
+    }
+  }, [user]);
+
+  // 購物車變化時自動儲存（防抖動）
+  useEffect(() => {
+    if (!user?.uid) return;
+
+    const timeoutId = setTimeout(() => {
+      saveUserCart(user.uid, cartItems);
+    }, 1000); // 1秒後儲存
+
+    return () => clearTimeout(timeoutId);
+  }, [cartItems, user]);
 
   const comboDeals = [
     { id: "combo1", name: "組合包A", items: [1, 3], discount: 50 },
@@ -100,11 +161,11 @@ export default function CartPage() {
 
   const placeOrder = async () => {
     if (!user || !user.uid) {
-      showToast("❌ 請先登入！");
+      showToast("請先登入！");
       return;
     }
     if (cartItems.length === 0) {
-      showToast("❌ 購物車是空的！");
+      showToast("購物車是空的！");
       return;
     }
 
@@ -142,19 +203,79 @@ export default function CartPage() {
 
       await addDoc(ordersRef, orderData);
 
-      showToast("✅ 訂單已送出！");
+      // 清空購物車並同步到 Firebase
       setCartItems([]);
+      await saveUserCart(user.uid, []);
+
+      showToast("訂單已送出！");
       navigate("/orders");
     } catch (err) {
       console.error("送出訂單錯誤:", err);
-      showToast("❌ 送出訂單失敗：" + err.message);
+      showToast("送出訂單失敗：" + err.message);
     }
   };
+
+  // 手動同步購物車
+  const syncCart = async () => {
+    if (!user?.uid) return;
+    await saveUserCart(user.uid, cartItems);
+    showToast("購物車已同步");
+  };
+
+  if (isLoading) {
+    return (
+      <div style={{ minHeight: "100vh", display: "flex", justifyContent: "center", alignItems: "center" }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "1.2rem", color: "#666", marginBottom: "10px" }}>載入購物車中...</div>
+          <div style={{ width: "40px", height: "40px", border: "4px solid #f3f3f3", borderTop: "4px solid #ff512f", borderRadius: "50%", animation: "spin 1s linear infinite", margin: "0 auto" }}></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
       <div style={{ width: "100%", maxWidth: "800px", background: "white", borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", padding: "30px" }}>
-        <h1 style={{ textAlign: "center", marginBottom: "24px", color: "#333" }}>購物車</h1>
+        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
+          <h1 style={{ color: "#333", margin: 0 }}>購物車</h1>
+          {user && (
+            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+              {isSyncing && (
+                <span style={{ fontSize: "0.9rem", color: "#666" }}>同步中...</span>
+              )}
+              <button 
+                onClick={syncCart}
+                disabled={isSyncing}
+                style={{
+                  padding: "6px 12px",
+                  fontSize: "0.85rem",
+                  background: "#f8f9fa",
+                  border: "1px solid #dee2e6",
+                  borderRadius: "6px",
+                  cursor: "pointer",
+                  color: "#666"
+                }}
+              >
+                手動同步
+              </button>
+            </div>
+          )}
+        </div>
+
+        {!user && (
+          <div style={{ 
+            background: "#fff3cd", 
+            border: "1px solid #ffeaa7", 
+            borderRadius: "8px", 
+            padding: "12px", 
+            marginBottom: "20px",
+            textAlign: "center"
+          }}>
+            <span style={{ color: "#856404" }}>
+              請先登入以保存您的購物車內容
+            </span>
+          </div>
+        )}
 
         {cartItems.length === 0 ? (
           <p style={{ textAlign: "center", color: "#555" }}>購物車是空的</p>
@@ -225,6 +346,13 @@ export default function CartPage() {
 
         <button onClick={() => navigate("/")} style={{ ...gradientBtnStyle, marginTop: "15px", width: "100%", background: "linear-gradient(90deg, #667eea 0%, #764ba2 100%)" }}>回到首頁</button>
       </div>
+
+      <style jsx>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

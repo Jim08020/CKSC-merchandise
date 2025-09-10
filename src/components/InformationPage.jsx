@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { auth, db } from "../firebase";
 import { signOut } from "firebase/auth";
-import { doc, setDoc } from "firebase/firestore";
+import { doc, setDoc, getDoc } from "firebase/firestore";
 import { useNavigate } from "react-router-dom";
 import { useToast } from "./ToastContext";
 
@@ -12,15 +12,18 @@ export default function InformationPage() {
   const [school, setSchool] = useState("");
   const [classandnumber, setClassandnumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [isLoadingUserData, setIsLoadingUserData] = useState(true);
+  const [isEditMode, setIsEditMode] = useState(false); // 是否為編輯模式
+  const [originalData, setOriginalData] = useState(null); // 儲存原始資料
   const navigate = useNavigate();
   const { showToast } = useToast();
 
   useEffect(() => {
     // 檢查使用者是否已登入
-    const unsubscribe = auth.onAuthStateChanged((currentUser) => {
+    const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
-        setName(currentUser.displayName || "");
+        await loadUserData(currentUser);
       } else {
         // 如果沒有登入，重定向到登入頁
         navigate("/auth");
@@ -30,12 +33,44 @@ export default function InformationPage() {
     return () => unsubscribe();
   }, [navigate]);
 
+  // 載入使用者資料
+  const loadUserData = async (currentUser) => {
+    try {
+      setIsLoadingUserData(true);
+      const userRef = doc(db, "users", currentUser.uid);
+      const userDoc = await getDoc(userRef);
+      
+      if (userDoc.exists()) {
+        const userData = userDoc.data();
+        // 設定表單資料
+        setName(userData.name || currentUser.displayName || "");
+        setPhone(userData.phone || "");
+        setSchool(userData.school || "");
+        setClassandnumber(userData.classandnumber || "");
+        
+        // 儲存原始資料
+        setOriginalData(userData);
+        setIsEditMode(true); // 設定為編輯模式
+      } else {
+        // 新用戶，使用Google資料作為預設值
+        setName(currentUser.displayName || "");
+        setIsEditMode(false); // 設定為新註冊模式
+      }
+    } catch (error) {
+      console.error("Error loading user data:", error);
+      showToast("載入資料失敗");
+      setName(currentUser.displayName || "");
+    } finally {
+      setIsLoadingUserData(false);
+    }
+  };
+
   // 儲存使用者完整資料
-  const saveCompleteUserData = async (user, additionalData) => {
+  const saveCompleteUserData = async (user, additionalData, isUpdate = false) => {
     try {
       const userRef = doc(db, "users", user.uid);
       
-      await setDoc(userRef, {
+      const userData = {
         name: additionalData.name || user.displayName || "",
         phone: additionalData.phone || "",
         email: user.email,
@@ -43,10 +78,17 @@ export default function InformationPage() {
         classandnumber: additionalData.classandnumber || "",
         googleId: user.uid,
         photoURL: user.photoURL || "",
-        createdAt: new Date(),
         authMethod: "google",
-        profileCompleted: true
-      });
+        profileCompleted: true,
+        updatedAt: new Date()
+      };
+
+      // 如果是新註冊，加上創建時間
+      if (!isUpdate) {
+        userData.createdAt = new Date();
+      }
+      
+      await setDoc(userRef, userData, { merge: true }); // 使用merge避免覆蓋其他欄位
       
       return true;
     } catch (error) {
@@ -55,8 +97,8 @@ export default function InformationPage() {
     }
   };
 
-  // 完成註冊資料填寫
-  const handleCompleteRegistration = async (e) => {
+  // 完成註冊或更新資料
+  const handleSubmit = async (e) => {
     e.preventDefault();
     
     if (!name.trim() || !phone.trim()) {
@@ -72,19 +114,42 @@ export default function InformationPage() {
         phone: phone.trim(),
         school: school.trim(),
         classandnumber: classandnumber.trim()
-      });
+      }, isEditMode);
       
       if (success) {
-        showToast("註冊完成！歡迎使用");
-        navigate("/");
+        if (isEditMode) {
+          showToast("資料更新成功！");
+          // 更新原始資料
+          setOriginalData({
+            ...originalData,
+            name: name.trim(),
+            phone: phone.trim(),
+            school: school.trim(),
+            classandnumber: classandnumber.trim(),
+          });
+        } else {
+          showToast("註冊完成！歡迎使用");
+          navigate("/");
+        }
       } else {
-        showToast("儲存資料失敗，請重試");
+        showToast(isEditMode ? "更新資料失敗，請重試" : "儲存資料失敗，請重試");
       }
     } catch (error) {
-      console.error("Complete registration error:", error);
-      showToast("註冊失敗：" + error.message);
+      console.error("Submit error:", error);
+      showToast((isEditMode ? "更新" : "註冊") + "失敗：" + error.message);
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  // 取消編輯，恢復原始資料
+  const handleCancelEdit = () => {
+    if (originalData) {
+      setName(originalData.name || "");
+      setPhone(originalData.phone || "");
+      setSchool(originalData.school || "");
+      setClassandnumber(originalData.classandnumber || "");
+      showToast("已恢復原始資料");
     }
   };
 
@@ -101,8 +166,13 @@ export default function InformationPage() {
     }
   };
 
-  // 如果還沒有用戶資訊，顯示載入狀態
-  if (!user) {
+  // 返回首頁
+  const handleGoHome = () => {
+    navigate("/");
+  };
+
+  // 如果還沒有用戶資訊或正在載入用戶資料，顯示載入狀態
+  if (!user || isLoadingUserData) {
     return (
       <div style={{ 
         minHeight: "100vh", 
@@ -112,7 +182,9 @@ export default function InformationPage() {
       }}>
         <div style={{ textAlign: "center", color: "#666" }}>
           <div style={{ marginBottom: "16px", fontSize: "1.1rem" }}>載入中...</div>
-          <div style={{ fontSize: "0.9rem" }}>正在驗證您的登入狀態</div>
+          <div style={{ fontSize: "0.9rem" }}>
+            {!user ? "正在驗證您的登入狀態" : "正在載入您的資料"}
+          </div>
         </div>
       </div>
     );
@@ -141,11 +213,11 @@ export default function InformationPage() {
         className="user-info-card"
       >
         <h1 style={{ marginBottom: "16px", color: "#333", fontSize: "1.4rem" }}>
-          資料表
+          {isEditMode ? "編輯資料" : "資料表"}
         </h1>
         
         <p style={{ marginBottom: "24px", color: "#666", fontSize: "0.95rem" }}>
-          請填寫以下資料完成註冊
+          {isEditMode ? "修改您的個人資料" : "請填寫以下資料完成註冊"}
         </p>
         
         {/* 顯示 Google 使用者資訊 */}
@@ -181,7 +253,7 @@ export default function InformationPage() {
           <div style={{ fontSize: "1.2rem" }}>✅</div>
         </div>
 
-        <form onSubmit={handleCompleteRegistration} style={{ display: "flex", flexDirection: "column" }}>
+        <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
           <input
             type="text"
             placeholder="姓名 *"
@@ -222,26 +294,52 @@ export default function InformationPage() {
             * 為必填欄位
           </p>
 
-          <div style={{ display: "flex", gap: "12px", marginTop: "8px" }}>
+          <div style={{ display: "flex", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
             <button 
               type="submit" 
               style={{
                 ...submitBtnStyle,
                 opacity: isLoading ? 0.7 : 1,
-                cursor: isLoading ? 'not-allowed' : 'pointer'
+                cursor: isLoading ? 'not-allowed' : 'pointer',
+                flex: isEditMode ? "1 1 100%" : "2 1 auto"
               }}
               disabled={isLoading}
             >
-              {isLoading ? "儲存中..." : "完成註冊"}
+              {isLoading ? 
+                (isEditMode ? "更新中..." : "儲存中...") : 
+                (isEditMode ? "更新資料" : "完成註冊")
+              }
             </button>
-            <button
-              type="button"
-              onClick={handleCancelRegistration}
-              style={cancelBtnStyle}
-              disabled={isLoading}
-            >
-              取消
-            </button>
+            
+            {isEditMode ? (
+              <>
+                <button
+                  type="button"
+                  onClick={handleCancelEdit}
+                  style={{...cancelBtnStyle, flex: "1 1 48%"}}
+                  disabled={isLoading}
+                >
+                  恢復原始資料
+                </button>
+                <button
+                  type="button"
+                  onClick={handleGoHome}
+                  style={{...homeBtnStyle, flex: "1 1 48%"}}
+                  disabled={isLoading}
+                >
+                  返回首頁
+                </button>
+              </>
+            ) : (
+              <button
+                type="button"
+                onClick={handleCancelRegistration}
+                style={{...cancelBtnStyle, flex: "1 1 auto"}}
+                disabled={isLoading}
+              >
+                取消
+              </button>
+            )}
           </div>
         </form>
 
@@ -258,6 +356,18 @@ export default function InformationPage() {
           <div style={{ textAlign: "center" , fontWeight: "bold", marginBottom: "4px" }}>隱私安全</div>
           <div style={{textAlign: "center"}}>您的資料將安全儲存，僅用於系統功能，不會外洩給第三方</div>
         </div>
+
+        {/* 如果是編輯模式，顯示最後更新時間 */}
+        {isEditMode && originalData && originalData.updatedAt && (
+          <div style={{ 
+            marginTop: "12px", 
+            fontSize: "0.8rem", 
+            color: "#999",
+            textAlign: "center"
+          }}>
+            最後更新：{new Date(originalData.updatedAt.toDate ? originalData.updatedAt.toDate() : originalData.updatedAt).toLocaleString('zh-TW')}
+          </div>
+        )}
       </div>
     </div>
   );
@@ -287,7 +397,6 @@ const submitBtnStyle = {
   cursor: "pointer",
   boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
   transition: "all 0.2s ease-in-out",
-  flex: 2
 };
 
 const cancelBtnStyle = {
@@ -299,5 +408,15 @@ const cancelBtnStyle = {
   fontSize: "1rem",
   cursor: "pointer",
   transition: "all 0.2s",
-  flex: 1
+};
+
+const homeBtnStyle = {
+  padding: "12px 20px",
+  borderRadius: "8px",
+  border: "1px solid #4CAF50",
+  background: "#4CAF50",
+  color: "white",
+  fontSize: "1rem",
+  cursor: "pointer",
+  transition: "all 0.2s",
 };
