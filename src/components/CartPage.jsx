@@ -11,8 +11,45 @@ export default function CartPage() {
   const [user] = useAuthState(auth);
   const [isLoading, setIsLoading] = useState(false);
   const [isSyncing, setIsSyncing] = useState(false);
+  const [userProfile, setUserProfile] = useState(null);
+  const [usePRPackage, setUsePRPackage] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [displayName, setDisplayName] = useState("");
+  
+    useEffect(() => {
+      if (!user) return;
+      const fetchName = async () => {
+        try {
+          const userDoc = await getDoc(doc(db, "users", user.uid));
+          if (userDoc.exists()) {
+            setDisplayName(userDoc.data().name || user.displayName || user.email);
+          } else {
+            setDisplayName(user.displayName || user.email);
+          }
+        } catch {
+          setDisplayName(user.displayName || user.email);
+        }
+      };
+      fetchName();
+    }, [user]);
+  // 從 Firebase 載入用戶資料
+  const loadUserProfile = async (userId) => {
+    if (!userId) return;
+    
+    try {
+      const userRef = doc(db, "users", userId);
+      const userSnap = await getDoc(userRef);
+      if (userSnap.exists()) {
+        const profile = userSnap.data();
+        setUserProfile(profile);
+        return profile;
+      }
+    } catch (error) {
+      console.error("載入用戶資料失敗:", error);
+    }
+    return null;
+  };
 
   // 從 Firebase 載入用戶的購物車
   const loadUserCart = async (userId) => {
@@ -55,10 +92,11 @@ export default function CartPage() {
     }
   };
 
-  // 用戶登入時載入購物車
+  // 用戶登入時載入購物車和用戶資料
   useEffect(() => {
     if (user?.uid) {
       loadUserCart(user.uid);
+      loadUserProfile(user.uid);
     }
   }, [user]);
 
@@ -78,6 +116,22 @@ export default function CartPage() {
     { id: "combo2", name: "組合包B", items: [5, 6, 7], discount: 100 },
     { id: "combo3", name: "組合包C", items: [1, 2, 3, 4], discount: 150 },
   ];
+
+  // 管理員郵箱列表
+  const adminEmails = [
+    "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
+    "chris20090731@gmail.com", //同上
+    "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
+    "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
+    "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
+    "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
+    "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
+    "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
+    "stud2@gl.ck.tp.edu.tw",//社團活動組楊蕙瑜組長
+  ];
+
+  // 檢查是否為管理員 (使用郵箱檢查)
+  const isAdmin = user?.email && adminEmails.includes(user.email);
 
   const checkComboDeals = () => {
     const itemQuantities = {};
@@ -135,6 +189,19 @@ export default function CartPage() {
   const calculatePricing = () => {
     const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const comboResult = checkComboDeals();
+    
+    // 如果是管理員且選擇使用公關品組合包，則免除所有金額
+    if (isAdmin && usePRPackage) {
+      return {
+        originalTotal,
+        finalTotal: 0,
+        totalDiscount: originalTotal,
+        appliedCombos: [],
+        prPackageApplied: true,
+        prPackageDiscount: originalTotal
+      };
+    }
+    
     const finalTotal = originalTotal - comboResult.totalDiscount;
 
     return {
@@ -143,10 +210,12 @@ export default function CartPage() {
       totalDiscount: comboResult.totalDiscount,
       appliedCombos: comboResult.appliedCombos,
       remainingItems: comboResult.remainingItems,
+      prPackageApplied: false,
+      prPackageDiscount: 0
     };
   };
 
-  const { originalTotal, finalTotal, totalDiscount, appliedCombos } = calculatePricing();
+  const { originalTotal, finalTotal, totalDiscount, appliedCombos, prPackageApplied, prPackageDiscount } = calculatePricing();
 
   const handleQuantityChange = (itemId, change) => {
     const currentItem = cartItems.find(item => item.id === itemId);
@@ -172,27 +241,35 @@ export default function CartPage() {
     try {
       const ordersRef = collection(db, "orders");
 
-      let profile = {};
-      try {
-        const userRef = doc(db, "users", user.uid);
-        const userSnap = await getDoc(userRef);
-        if (userSnap.exists()) profile = userSnap.data();
-      } catch {}
+      let profile = userProfile || {};
+      if (!profile.name) {
+        try {
+          const userRef = doc(db, "users", user.uid);
+          const userSnap = await getDoc(userRef);
+          if (userSnap.exists()) profile = userSnap.data();
+        } catch {}
+      }
 
       const orderData = {
         userId: user.uid,
         items: cartItems,
         originalTotal,
         finalTotal,
-        totalDiscount,
-        appliedCombos: appliedCombos.map(combo => ({
-          id: combo.id,
-          name: combo.name,
-          items: combo.items,
-          applicableCount: combo.applicableCount,
-          discountPerSet: combo.discount,
-          totalDiscount: combo.discount * combo.applicableCount
-        })),
+        totalDiscount: prPackageApplied ? prPackageDiscount : totalDiscount,
+        // 如果使用公關品，則在 appliedCombos 中記錄公關品
+        appliedCombos: prPackageApplied 
+          ? [{ name: "公關品" }]
+          : appliedCombos.map(combo => ({
+              id: combo.id,
+              name: combo.name,
+              items: combo.items,
+              applicableCount: combo.applicableCount,
+              discountPerSet: combo.discount,
+              totalDiscount: combo.discount * combo.applicableCount
+            })),
+        prPackageUsed: prPackageApplied,
+        prPackageDiscount: prPackageApplied ? prPackageDiscount : 0,
+        isAdminOrder: isAdmin,
         createdAt: serverTimestamp(),
         customerName: profile.name || "",
         customerPhone: profile.phone || "",
@@ -206,6 +283,7 @@ export default function CartPage() {
       // 清空購物車並同步到 Firebase
       setCartItems([]);
       await saveUserCart(user.uid, []);
+      setUsePRPackage(false); // 重置公關品選項
 
       showToast("訂單已送出！");
       navigate("/orders");
@@ -213,13 +291,6 @@ export default function CartPage() {
       console.error("送出訂單錯誤:", err);
       showToast("送出訂單失敗：" + err.message);
     }
-  };
-
-  // 手動同步購物車
-  const syncCart = async () => {
-    if (!user?.uid) return;
-    await saveUserCart(user.uid, cartItems);
-    showToast("購物車已同步");
   };
 
   if (isLoading) {
@@ -238,28 +309,37 @@ export default function CartPage() {
       <div style={{ width: "100%", maxWidth: "800px", background: "white", borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", padding: "30px" }}>
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
           <h1 style={{ color: "#333", margin: 0 }}>購物車</h1>
-          {user && (
-            <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
-              {isSyncing && (
-                <span style={{ fontSize: "0.9rem", color: "#666" }}>同步中...</span>
-              )}
-              <button 
-                onClick={syncCart}
-                disabled={isSyncing}
-                style={{
-                  padding: "6px 12px",
-                  fontSize: "0.85rem",
-                  background: "#f8f9fa",
-                  border: "1px solid #dee2e6",
-                  borderRadius: "6px",
-                  cursor: "pointer",
-                  color: "#666"
-                }}
-              >
-                手動同步
-              </button>
-            </div>
-          )}
+          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+            {isAdmin && (
+              <span style={{ 
+                display: "flex",
+                alignItems: "center",
+                gap: "12px",
+                padding: "12px",
+                borderRadius: "12px",
+                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
+                marginBottom: 0,
+              }}>
+                <img 
+                  src={user.photoURL || "https://via.placeholder.com/48?text=👤"} 
+                  alt="User Avatar"
+                  style={{
+                    width: "48px",
+                    height: "48px",
+                    borderRadius: "50%",
+                    objectFit: "cover",
+                    border: "2px solid #ddd"
+                  }}
+                />
+                <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
+                  Admin-{displayName || "未命名用戶"}
+                </p>
+                <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>
+                  {user.email}
+                </p>
+              </span>
+            )}
+          </div>
         </div>
 
         {!user && (
@@ -274,6 +354,34 @@ export default function CartPage() {
             <span style={{ color: "#856404" }}>
               請先登入以保存您的購物車內容
             </span>
+          </div>
+        )}
+
+        {/* 管理員公關品組合包選項 */}
+        {isAdmin && cartItems.length > 0 && (
+          <div style={{ 
+            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
+            border: "none",
+            borderRadius: "12px", 
+            padding: "16px", 
+            marginBottom: "20px",
+            color: "white"
+          }}>
+            <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
+              <div style={{ flex: 1 }}>
+                <div style={{ fontWeight: "bold", marginBottom: "4px" }}>管理員專用</div>
+                <div style={{ fontSize: "0.9rem", opacity: "0.9" }}>公關品 - 免除所有金額</div>
+              </div>
+              <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
+                <input
+                  type="checkbox"
+                  checked={usePRPackage}
+                  onChange={(e) => setUsePRPackage(e.target.checked)}
+                  style={{ transform: "scale(1.2)" }}
+                />
+                <span style={{ fontWeight: "bold" }}>使用公關品</span>
+              </label>
+            </div>
           </div>
         )}
 
@@ -299,7 +407,24 @@ export default function CartPage() {
               ))}
             </div>
 
-            {appliedCombos.length > 0 && (
+            {/* 公關品組合包折扣顯示 */}
+            {prPackageApplied && (
+              <div style={{ marginTop: "20px", padding: "16px", background: "linear-gradient(135deg, #667eea20 0%, #764ba220 100%)", borderRadius: "10px", border: "2px solid #667eea" }}>
+                <div style={{ color: "#667eea", fontWeight: "bold", fontSize: "1.1rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
+                  公關品
+                </div>
+                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
+                  <span>僅限公關場合得使用，並應獲得主席之准許</span>
+                  <span style={{ color: "#667eea", fontWeight: "bold" }}>- NT$ {prPackageDiscount}</span>
+                </div>
+                <div style={{ textAlign: "right", marginTop: "8px", fontWeight: "bold", color: "#667eea" }}>
+                  總共節省: NT$ {prPackageDiscount}
+                </div>
+              </div>
+            )}
+
+            {/* 一般組合包折扣顯示 */}
+            {!prPackageApplied && appliedCombos.length > 0 && (
               <div style={{ marginTop: "20px", padding: "16px", background: "#fff0f6", borderRadius: "10px", border: "1px solid #f9c2d3" }}>
                 <div style={{ color: "#d63384", fontWeight: "bold", fontSize: "1.1rem", marginBottom: "12px" }}>🎉 套餐折扣</div>
                 {appliedCombos.map((combo, index) => (
@@ -313,22 +438,30 @@ export default function CartPage() {
             )}
 
             <div style={{ marginTop: "24px", padding: "20px", background: "#f8f9fa", borderRadius: "10px", border: "1px solid #e9ecef" }}>
-              {totalDiscount > 0 ? (
+              {(totalDiscount > 0 || prPackageApplied) ? (
                 <>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ color: "#6c757d", textDecoration: "line-through" }}>商品小計：</span>
+                    <span style={{ color: "#6c757d", textDecoration: prPackageApplied ? "line-through" : "line-through" }}>商品小計：</span>
                     <span style={{ color: "#6c757d" }}>NT$ {originalTotal}</span>
                   </div>
                   <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                    <span style={{ color: "#28a745" }}>套餐優惠：</span>
-                    <span style={{ color: "#28a745", fontWeight: "bold" }}>- NT$ {totalDiscount}</span>
+                    <span style={{ color: prPackageApplied ? "#667eea" : "#28a745" }}>
+                      {prPackageApplied ? "公關品：" : "套餐優惠："}
+                    </span>
+                    <span style={{ color: prPackageApplied ? "#667eea" : "#28a745", fontWeight: "bold" }}>
+                      - NT$ {prPackageApplied ? prPackageDiscount : totalDiscount}
+                    </span>
                   </div>
                   <hr style={{ borderTop: "1px solid #dee2e6", margin: "12px 0" }} />
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <strong style={{ fontSize: "1.2rem", color: "#333" }}>總金額：</strong>
-                    <strong style={{ fontSize: "1.3rem", color: "#ff512f" }}>NT$ {finalTotal}</strong>
+                    <strong style={{ fontSize: "1.3rem", color: prPackageApplied ? "#667eea" : "#ff512f" }}>
+                      NT$ {finalTotal}
+                    </strong>
                   </div>
-                  <div style={{ textAlign: "right", color: "#28a745", fontSize: "0.9rem", marginTop: "4px" }}>您已節省 NT$ {totalDiscount}！</div>
+                  <div style={{ textAlign: "right", color: prPackageApplied ? "#667eea" : "#28a745", fontSize: "0.9rem", marginTop: "4px" }}>
+                    {prPackageApplied ? "公關品 - 全額免除" : `您已節省 NT$ ${totalDiscount}！`}
+                  </div>
                 </>
               ) : (
                 <div style={{ display: "flex", justifyContent: "space-between" }}>
@@ -338,8 +471,26 @@ export default function CartPage() {
               )}
             </div>
 
-            <button style={{ ...gradientBtnStyle, marginTop: "30px", width: "100%", fontSize: "1.1rem", padding: "15px 20px" }} onClick={placeOrder} disabled={!user}>
-              {totalDiscount > 0 ? `送出訂單 (已省 NT$ ${totalDiscount})` : "送出訂單"}
+            <button 
+              style={{ 
+                ...gradientBtnStyle, 
+                marginTop: "30px", 
+                width: "100%", 
+                fontSize: "1.1rem", 
+                padding: "15px 20px",
+                background: prPackageApplied 
+                  ? "linear-gradient(90deg, #667eea 0%, #764ba2 100%)" 
+                  : "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)"
+              }} 
+              onClick={placeOrder} 
+              disabled={!user}
+            >
+              {prPackageApplied 
+                ? `送出訂單 (公關品免費)` 
+                : totalDiscount > 0 
+                  ? `送出訂單 (已省 NT$ ${totalDiscount})` 
+                  : "送出訂單"
+              }
             </button>
           </>
         )}
