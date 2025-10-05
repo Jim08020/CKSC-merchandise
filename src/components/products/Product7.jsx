@@ -8,14 +8,13 @@ export default function ProductPage() {
   const { addToCart } = useCart();
   const { showToast } = useToast();
   
-  const product = {
-    no: 7,
-    id: 7,
-    name: "鑰匙圈",
-    price: 300,
-  };
+  const products = [
+    { id: "7_1", no: 7, name: "鑰匙圈A", price: 300 },
+    { id: "7_2", no: 7, name: "鑰匙圈B", price: 300 },
+    { id: "7_3", no: 7, name: "鑰匙圈C", price: 300 },
+  ];
 
-  const handleAddToCart = () => {
+  const handleAddToCart = (product) => {
     addToCart(product);
     showToast(`${product.name} 已加入購物車`);
   };
@@ -53,57 +52,94 @@ export default function ProductPage() {
             marginBottom: "24px",
           }}
         >
-          NT$ 100
+          NT$ 300
         </div>
 
-        {/* 商品圖片示意 */}
-        <div
+        <table
           style={{
             width: "100%",
-            maxWidth: "300px",
-            height: "300px",
-            background: "#e0e0e0",
-            borderRadius: "12px",
+            borderCollapse: "separate",
+            borderSpacing: 0,
             marginBottom: "24px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            fontSize: "1.2rem",
-            color: "#888",
-          }}
-        >
-          商品圖片
-        </div>
-        
-        {/* 按鈕群組 */}
-        <div style={{ display: "flex", gap: "12px", marginBottom: "20px" }}>
-          <button
-            onClick={handleAddToCart}
-            style={{
-              padding: "12px 24px",
-              background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
-              color: "white",
-              border: "none",
-              borderRadius: "10px",
-              fontWeight: "bold",
-              fontSize: "1rem",
-              cursor: "pointer",
-              boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
-              transition: "all 0.2s",
-              minWidth: "140px",
-            }}
-            onMouseEnter={(e) => {
-              e.target.style.transform = "translateY(-2px)";
-              e.target.style.boxShadow = "0 6px 16px rgba(221,36,118,0.35)";
-            }}
-            onMouseLeave={(e) => {
-              e.target.style.transform = "translateY(0)";
-              e.target.style.boxShadow = "0 4px 12px rgba(221,36,118,0.25)";
-            }}
-          >
-            加入購物車
-          </button>
-        </div>
+            borderRadius: "12px",
+            overflow: "hidden",
+            boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+          }}>
+          <thead>
+            <tr style={{ background: "linear-gradient(90deg, #ff512f, #dd2476)", color: "white" }}>
+              <th style={{ padding: "12px", textAlign: "center" }}>樣式</th>
+              <th style={{ padding: "12px", textAlign: "center" }}>購買</th>
+            </tr>
+          </thead>
+          <tbody>
+            {products.map((product) => (
+              <tr key={product.id}>
+                <td style={{
+                  padding: "12px",
+                  textAlign: "center",
+                  fontWeight: "bold",
+                  fontSize: "0.9rem",
+                  color: "#555",
+                }}>
+                  <div
+                    style={{
+                      width: "100%",
+                      maxWidth: "200px",
+                      height: "200px",
+                      marginBottom: "24px",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                      borderRadius: "12px",
+                      overflow: "hidden",
+                      margin: "0 auto",
+                    }}
+                  >
+                    <img
+                      src={`/images/product-${product.id}.png`}
+                      alt={product.name}
+                      style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                    />
+                  </div>
+                  <div style={{ marginTop: "8px" }}>{product.name}</div>
+                </td>
+
+                <td
+                  style={{
+                    padding: "12px",
+                    textAlign: "center",
+                  }}>
+                  <button
+                    onClick={() => handleAddToCart(product)}
+                    style={{  
+                      padding: "8px 16px",
+                      background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+                      color: "white",
+                      border: "none",
+                      borderRadius: "6px",
+                      fontWeight: "bold",
+                      fontSize: "0.9rem",
+                      cursor: "pointer",
+                      boxShadow: "0 2px 8px rgba(221,36,118,0.25)",
+                      transition: "all 0.2s",
+                      minWidth: "80px",
+                    }}
+                    onMouseEnter={(e) => {
+                      e.target.style.transform = "translateY(-2px)";
+                      e.target.style.boxShadow = "0 4px 12px rgba(221,36,118,0.35)";
+                    }}
+                    onMouseLeave={(e) => {
+                      e.target.style.transform = "translateY(0)";
+                      e.target.style.boxShadow = "0 2px 8px rgba(221,36,118,0.25)";
+                    }}
+                  >
+                    加入購物車
+                  </button>
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
 
         {/* 回首頁按鈕 */}
         <button

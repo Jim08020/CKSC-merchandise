@@ -1,5 +1,5 @@
 import React from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useToast } from "../ToastContext";
 
@@ -7,6 +7,7 @@ export default function ProductPage() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { showToast } = useToast();
+  const { id } = useParams();
   
   // 座墊產品資料
   const product = {
@@ -67,17 +68,19 @@ export default function ProductPage() {
             width: "100%",
             maxWidth: "300px",
             height: "300px",
-            background: "#e0e0e0",
-            borderRadius: "12px",
             marginBottom: "24px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            fontSize: "1.2rem",
-            color: "#888",
+            borderRadius: "12px",
+            overflow: "hidden",
           }}
         >
-          商品圖片
+          <img
+            src={`/images/product-${id}.png`}
+            alt={`商品 ${id}`}
+            style={{ width: "100%", height: "100%", objectFit: "cover" }}
+          />
         </div>
 
         {/* 規格表 */}
