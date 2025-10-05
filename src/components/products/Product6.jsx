@@ -12,7 +12,7 @@ export default function ProductPage() {
   const product = {
     no: 6,
     id: 6,    
-    name: "證件套",
+    name: "真皮證件套",
     price: 200,
     specifications: {
       material: "牛皮"
@@ -46,7 +46,7 @@ export default function ProductPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "8px", color: "#333" }}>證件套</h1>
+        <h1 style={{ marginBottom: "8px", color: "#333" }}>真皮證件套</h1>
 
         {/* 價格區塊 */}
         <div

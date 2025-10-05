@@ -146,14 +146,16 @@ export default function ProductPage() {
           onClick={() => navigate("/")}
           style={{
             padding: "12px 28px",
-            background: "#f5f5f5",
-            color: "#333",
-            border: "1px solid #ddd",
-            borderRadius: "10px",
+            background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+            color: "white",
+            border: "none",
+            borderRadius: "6px",
             fontWeight: "bold",
-            fontSize: "1rem",
+            fontSize: "0.9rem",
             cursor: "pointer",
+            boxShadow: "0 2px 8px rgba(221,36,118,0.25)",
             transition: "all 0.2s",
+            minWidth: "80px",
           }}
           onMouseEnter={(e) => {
             e.target.style.background = "#eeeeee";

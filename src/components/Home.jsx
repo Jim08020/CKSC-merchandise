@@ -7,13 +7,15 @@ export default function Home() {
   const [selectedItems] = useState(new Set());
 
   const products = [
-    { id: 1, no: 1, name: "棒球外套", price: 100 },
-    { id: 2, no: 2, name: "棉踢", price: 200 },
-    { id: 3, no: 3, name: "排汗衫", price: 300 },
-    { id: 4, no: 4, name: "帽踢", price: 300 },
-    { id: 5, no: 5, name: "座墊", price: 100 },
-    { id: 6, no: 6, name: "證件套", price: 200 },
-    { id: 7, no: 7, name: "鑰匙圈", price: 300 },
+    { id: 1, textid: "1", no: 1, name: "棒球外套", price: 100 },
+    { id: 2, textid: "2", no: 2, name: "棉踢", price: 200 },
+    { id: 3, textid: "3", no: 3, name: "排汗衫", price: 300 },
+    { id: 4, textid: "4", no: 4, name: "帽踢", price: 300 },
+    { id: 5, textid: "5", no: 5, name: "座墊", price: 100 },
+    { id: 6, textid: "6", no: 6, name: "真皮證件套", price: 200 },
+    { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈A", price: 300 },
+    { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈B", price: 300 },
+    { id: 7_3, textid: "7_3", no: 7, name: "鑰匙圈C", price: 300 },
   ];
 
   // 套餐組合設定
@@ -105,47 +107,33 @@ export default function Home() {
                 alignItems: "center",
                 transition: "all 0.3s",
                 cursor: "pointer",
-                border: isSelected ? "3px solid #4CAF50" : "1px solid #eee",
-              }}
-              onMouseEnter={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.transform = "translateY(-4px)";
-                  e.currentTarget.style.boxShadow = "0 8px 20px rgba(0,0,0,0.15)";
-                }
-              }}
-              onMouseLeave={(e) => {
-                if (!isSelected) {
-                  e.currentTarget.style.transform = "translateY(0)";
-                  e.currentTarget.style.boxShadow = "0 4px 12px rgba(0,0,0,0.1)";
-                }
-              }}
-            >
-              {isSelected && (
-                <div style={{ 
-                  position: "absolute", 
-                  top: "10px", 
-                  right: "10px", 
-                  background: "white", 
-                  color: "#4CAF50", 
-                  borderRadius: "50%", 
-                  width: "24px", 
-                  height: "24px", 
-                  display: "flex", 
-                  alignItems: "center", 
-                  justifyContent: "center",
-                  fontSize: "14px",
-                  fontWeight: "bold"
-                }}>
-                  ✓
-                </div>
-              )}
-              
+                }}
+            > 
               <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "8px" }}>
                 {product.name}
               </div>
               <div style={{ color: isSelected ? "#e8f5e8" : "#555", marginBottom: "12px" }}>
                 ${product.price}
               </div>
+              <div style={{
+                width: "100%",
+                Width: "200px",
+                height: "200px",
+                marginBottom: "24px",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                borderRadius: "12px",
+                overflow: "hidden",
+              }}
+              >
+                <img
+                  src={`/images/product-${product.textid}.png`}
+                  alt={product.name}
+                  style={{ width: "100%", height: "100%", objectFit: "cover" }}
+                />
+              </div>
+              
               <div style={{ display: "flex", gap: "8px" }}>
                 <button
                   style={{

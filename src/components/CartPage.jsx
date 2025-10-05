@@ -308,8 +308,8 @@ export default function CartPage() {
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
       <div style={{ width: "100%", maxWidth: "800px", background: "white", borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", padding: "30px" }}>
         <h1 style={{ color: "#333", margin: 0 , textAlign: "center" }}>購物車</h1><br />
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
+        <div style={{ display: "flex", alignItems: "center", marginBottom: "24px", justifyContent: "center" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
             {isAdmin && (
               <span style={{ 
                 display: "flex",
