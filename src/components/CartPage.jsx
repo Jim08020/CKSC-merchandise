@@ -307,8 +307,8 @@ export default function CartPage() {
   return (
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
       <div style={{ width: "100%", maxWidth: "800px", background: "white", borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", padding: "30px" }}>
+        <h1 style={{ color: "#333", margin: 0 , textAlign: "center" }}>購物車</h1><br />
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "24px" }}>
-          <h1 style={{ color: "#333", margin: 0 }}>購物車</h1>
           <div style={{ display: "flex", alignItems: "center", gap: "10px" }}>
             {isAdmin && (
               <span style={{ 
@@ -328,14 +328,12 @@ export default function CartPage() {
                     height: "48px",
                     borderRadius: "50%",
                     objectFit: "cover",
-                    border: "2px solid #ddd"
+                    border: "2px solid #ddd",
+                    display: "flex"
                   }}
                 />
                 <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
                   Admin-{displayName || "未命名用戶"}
-                </p>
-                <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>
-                  {user.email}
                 </p>
               </span>
             )}
@@ -415,10 +413,6 @@ export default function CartPage() {
                 </div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                   <span>僅限公關場合得使用，並應獲得主席之准許</span>
-                  <span style={{ color: "#667eea", fontWeight: "bold" }}>- NT$ {prPackageDiscount}</span>
-                </div>
-                <div style={{ textAlign: "right", marginTop: "8px", fontWeight: "bold", color: "#667eea" }}>
-                  總共節省: NT$ {prPackageDiscount}
                 </div>
               </div>
             )}
@@ -486,7 +480,7 @@ export default function CartPage() {
               disabled={!user}
             >
               {prPackageApplied 
-                ? `送出訂單 (公關品免費)` 
+                ? `送出公關品` 
                 : totalDiscount > 0 
                   ? `送出訂單 (已省 NT$ ${totalDiscount})` 
                   : "送出訂單"

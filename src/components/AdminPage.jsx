@@ -10,27 +10,26 @@ import { useToast } from "./ToastContext";
 export default function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [deliveredOrders, setDeliveredOrders] = useState([]);
-  const [productCounts, setProductCounts] = useState({});
-  const [productCosts, setProductCosts] = useState({});
-  const [comboCounts, setComboCounts] = useState({});
-  const [totalRevenue, setTotalRevenue] = useState(0);
-  const [totalDiscount, setTotalDiscount] = useState(0);
-  
-  // 已交貨統計
-  const [deliveredProductCounts, setDeliveredProductCounts] = useState({});
-  const [deliveredProductCosts, setDeliveredProductCosts] = useState({});
-  const [deliveredComboCounts, setDeliveredComboCounts] = useState({});
-  const [deliveredTotalRevenue, setDeliveredTotalRevenue] = useState(0);
-  const [deliveredTotalDiscount, setDeliveredTotalDiscount] = useState(0);
-  const [deliveryStats, setDeliveryStats] = useState({});
   
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("all"); // "all" 或 "delivered"
+  const [activeTab, setActiveTab] = useState("all");
+  const [selectedSchool, setSelectedSchool] = useState("all");
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [displayName, setDisplayName] = useState("");
+
+  // 學校列表
+  const schools = [
+    "建國中學",
+    "北一女中",
+    "中山女高",
+    "景美女中",
+    "成功高中",
+    "師大附中",
+    "建中家長會",
+  ];
 
   useEffect(() => {
     if (!user) return;
@@ -58,15 +57,15 @@ export default function AdminPage() {
         return;
       }                   
       const adminEmails = [
-        "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
-        "chris20090731@gmail.com", //同上
-        "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
-        "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
-        "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
-        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
-        "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
-        "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
-        "stud2@gl.ck.tp.edu.tw",//社團活動組楊蕙瑜組長
+        "ck11300333@gl.ck.tp.edu.tw",
+        "chris20090731@gmail.com",
+        "ck11300329@gl.ck.tp.edu.tw",
+        "ck11300569@gl.ck.tp.edu.tw",
+        "ck11300110@gl.ck.tp.edu.tw",
+        "ck11300044@gl.ck.tp.edu.tw",
+        "ck11300307@gl.ck.tp.edu.tw",
+        "ck11300554@gl.ck.tp.edu.tw",
+        "stud2@gl.ck.tp.edu.tw",
       ];
       
       if (adminEmails.includes(user.email)) {
@@ -132,7 +131,15 @@ export default function AdminPage() {
     return stats;
   };
 
-  // 取得訂單並計算商品/套餐統計、折扣、總營收
+  // 根據選擇的學校篩選訂單
+  const filterOrdersBySchool = (ordersList) => {
+    if (selectedSchool === "all") {
+      return ordersList;
+    }
+    return ordersList.filter(order => order.school === selectedSchool);
+  };
+
+  // 取得訂單
   useEffect(() => {
     if (!isAdmin) return;
     const fetchOrders = async () => {
@@ -164,29 +171,8 @@ export default function AdminPage() {
 
         setOrders(allOrders);
         
-        // 已交貨訂單
         const delivered = allOrders.filter(order => order.delivered);
         setDeliveredOrders(delivered);
-
-        // 計算全部訂單統計
-        const allStats = calculateStatistics(allOrders);
-        setProductCounts(allStats.productCounts);
-        setProductCosts(allStats.productCosts);
-        setComboCounts(allStats.comboCounts);
-        setTotalDiscount(allStats.totalDiscount);
-        setTotalRevenue(allStats.totalRevenue);
-
-        // 計算已交貨統計
-        const deliveredStats = calculateStatistics(delivered);
-        setDeliveredProductCounts(deliveredStats.productCounts);
-        setDeliveredProductCosts(deliveredStats.productCosts);
-        setDeliveredComboCounts(deliveredStats.comboCounts);
-        setDeliveredTotalDiscount(deliveredStats.totalDiscount);
-        setDeliveredTotalRevenue(deliveredStats.totalRevenue);
-
-        // 計算交貨人員統計
-        const deliveryStatsData = calculateDeliveryStats(allOrders);
-        setDeliveryStats(deliveryStatsData);
 
       } catch (err) {
         console.error("取得訂單錯誤:", err);
@@ -207,27 +193,17 @@ export default function AdminPage() {
         deliveryUpdatedByName: displayName || user.email || "管理員"
       };
       await updateDoc(orderRef, updateData);
-      setOrders(prev => prev.map(order => 
-        order.id === orderId ? { ...order, ...updateData, deliveryUpdatedAt: new Date() } : order
-      ));
-      showToast(delivered ? "✅ 已標記為已交貨" : "📋 已標記為未交貨");
       
-      // 重新計算統計
       const updatedOrders = orders.map(order => 
         order.id === orderId ? { ...order, ...updateData, deliveryUpdatedAt: new Date() } : order
       );
+      
+      setOrders(updatedOrders);
+      
       const delivered_updated = updatedOrders.filter(order => order.delivered);
       setDeliveredOrders(delivered_updated);
       
-      const deliveredStats = calculateStatistics(delivered_updated);
-      setDeliveredProductCounts(deliveredStats.productCounts);
-      setDeliveredProductCosts(deliveredStats.productCosts);
-      setDeliveredComboCounts(deliveredStats.comboCounts);
-      setDeliveredTotalDiscount(deliveredStats.totalDiscount);
-      setDeliveredTotalRevenue(deliveredStats.totalRevenue);
-      
-      const deliveryStatsData = calculateDeliveryStats(updatedOrders);
-      setDeliveryStats(deliveryStatsData);
+      showToast(delivered ? "✅ 已標記為已交貨" : "📋 已標記為未交貨");
       
     } catch (err) {
       console.error("更新交貨狀態錯誤:", err);
@@ -237,27 +213,24 @@ export default function AdminPage() {
 
   // 匯出 Excel
   const exportToExcel = (onlyDelivered = false) => {
-    const exportOrders = onlyDelivered ? deliveredOrders : orders;
-    const exportProductCounts = onlyDelivered ? deliveredProductCounts : productCounts;
-    const exportProductCosts = onlyDelivered ? deliveredProductCosts : productCosts;
-    const exportComboCounts = onlyDelivered ? deliveredComboCounts : comboCounts;
-    const exportTotalDiscount = onlyDelivered ? deliveredTotalDiscount : totalDiscount;
-    const exportTotalRevenue = onlyDelivered ? deliveredTotalRevenue : totalRevenue;
+    const baseOrders = onlyDelivered ? deliveredOrders : orders;
+    const exportOrders = filterOrdersBySchool(baseOrders);
+    const exportStats = calculateStatistics(exportOrders);
     
     const summaryData = [];
 
     // 商品統計
-    Object.entries(exportProductCounts).forEach(([name, total]) => {
+    Object.entries(exportStats.productCounts).forEach(([name, total]) => {
       summaryData.push({
         項目名稱: name,
         總數量: total,
-        總金額: exportProductCosts[name] || 0,
+        總金額: exportStats.productCosts[name] || 0,
         類型: "商品"
       });
     });
 
     // 套餐統計
-    Object.entries(exportComboCounts).forEach(([comboName, count]) => {
+    Object.entries(exportStats.comboCounts).forEach(([comboName, count]) => {
       const comboInstances = exportOrders.flatMap(o => o.appliedCombos || [])
         .filter(c => c.name === comboName);
 
@@ -275,21 +248,24 @@ export default function AdminPage() {
     });
 
     summaryData.push({});
-    summaryData.push({ 項目名稱: "折扣總額", 總數量: "-", 總金額: exportTotalDiscount });
-    summaryData.push({ 項目名稱: "總營收", 總數量: "-", 總金額: exportTotalRevenue });
+    summaryData.push({ 項目名稱: "折扣總額", 總數量: "-", 總金額: exportStats.totalDiscount });
+    summaryData.push({ 項目名稱: "總營收", 總數量: "-", 總金額: exportStats.totalRevenue });
 
     // 如果是已交貨統計，加入交貨人員統計
-    if (onlyDelivered && Object.keys(deliveryStats).length > 0) {
-      summaryData.push({});
-      summaryData.push({ 項目名稱: "=== 交貨人員統計 ===", 總數量: "", 總金額: "" });
-      Object.entries(deliveryStats).forEach(([updater, stats]) => {
-        summaryData.push({
-          項目名稱: `${updater} (交貨員)`,
-          總數量: `${stats.count} 筆訂單`,
-          總金額: `NT$ ${stats.totalAmount}`,
-          類型: "交貨統計"
+    if (onlyDelivered) {
+      const filteredDeliveryStats = calculateDeliveryStats(exportOrders);
+      if (Object.keys(filteredDeliveryStats).length > 0) {
+        summaryData.push({});
+        summaryData.push({ 項目名稱: "=== 交貨人員統計 ===", 總數量: "", 總金額: "" });
+        Object.entries(filteredDeliveryStats).forEach(([updater, stats]) => {
+          summaryData.push({
+            項目名稱: `${updater} (交貨員)`,
+            總數量: `${stats.count} 筆訂單`,
+            總金額: `NT$ ${stats.totalAmount}`,
+            類型: "交貨統計"
+          });
         });
-      });
+      }
     }
 
     const productSheet = XLSX.utils.json_to_sheet(summaryData);
@@ -351,26 +327,25 @@ export default function AdminPage() {
     productSheet['!cols'] = [{ wch: 20 }, { wch: 10 }, { wch: 12 }, { wch: 10 }];
 
     const workbook = XLSX.utils.book_new();
+    const schoolPrefix = selectedSchool !== "all" ? `${selectedSchool}_` : "";
     const sheetPrefix = onlyDelivered ? "已交貨" : "全部";
     XLSX.utils.book_append_sheet(workbook, productSheet, `${sheetPrefix}商品統計`);
     XLSX.utils.book_append_sheet(workbook, ordersSheet, `${sheetPrefix}訂單明細`);
 
-    const filename = onlyDelivered ? 
-      `已交貨訂單統計_${new Date().toISOString().slice(0,10)}.xlsx` :
-      `訂單統計_${new Date().toISOString().slice(0,10)}.xlsx`;
+    const filename = `${schoolPrefix}${onlyDelivered ? '已交貨' : ''}訂單統計_${new Date().toISOString().slice(0,10)}.xlsx`;
     
     const excelBuffer = XLSX.write(workbook, { bookType: "xlsx", type: "array" });
     saveAs(new Blob([excelBuffer], { type: "application/octet-stream" }), filename);
-    showToast(`✅ ${onlyDelivered ? '已交貨' : '全部'} Excel 已匯出`);
+    showToast(`✅ ${selectedSchool !== "all" ? selectedSchool + ' ' : ''}${onlyDelivered ? '已交貨' : '全部'} Excel 已匯出`);
   };
 
   if (loading) return <div style={{ textAlign: "center", marginTop: "40px" }}><p>檢查權限中...</p></div>;
   if (!isAdmin) return null;
 
-  const currentOrders = activeTab === "delivered" ? deliveredOrders : orders;
-  const currentProductCounts = activeTab === "delivered" ? deliveredProductCounts : productCounts;
-  const currentTotalRevenue = activeTab === "delivered" ? deliveredTotalRevenue : totalRevenue;
-  const currentTotalDiscount = activeTab === "delivered" ? deliveredTotalDiscount : totalDiscount;
+  // 根據選擇的學校和分頁篩選訂單
+  const baseOrders = activeTab === "delivered" ? deliveredOrders : orders;
+  const currentOrders = filterOrdersBySchool(baseOrders);
+  const currentStats = calculateStatistics(currentOrders);
 
   return (
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", flexDirection: "column", alignItems: "center" }}>
@@ -406,6 +381,42 @@ export default function AdminPage() {
       
       <h1 style={{ marginBottom: "20px", color: "#333" }}>後台管理 - 訂單統計</h1>
 
+      {/* 學校篩選器 */}
+      <div style={{
+        marginBottom: "16px",
+        width: "100%",
+        maxWidth: "1000px"
+      }}>
+        <label style={{ 
+          display: "block", 
+          marginBottom: "8px", 
+          fontWeight: "600", 
+          color: "#333",
+          fontSize: "0.95rem"
+        }}>
+          篩選學校：
+        </label>
+        <select
+          value={selectedSchool}
+          onChange={(e) => setSelectedSchool(e.target.value)}
+          style={{
+            width: "100%",
+            padding: "10px 14px",
+            borderRadius: "8px",
+            border: "1px solid #ddd",
+            fontSize: "1rem",
+            cursor: "pointer",
+            background: "white",
+            outline: "none"
+          }}
+        >
+          <option value="all">全部</option>
+          {schools.map(school => (
+            <option key={school} value={school}>{school}</option>
+          ))}
+        </select>
+      </div>
+
       {/* 分頁切換 */}
       <div style={{ 
         display: "flex", 
@@ -430,7 +441,7 @@ export default function AdminPage() {
             boxShadow: activeTab === "all" ? "0 1px 3px rgba(0,0,0,0.1)" : "none"
           }}
         >
-          全部訂單 ({orders.length})
+          全部訂單 ({currentOrders.length})
         </button>
         <button
           onClick={() => setActiveTab("delivered")}
@@ -446,7 +457,7 @@ export default function AdminPage() {
             boxShadow: activeTab === "delivered" ? "0 1px 3px rgba(0,0,0,0.1)" : "none"
           }}
         >
-          已交貨 ({deliveredOrders.length})
+          已交貨 ({currentOrders.filter(o => o.delivered).length})
         </button>
       </div>
 
@@ -455,6 +466,7 @@ export default function AdminPage() {
         <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
           <div>
             <h2 style={{ margin: 0, color: "#333" }}>
+              {selectedSchool !== "all" && `${selectedSchool} - `}
               {activeTab === "delivered" ? "已交貨統計與匯出" : "匯出與總覽"}
             </h2>
             <p style={{ margin: "6px 0 8px", color: "#666", fontSize: "0.95rem" }}>
@@ -471,21 +483,21 @@ export default function AdminPage() {
                 <div style={{ color: "#0369a1", fontSize: "0.9rem" }}>
                   {activeTab === "delivered" ? "已交貨營收" : "總營收"}
                 </div>
-                <div style={{ color: "#0c4a6e", fontWeight: 700, fontSize: "1.1rem" }}>NT$ {currentTotalRevenue}</div>
+                <div style={{ color: "#0c4a6e", fontWeight: 700, fontSize: "1.1rem" }}>NT$ {currentStats.totalRevenue}</div>
               </div>
               <div style={{ background: "#fff1f2", border: "1px solid #ffe4e6", borderRadius: "10px", padding: "10px 14px" }}>
                 <div style={{ color: "#be123c", fontSize: "0.9rem" }}>折扣總額</div>
-                <div style={{ color: "#9f1239", fontWeight: 700, fontSize: "1.1rem" }}>NT$ {currentTotalDiscount}</div>
+                <div style={{ color: "#9f1239", fontWeight: 700, fontSize: "1.1rem" }}>NT$ {currentStats.totalDiscount}</div>
               </div>
               {activeTab === "all" && (
                 <>
                   <div style={{ background: "#dcfce7", border: "1px solid #bbf7d0", borderRadius: "10px", padding: "10px 14px" }}>
                     <div style={{ color: "#166534", fontSize: "0.9rem" }}>已交貨</div>
-                    <div style={{ color: "#14532d", fontWeight: 700, fontSize: "1.1rem" }}>{orders.filter(o => o.delivered).length}</div>
+                    <div style={{ color: "#14532d", fontWeight: 700, fontSize: "1.1rem" }}>{currentOrders.filter(o => o.delivered).length}</div>
                   </div>
                   <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: "10px", padding: "10px 14px" }}>
                     <div style={{ color: "#92400e", fontSize: "0.9rem" }}>未交貨</div>
-                    <div style={{ color: "#78350f", fontWeight: 700, fontSize: "1.1rem" }}>{orders.filter(o => !o.delivered).length}</div>
+                    <div style={{ color: "#78350f", fontWeight: 700, fontSize: "1.1rem" }}>{currentOrders.filter(o => !o.delivered).length}</div>
                   </div>
                 </>
               )}
@@ -495,44 +507,47 @@ export default function AdminPage() {
             onClick={() => exportToExcel(activeTab === "delivered")}
             style={{ padding: "12px 24px", background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)", color: "white", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "1rem", cursor: "pointer", boxShadow: "0 4px 12px rgba(221,36,118,0.25)" }}
           >
-            匯出 {activeTab === "delivered" ? "已交貨" : "全部"} Excel
+            匯出 {selectedSchool !== "all" && selectedSchool} {activeTab === "delivered" ? "已交貨" : "全部"} Excel
           </button>
         </div>
 
         {/* 已交貨統計專屬：交貨人員統計 */}
-        {activeTab === "delivered" && Object.keys(deliveryStats).length > 0 && (
-          <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", padding: "20px" }}>
-            <h2 style={{ margin: "0 0 16px", color: "#333" }}>交貨人員統計</h2>
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
-              {Object.entries(deliveryStats).map(([updater, stats]) => (
-                <div key={updater} style={{ 
-                  padding: "16px", 
-                  background: "#f8fafc", 
-                  border: "1px solid #e2e8f0", 
-                  borderRadius: "8px",
-                  textAlign: "center"
-                }}>
-                  <div style={{ fontWeight: "bold", color: "#1f2937", marginBottom: "4px" }}>{updater}</div>
-                  <div style={{ fontSize: "0.9rem", color: "#64748b" }}>
-                    {stats.count} 筆訂單
+        {activeTab === "delivered" && (() => {
+          const filteredDeliveryStats = calculateDeliveryStats(currentOrders);
+          return Object.keys(filteredDeliveryStats).length > 0 && (
+            <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", padding: "20px" }}>
+              <h2 style={{ margin: "0 0 16px", color: "#333" }}>交貨人員統計</h2>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))", gap: "12px" }}>
+                {Object.entries(filteredDeliveryStats).map(([updater, stats]) => (
+                  <div key={updater} style={{ 
+                    padding: "16px", 
+                    background: "#f8fafc", 
+                    border: "1px solid #e2e8f0", 
+                    borderRadius: "8px",
+                    textAlign: "center"
+                  }}>
+                    <div style={{ fontWeight: "bold", color: "#1f2937", marginBottom: "4px" }}>{updater}</div>
+                    <div style={{ fontSize: "0.9rem", color: "#64748b" }}>
+                      {stats.count} 筆訂單
+                    </div>
+                    <div style={{ fontSize: "1rem", fontWeight: "600", color: "#059669", marginTop: "4px" }}>
+                      NT$ {stats.totalAmount}
+                    </div>
                   </div>
-                  <div style={{ fontSize: "1rem", fontWeight: "600", color: "#059669", marginTop: "4px" }}>
-                    NT$ {stats.totalAmount}
-                  </div>
-                </div>
-              ))}
+                ))}
+              </div>
             </div>
-          </div>
-        )}
+          );
+        })()}
 
         {/* 商品總數量 Card */}
         <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", padding: "20px", display: "flex", flexDirection: "column", gap: "12px" }}>
           <h2 style={{ margin: 0, color: "#333" }}>
             {activeTab === "delivered" ? "已交貨商品統計" : "商品總數量"}
           </h2>
-          {Object.keys(currentProductCounts).length === 0 ? <p style={{ color: "#555" }}>尚無統計資料</p> : (
+          {Object.keys(currentStats.productCounts).length === 0 ? <p style={{ color: "#555" }}>尚無統計資料</p> : (
             <ul style={{ listStyle: "none", padding: 0, margin: 0 }}>
-              {Object.entries(currentProductCounts).map(([name, total]) => (
+              {Object.entries(currentStats.productCounts).map(([name, total]) => (
                 <li key={name} style={{ display: "flex", justifyContent: "space-between", alignItems: "center", padding: "12px 14px", borderRadius: "10px", border: "1px solid #eee", boxShadow: "0 2px 6px rgba(0,0,0,0.04)", marginBottom: "10px", background: "#f9f9f9" }}>
                   <span style={{ color: "#333", fontWeight: 600 }}>{name}</span>
                   <span style={{ color: "#666" }}>總數量：{total}</span>

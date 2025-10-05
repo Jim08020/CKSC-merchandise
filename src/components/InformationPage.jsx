@@ -17,6 +17,13 @@ export default function InformationPage() {
   const [originalData, setOriginalData] = useState(null); // 儲存原始資料
   const navigate = useNavigate();
   const { showToast } = useToast();
+  const [ckagree, setckAgree] = useState(false);
+  const [tfgagree, settfgAgree] = useState(false);
+  const [zsagree, setzsAgree] = useState(false);
+  const [jmagree, setjmAgree] = useState(false);
+  const [cgagree, setcgAgree] = useState(false);
+  const [hsnuagree, sethsnuAgree] = useState(false);
+  const [parentsagree, setparentsAgree] = useState(false);
 
   useEffect(() => {
     // 檢查使用者是否已登入
@@ -270,6 +277,72 @@ export default function InformationPage() {
             required
             style={inputStyle}
           />
+          <div style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+            &thinsp;請選擇學校
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={ckagree} 
+                onChange={() => (setckAgree(!ckagree), setSchool("建國中學"))} 
+                style={{ marginRight: "8px" }}
+              />
+              建國中學
+            </label>
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={tfgagree} 
+                onChange={() => (settfgAgree(!tfgagree), setSchool("北一女中"))} 
+                style={{ marginRight: "8px" }}
+              />
+              北一女中
+            </label>
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={zsagree} 
+                onChange={() => (setzsAgree(!zsagree), setSchool("中山女高"))} 
+                style={{ marginRight: "8px" }}
+              />
+              中山女高
+            </label>
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={jmagree} 
+                onChange={() => (setjmAgree(!jmagree), setSchool("景美女中"))} 
+                style={{ marginRight: "8px" }}
+              />
+              景美女中
+            </label>
+          <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={cgagree} 
+                onChange={() => (setcgAgree(!cgagree), setSchool("成功高中"))} 
+                style={{ marginRight: "8px" }}
+              />
+              成功高中
+            </label>
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={hsnuagree} 
+                onChange={() => (sethsnuAgree(!hsnuagree), setSchool("師大附中"))} 
+                style={{ marginRight: "8px" }}
+              />
+              師大附中
+            </label>
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={parentsagree} 
+                onChange={() => (setparentsAgree(!parentsagree), setSchool("建中家長會"))} 
+                style={{ marginRight: "8px" }}
+              />
+              建中家長會
+            </label><br />
+          </div>
           <input
             type="text"
             placeholder="學校（如為友校或本校學生請填寫）"
