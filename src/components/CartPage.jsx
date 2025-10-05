@@ -136,7 +136,9 @@ export default function CartPage() {
   const checkComboDeals = () => {
     const itemQuantities = {};
     cartItems.forEach(item => {
-      if (item.no) itemQuantities[item.no] = item.quantity;
+      if (item.no) {
+        itemQuantities[item.no] = (itemQuantities[item.no] || 0) + item.quantity;
+      }
     });
 
     const possibleCombos = [];

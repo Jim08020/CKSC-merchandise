@@ -13,9 +13,9 @@ export default function Home() {
     { id: 4, textid: "4", no: 4, name: "帽踢", price: 300 },
     { id: 5, textid: "5", no: 5, name: "座墊", price: 100 },
     { id: 6, textid: "6", no: 6, name: "真皮證件套", price: 200 },
-    { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈A", price: 300 },
-    { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈B", price: 300 },
-    { id: 7_3, textid: "7_3", no: 7, name: "鑰匙圈C", price: 300 },
+    { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈", category: "A", price: 300 },
+    { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈", category: "B", price: 300 },
+    { id: 7_3, textid: "7_3", no: 7, name: "鑰匙圈", category: "C", price: 300 },
   ];
 
   // 套餐組合設定
@@ -110,7 +110,7 @@ export default function Home() {
                 }}
             > 
               <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "8px" }}>
-                {product.name}
+                {product.name}{product.category ? `${product.category}` : ""}
               </div>
               <div style={{ color: isSelected ? "#e8f5e8" : "#555", marginBottom: "12px" }}>
                 ${product.price}
