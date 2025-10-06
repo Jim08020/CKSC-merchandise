@@ -13,11 +13,11 @@ export default function ProductPage() {
   const product = {
     no: 5,
     id: 5,
-    name: "座墊",
-    price: 100,
+    name: "毛巾",
+    price: 250,
     specifications: {
-      size: "40 x 40 x 5 cm",
-      material: "棉花"
+      size: "100 x 30 cm",
+      material: "棉"
     }
   };
 
@@ -48,7 +48,7 @@ export default function ProductPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "8px", color: "#333" }}>座墊</h1>
+        <h1 style={{ marginBottom: "8px", color: "#333" }}>{product.name}</h1>
 
         {/* 價格區塊 */}
         <div
@@ -57,9 +57,14 @@ export default function ProductPage() {
             fontWeight: "bold",
             color: "#dd2476",
             marginBottom: "24px",
+            textAlign: "center",
           }}
         >
-          NT$ 100
+          <div style={{textDecoration: "line-through", opacity: 0.7}}>
+            NT$ 400 
+          </div>
+          早鳥優惠價：
+          NT$ 200
         </div>
 
         {/* 商品圖片示意 */}
@@ -109,11 +114,11 @@ export default function ProductPage() {
           <tbody>
             <tr style={{ background: "#fafafa" }}>
               <td style={{ padding: "12px", fontWeight: "bold", textAlign: "center" }}>尺寸</td>
-              <td style={{ padding: "12px", textAlign: "center" }}>40 x 40 x 5 cm</td>
+              <td style={{ padding: "12px", textAlign: "center" }}>{product.specifications.size}</td>
             </tr>
             <tr>
               <td style={{ padding: "12px", fontWeight: "bold", textAlign: "center" }}>材質</td>
-              <td style={{ padding: "12px", textAlign: "center" }}>棉花</td>
+              <td style={{ padding: "12px", textAlign: "center" }}>{product.specifications.material}</td>
             </tr>
           </tbody>
         </table>

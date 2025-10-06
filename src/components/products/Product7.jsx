@@ -9,9 +9,8 @@ export default function ProductPage() {
   const { showToast } = useToast();
   
   const products = [
-    { id: "7_1", no: 7, name: "鑰匙圈A", price: 300 },
-    { id: "7_2", no: 7, name: "鑰匙圈B", price: 300 },
-    { id: "7_3", no: 7, name: "鑰匙圈C", price: 300 },
+    { id: "7_1", no: 7, name: "鑰匙圈A", price: 50, orPrice: 70 },
+    { id: "7_2", no: 7, name: "鑰匙圈B", price: 50, orPrice: 70 },
   ];
 
   const handleAddToCart = (product) => {
@@ -50,9 +49,14 @@ export default function ProductPage() {
             fontWeight: "bold",
             color: "#dd2476",
             marginBottom: "24px",
+            textAlign: "center",
           }}
         >
-          NT$ 300
+          <div style={{textDecoration: "line-through", opacity: 0.7}}>
+            NT$ 70
+          </div>
+          早鳥優惠價：
+          NT$ 50
         </div>
 
         <table

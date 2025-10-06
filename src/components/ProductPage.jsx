@@ -9,7 +9,7 @@ import Product4 from "./products/Product4";
 import Product5 from "./products/Product5";
 import Product6 from "./products/Product6";
 import Product7 from "./products/Product7";
-
+import Product8 from "./products/Product8";
 
 // id → 對應的商品 component
 const productMap = {
@@ -20,6 +20,7 @@ const productMap = {
   5: Product5,
   6: Product6,
   7: Product7,
+  8: Product8,
 };
 
 export default function ProductPage() {

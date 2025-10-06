@@ -10,11 +10,11 @@ export default function ProductPage() {
   const { showToast } = useToast();
   
   const products = [
-    { id: 2_1, no: 2, name: "棉踢S", price: 100 },
-    { id: 2_2, no: 2, name: "棉踢M", price: 100 },
-    { id: 2_3, no: 2, name: "棉踢L", price: 100 },
-    { id: 2_4, no: 2, name: "棉踢XL", price: 100 },
-    { id: 2_5, no: 2, name: "棉踢2L", price: 100 },
+    { id: 2_1, no: 2, name: "棉短踢S", price: 300, orPrice: 500 },
+    { id: 2_2, no: 2, name: "棉短踢M", price: 300, orPrice: 500 },
+    { id: 2_3, no: 2, name: "棉短踢L", price: 300, orPrice: 500 },
+    { id: 2_4, no: 2, name: "棉短踢XL", price: 300, orPrice: 500 },
+    { id: 2_5, no: 2, name: "棉短踢2L", price: 390, orPrice: 500 },
   ];
 
   // 尺碼資料，包含對應的產品 ID
@@ -58,17 +58,22 @@ export default function ProductPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>棉踢</h1>
-
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>棉短踢</h1>
+        
         <div
           style={{
             fontSize: "1.5rem",
             fontWeight: "bold",
             color: "#dd2476",
             marginBottom: "24px",
+            textAlign: "center",
           }}
         >
-          NT$ 100
+          <div style={{textDecoration: "line-through", opacity: 0.7}}>
+            NT$ 500 
+          </div>
+          早鳥優惠價：
+          NT$ 300
         </div>
 
         {/* 商品圖片示意 */}

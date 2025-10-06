@@ -10,11 +10,11 @@ export default function ProductPage() {
   const { showToast } = useToast();
   
   const products = [
-    { id: 1_1, no: 1, name: "棒球外套S", price: 100 },
-    { id: 1_2, no: 1, name: "棒球外套M", price: 100 },
-    { id: 1_3, no: 1, name: "棒球外套L", price: 100 },
-    { id: 1_4, no: 1, name: "棒球外套XL", price: 100 },
-    { id: 1_5, no: 1, name: "棒球外套2L", price: 100 },
+    { id: 1_1, no: 1, name: "棒球外套S", price: 700, orPrice: 900 },
+    { id: 1_2, no: 1, name: "棒球外套M", price: 700, orPrice: 900 },
+    { id: 1_3, no: 1, name: "棒球外套L", price: 700, orPrice: 900 },
+    { id: 1_4, no: 1, name: "棒球外套XL", price: 700, orPrice: 900 },
+    { id: 1_5, no: 1, name: "棒球外套2L", price: 700, orPrice: 900 },
   ];
 
   // 尺碼資料，包含對應的產品 ID
@@ -66,9 +66,14 @@ export default function ProductPage() {
             fontWeight: "bold",
             color: "#dd2476",
             marginBottom: "24px",
+            textAlign: "center",
           }}
         >
-          NT$ 100
+          <div style={{textDecoration: "line-through", opacity: 0.7}}>
+            NT$ 900 
+          </div>
+          早鳥優惠價：
+          NT$ 700
         </div>
 
         {/* 商品圖片示意 */}

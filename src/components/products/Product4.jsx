@@ -10,11 +10,11 @@ export default function ProductPage() {
   const { showToast } = useToast();
   
   const products = [
-    { id: 4_1, no: 4, name: "帽踢S", price: 100 },
-    { id: 4_2, no: 4, name: "帽踢M", price: 100 },
-    { id: 4_3, no: 4, name: "帽踢L", price: 100 },
-    { id: 4_4, no: 4, name: "帽踢XL", price: 100 },
-    { id: 4_5, no: 4, name: "帽踢2L", price: 100 },
+    { id: 4_1, no: 4, name: "帽踢S", price: 650, orPrice: 850 },
+    { id: 4_2, no: 4, name: "帽踢M", price: 650, orPrice: 850 },
+    { id: 4_3, no: 4, name: "帽踢L", price: 650, orPrice: 850 },
+    { id: 4_4, no: 4, name: "帽踢XL", price: 650, orPrice: 850 },
+    { id: 4_5, no: 4, name: "帽踢2L", price: 650, orPrice: 850 },
   ];
 
   // 尺碼資料，包含對應的產品 ID
@@ -66,9 +66,14 @@ export default function ProductPage() {
             fontWeight: "bold",
             color: "#dd2476",
             marginBottom: "24px",
+            textAlign: "center",
           }}
         >
-          NT$ 100
+          <div style={{textDecoration: "line-through", opacity: 0.7}}>
+            NT$ 850 
+          </div>
+          早鳥優惠價：
+          NT$ 650
         </div>
 
         {/* 商品圖片示意 */}

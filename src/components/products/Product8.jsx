@@ -10,11 +10,11 @@ export default function ProductPage() {
   const { id } = useParams();
 
   const product = {
-    no: 6,
-    id: 6,    
-    name: "包包",
-    price: 750,
-    orPrice: 950,
+    no: 8,
+    id: 8,    
+    name: "徽章",
+    price: 50,
+    orPrice: 70,
   };
 
   const handleAddToCart = () => {
@@ -57,10 +57,10 @@ export default function ProductPage() {
           }}
         >
           <div style={{textDecoration: "line-through", opacity: 0.7}}>
-            NT$ 950
+            NT$ 70
           </div>
           早鳥優惠價：
-          NT$ 750
+          NT$ 50
         </div>
 
         {/* 商品圖片示意 */}

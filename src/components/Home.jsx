@@ -1,4 +1,5 @@
 // Home.jsx
+import { or } from "firebase/firestore";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -7,42 +8,50 @@ export default function Home() {
   const [selectedItems] = useState(new Set());
 
   const products = [
-    { id: 1, textid: "1", no: 1, name: "棒球外套", price: 100 },
-    { id: 2, textid: "2", no: 2, name: "棉踢", price: 200 },
-    { id: 3, textid: "3", no: 3, name: "排汗衫", price: 300 },
-    { id: 4, textid: "4", no: 4, name: "帽踢", price: 300 },
-    { id: 5, textid: "5", no: 5, name: "座墊", price: 100 },
-    { id: 6, textid: "6", no: 6, name: "真皮證件套", price: 200 },
-    { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈", category: "A", price: 300 },
-    { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈", category: "B", price: 300 },
-    { id: 7_3, textid: "7_3", no: 7, name: "鑰匙圈", category: "C", price: 300 },
+    { id: 1, textid: "1", no: 1, name: "棒球外套", price: 700, orPrice: 900},
+    { id: 2, textid: "2", no: 2, name: "棉短踢", price: 300, orPrice: 500 },
+    { id: 3, textid: "3", no: 3, name: "真皮證件套", price: 200, orPrice: 400 },
+    { id: 4, textid: "4", no: 4, name: "帽踢", price: 650, orPrice: 850 },
+    { id: 5, textid: "5", no: 5, name: "毛巾", price: 200, orPrice: 400 },
+    { id: 6, textid: "6", no: 6, name: "包包", price: 750, orPrice: 950 },
+    { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈", category: "A", price: 50, orPrice: 70 },
+    { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈", category: "B", price: 50, orPrice: 70 },
+    { id: 8, textid: "8", no: 8, name: "徽章", price: 50, orPrice: 70 },
   ];
 
   // 套餐組合設定
   const comboDeals = [
     {
-      id: "combo1",
+      id: "combo1", //短踢+毛巾
       name: "組合包A",
-      items: [1, 3], // 棒球外套 + 排汗衫
-      originalPrice: 400,
-      comboPrice: 350,
-      discount: 50,
+      items: [2, 5],
+      originalPrice: 750,
+      comboPrice: 400,
+      discount: 350,
     },
     {
-      id: "combo2", 
+      id: "combo2", //棒球外套+帽踢
       name: "組合包B",
-      items: [5, 6, 7], // 座墊 + 證件套 + 鑰匙圈
-      originalPrice: 600,
-      comboPrice: 500,
-      discount: 100,
+      items: [1, 4], 
+      originalPrice: 1600,
+      comboPrice: 1250,
+      discount: 350,
     },
     {
-      id: "combo3",
+      id: "combo3", //棒球外套+帽踢+短踢
+      name: "組合包C",
+      items: [1, 2 ,4], 
+      originalPrice: 1900,
+      comboPrice: 1500,
+      discount: 400,
+    },
+    {
+      id: "combo4",
       name: "全套組合包",
-      items: [1, 2, 3, 4], // 棒球外套 + 棉踢 + 排汗衫 + 帽踢
-      originalPrice: 900,
-      comboPrice: 750,
-      discount: 150,
+      items: [1, 2, 3, 4, 5, 6, 7, 8], //All
+      originalPrice: 3000,
+      comboPrice: 2500,
+      discount: 500,
     },
   ];
 
@@ -62,6 +71,23 @@ export default function Home() {
         <h2 style={{ margin: "0 0 15px 0", textAlign: "center" }}>🎁 組合包優惠</h2>
         <p style={{ textAlign: "center", marginBottom: "20px", color: "#0000009f" }}>
           各品項加入購物車後將會自動計算最佳組合並折扣
+        </p>
+        <p style={{ 
+          textAlign: "center", 
+          marginBottom: "20px", 
+          background: "#ffe7e7ff",
+          border: "1px solid #ff0000ff",
+          display: "flex", 
+          flexWrap: "wrap", 
+          gap: "15px", 
+          justifyContent: "center",
+          color: "#a10d0dff",
+          padding: "15px",
+          borderRadius: "10px",
+          backdropFilter: "blur(10px)",
+          minWidth: "200px"}}>
+          滿$1500即贈送徽章或鑰匙圈 1 個<br />
+          限時早鳥預購優惠，售完為止
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", justifyContent: "center" }}>
           {comboDeals.map(combo => (
@@ -113,6 +139,9 @@ export default function Home() {
                 {product.name}{product.category ? `${product.category}` : ""}
               </div>
               <div style={{ color: isSelected ? "#e8f5e8" : "#555", marginBottom: "12px" }}>
+                <div style={{textDecoration: "line-through", opacity: 0.7}}>
+                  ${product.orPrice}
+                </div>
                 ${product.price}
               </div>
               <div style={{
