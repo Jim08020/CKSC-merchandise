@@ -11,7 +11,7 @@ const firebaseConfig = {
   storageBucket: "cksc-merchandis.firebasestorage.app",
   messagingSenderId: "294251224185",
   appId: "1:294251224185:web:5b1904f929e6ced3eb08a8",
-  measurementId: "G-XTV45Z681Q"
+  measurementId: "G-J8LM25YKVM"
 };
 
 const app = initializeApp(firebaseConfig);
