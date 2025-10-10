@@ -1,5 +1,4 @@
 // Home.jsx
-import { or } from "firebase/firestore";
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 

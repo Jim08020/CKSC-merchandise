@@ -2,6 +2,8 @@ import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
 import { auth } from "./firebase";
+import { IoMdMenu } from "react-icons/io";
+import { MdOutlineShoppingBag } from "react-icons/md";
 
 import AuthPage from "./components/AuthPage";
 import HomePage from "./components/Home";
@@ -89,10 +91,10 @@ function App() {
       {/* Header */}
       <header
         style={{
-          padding: "12px 20px",
+          padding: "10px 20px",
           marginBottom: "32px",
-          background: "linear-gradient(90deg, #232526 0%, #414345 100%)",
-          color: "white",
+          background: "white",
+          color: "black",
           display: "flex",
           alignItems: "center",
           justifyContent: "space-between",
@@ -103,16 +105,12 @@ function App() {
         <button
           onClick={() => setDrawerOpen(true)}
           style={{
-            padding: "1px 1px",
-            borderRadius: "8px",
             border: "none",
-            background: "transparent",
-            color: "white",
             fontSize: "1.5rem",
-            cursor: "pointer",
+            background: "transparent",
           }}
         >
-          &#9776;
+          <IoMdMenu />
         </button>
 
         <span style={{ fontSize: "1.0rem", fontWeight: "bold", letterSpacing: "2px" }}>
@@ -123,16 +121,12 @@ function App() {
           <button
             onClick={() => navigate("/cart")}
             style={{
-            padding: "1px 1px",
-            borderRadius: "8px",
             border: "none",
             background: "transparent",
-            color: "white",
             fontSize: "1.5rem",
-            cursor: "pointer",
           }}
           >
-            &#x1f6d2;
+            <MdOutlineShoppingBag />
           </button>
         ) : (
           <button
