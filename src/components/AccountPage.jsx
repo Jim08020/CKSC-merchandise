@@ -315,17 +315,6 @@ export default function AdminAccountManagement() {
             </div>
             <div style={{ color: "#666", marginTop: "8px" }}>活躍用戶</div>
           </div>
-          <div style={{
-            background: "white",
-            padding: "20px",
-            borderRadius: "12px",
-            boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
-          }}>
-            <div style={{ fontSize: "2rem", fontWeight: "bold", color: "#f44336" }}>
-              {users.filter(u => u.status === "suspended").length}
-            </div>
-            <div style={{ color: "#666", marginTop: "8px" }}>停用用戶</div>
-          </div>
         </div>
 
         {/* 搜尋和篩選 */}
