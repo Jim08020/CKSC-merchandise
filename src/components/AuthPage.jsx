@@ -9,7 +9,6 @@ import {
 import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "./ToastContext";
-import { adminEmails } from "./Data";
 
 export default function AuthPage() {
   const [agree, setAgree] = useState(false);
@@ -24,23 +23,19 @@ export default function AuthPage() {
     return ua.includes('line/') || ua.includes('liff/');
   };
 
-  // 初始化或更新使用者資料（包含 role）
+  // 初始化或更新使用者資料
   const initializeUserData = async (user) => {
     try {
       const userRef = doc(db, "users", user.uid);
       const userSnap = await getDoc(userRef);
       
-      // 判斷是否為管理員
-      const isAdmin = adminEmails.includes(user.email?.toLowerCase());
-      const role = isAdmin ? "admin" : "user";
-      
       if (!userSnap.exists()) {
-        // 新用戶：建立完整資料
+        // 新用戶：建立完整資料，預設為一般用戶
         await setDoc(userRef, {
           email: user.email,
           displayName: user.displayName || "",
           photoURL: user.photoURL || "",
-          role: role,
+          role: "user", // 預設為一般用戶
           status: "active",
           profileCompleted: false,
           createdAt: new Date().toISOString(),
@@ -48,13 +43,12 @@ export default function AuthPage() {
         });
         return true; // 是新用戶
       } else {
-        // 現有用戶：檢查並更新 role（如果沒有或需要更新）
+        // 現有用戶：確保有 role 欄位（如果沒有則設為 user）
         const userData = userSnap.data();
-        const needsUpdate = !userData.role || userData.role !== role;
         
-        if (needsUpdate) {
+        if (!userData.role) {
           await setDoc(userRef, {
-            role: role,
+            role: "user",
             updatedAt: new Date().toISOString()
           }, { merge: true });
         }

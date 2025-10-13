@@ -5,7 +5,6 @@ import { doc, getDoc } from "firebase/firestore";
 import { auth, db } from "./firebase";
 import { IoMdMenu } from "react-icons/io";
 import { MdOutlineShoppingBag } from "react-icons/md";
-import { adminEmails } from "./components/Data";
 
 import AuthPage from "./components/AuthPage";
 import AccountPage from "./components/AccountPage";
@@ -42,19 +41,16 @@ function App() {
           
           if (userDoc.exists()) {
             const userData = userDoc.data();
-            // 優先使用資料庫中的 role
+            // 使用 Firestore 中的 role 欄位判斷
             isAdmin = userData.role === "admin";
-          } else {
-            // 如果資料庫沒有資料，檢查 adminEmails（備用方案）
-            isAdmin = adminEmails.includes(currentUser.email?.toLowerCase());
           }
+          // 移除 adminEmails 的備用判斷邏輯
 
           setUser({ ...currentUser, isAdmin });
         } catch (error) {
           console.error("Error fetching user role:", error);
-          // 發生錯誤時使用 adminEmails 作為備用
-          const isAdmin = adminEmails.includes(currentUser.email?.toLowerCase());
-          setUser({ ...currentUser, isAdmin });
+          // 發生錯誤時預設為非管理員
+          setUser({ ...currentUser, isAdmin: false });
         }
       } else {
         setUser(null);
