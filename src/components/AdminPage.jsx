@@ -1,12 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { db, auth } from "../firebase";
-import { collection, getDocs, query, orderBy, doc, getDoc, deleteDoc , updateDoc, serverTimestamp } from "firebase/firestore";
+import { collection, getDocs, query, orderBy, doc, getDoc, deleteDoc, updateDoc, serverTimestamp } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { useToast } from "./ToastContext";
-import { adminEmails } from "./Data";
 
 export default function AdminPage() {
   const [orders, setOrders] = useState([]);
@@ -14,6 +13,7 @@ export default function AdminPage() {
   
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("all");
   const [selectedSchool, setSelectedSchool] = useState("all");
@@ -51,24 +51,34 @@ export default function AdminPage() {
 
   // 檢查管理員權限
   useEffect(() => {
-    const checkAdminPermission = () => {
+    const checkAdminStatus = async () => {
       if (!user) {
-        showToast("❌ 請先登入");
-        navigate("/login");
-        return;
-      }                   
-      
-      if (adminEmails.includes(user.email)) {
-        setIsAdmin(true);
-      } else {
-        showToast("❌ 您沒有權限查看此頁面");
-        navigate("/");
+        setIsAdmin(false);
+        setCheckingAdmin(false);
         return;
       }
-      setLoading(false);
+
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
+        
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          // 僅檢查資料庫中的 role
+          setIsAdmin(userData.role === "admin");
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("檢查管理員權限失敗:", error);
+        setIsAdmin(false);
+      } finally {
+        setCheckingAdmin(false);
+      }
     };
-    checkAdminPermission();
-  }, [user, navigate, showToast]);
+
+    checkAdminStatus();
+  }, [user]);
 
   // 計算統計數據
   const calculateStatistics = (ordersList) => {
@@ -131,9 +141,11 @@ export default function AdminPage() {
 
   // 取得訂單
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || checkingAdmin) return;
+    
     const fetchOrders = async () => {
       try {
+        setLoading(true);
         const q = query(collection(db, "orders"), orderBy("createdAt", "desc"));
         const snapshot = await getDocs(q);
         const allOrdersRaw = snapshot.docs.map(d => ({ id: d.id, ...d.data() }));
@@ -166,11 +178,14 @@ export default function AdminPage() {
 
       } catch (err) {
         console.error("取得訂單錯誤:", err);
+        showToast("獲取訂單失敗");
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOrders();
-  }, [isAdmin]);
+  }, [isAdmin, checkingAdmin]);
 
   // 更新交貨狀態
   const updateDeliveryStatus = async (orderId, delivered) => {
@@ -241,7 +256,7 @@ export default function AdminPage() {
     summaryData.push({ 項目名稱: "折扣總額", 總數量: "-", 總金額: exportStats.totalDiscount });
     summaryData.push({ 項目名稱: "總營收", 總數量: "-", 總金額: exportStats.totalRevenue });
 
-    // 如果是已交貨統計，加入交貨人員統計
+    // 如果是已交貨統計,加入交貨人員統計
     if (onlyDelivered) {
       const filteredDeliveryStats = calculateDeliveryStats(exportOrders);
       if (Object.keys(filteredDeliveryStats).length > 0) {
@@ -329,8 +344,70 @@ export default function AdminPage() {
     showToast(`✅ ${selectedSchool !== "all" ? selectedSchool + ' ' : ''}${onlyDelivered ? '已交貨' : '全部'} Excel 已匯出`);
   };
 
-  if (loading) return <div style={{ textAlign: "center", marginTop: "40px" }}><p>檢查權限中...</p></div>;
-  if (!isAdmin) return null;
+  // 檢查中
+  if (checkingAdmin) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🔐</div>
+          <p style={{ color: "#666" }}>驗證權限中...</p>
+        </div>
+      </div>
+    );
+  }
+
+  // 權限不足
+  if (!isAdmin) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        padding: "20px"
+      }}>
+        <h2 style={{ color: "#d32f2f", marginBottom: "16px" }}>⚠️ 權限不足</h2>
+        <p style={{ color: "#666", marginBottom: "24px" }}>您沒有權限訪問此頁面</p>
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            padding: "12px 28px",
+            background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+            color: "white",
+            border: "none",
+            borderRadius: "10px",
+            fontWeight: "bold",
+            cursor: "pointer"
+          }}
+        >
+          回到首頁
+        </button>
+      </div>
+    );
+  }
+
+  // 載入中
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "16px" }}>⏳</div>
+          <p style={{ color: "#666" }}>載入中...</p>
+        </div>
+      </div>
+    );
+  }
 
   // 根據選擇的學校和分頁篩選訂單
   const baseOrders = activeTab === "delivered" ? deliveredOrders : orders;

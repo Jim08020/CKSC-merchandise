@@ -6,9 +6,10 @@ import {
   signInWithRedirect,
   getRedirectResult
 } from "firebase/auth";
-import { doc, getDoc } from "firebase/firestore";
+import { doc, getDoc, setDoc } from "firebase/firestore";
 import { useNavigate, Link } from "react-router-dom";
 import { useToast } from "./ToastContext";
+import { adminEmails } from "./Data";
 
 export default function AuthPage() {
   const [agree, setAgree] = useState(false);
@@ -20,7 +21,50 @@ export default function AuthPage() {
   // 檢測是否在 LINE 內建瀏覽器
   const isLineApp = () => {
     const ua = navigator.userAgent.toLowerCase();
-    return ua.includes('line/');
+    return ua.includes('line/') || ua.includes('liff/');
+  };
+
+  // 初始化或更新使用者資料（包含 role）
+  const initializeUserData = async (user) => {
+    try {
+      const userRef = doc(db, "users", user.uid);
+      const userSnap = await getDoc(userRef);
+      
+      // 判斷是否為管理員
+      const isAdmin = adminEmails.includes(user.email?.toLowerCase());
+      const role = isAdmin ? "admin" : "user";
+      
+      if (!userSnap.exists()) {
+        // 新用戶：建立完整資料
+        await setDoc(userRef, {
+          email: user.email,
+          displayName: user.displayName || "",
+          photoURL: user.photoURL || "",
+          role: role,
+          status: "active",
+          profileCompleted: false,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString()
+        });
+        return true; // 是新用戶
+      } else {
+        // 現有用戶：檢查並更新 role（如果沒有或需要更新）
+        const userData = userSnap.data();
+        const needsUpdate = !userData.role || userData.role !== role;
+        
+        if (needsUpdate) {
+          await setDoc(userRef, {
+            role: role,
+            updatedAt: new Date().toISOString()
+          }, { merge: true });
+        }
+        
+        return false; // 不是新用戶
+      }
+    } catch (error) {
+      console.error("Error initializing user data:", error);
+      throw error;
+    }
   };
 
   // 檢查使用者是否已完成資料填寫
@@ -41,29 +85,23 @@ export default function AuthPage() {
     }
   };
 
-  // 檢查使用者是否為新用戶
-  const checkIfNewUser = async (user) => {
-    try {
-      const userRef = doc(db, "users", user.uid);
-      const userSnap = await getDoc(userRef);
-      return !userSnap.exists();
-    } catch (error) {
-      console.error("Error checking user:", error);
-      return false;
-    }
-  };
-
   // 處理登入成功後的導向
   const handleAuthSuccess = async (user) => {
-    const isNew = await checkIfNewUser(user);
-    const profileCompleted = await checkUserProfileCompleted(user);
-    
-    if (isNew || !profileCompleted) {
-      showToast("Google 認證成功！請完成註冊資料");
-      navigate("/info");
-    } else {
-      showToast("登入成功！");
-      navigate("/");
+    try {
+      // 初始化使用者資料並獲取是否為新用戶
+      const isNewUser = await initializeUserData(user);
+      const profileCompleted = await checkUserProfileCompleted(user);
+      
+      if (isNewUser || !profileCompleted) {
+        showToast("Google 認證成功！請完成註冊資料");
+        navigate("/info");
+      } else {
+        showToast("登入成功！");
+        navigate("/");
+      }
+    } catch (error) {
+      console.error("Error handling auth success:", error);
+      showToast("資料初始化失敗，請重試");
     }
   };
 
@@ -85,8 +123,10 @@ export default function AuthPage() {
         
         if (error.code === 'auth/account-exists-with-different-credential') {
           showToast("此帳號已使用其他方式註冊");
+        } else if (error.code === 'auth/popup-closed-by-user') {
+          showToast("登入已取消");
         } else {
-          showToast("Google 認證失敗：" + error.message);
+          showToast("Google 認證失敗，請重試");
         }
       } finally {
         setIsLoading(false);
@@ -131,8 +171,11 @@ export default function AuthPage() {
         showToast("彈出視窗被阻擋，請允許彈出視窗後重試");
       } else if (error.code === 'auth/account-exists-with-different-credential') {
         showToast("此帳號已使用其他方式註冊");
+      } else if (error.code === 'auth/cancelled-popup-request') {
+        // 使用者快速點擊多次，忽略此錯誤
+        console.log("Popup request cancelled");
       } else {
-        showToast("Google 認證失敗：" + error.message);
+        showToast("Google 認證失敗，請重試");
       }
       
       setIsLoading(false);
@@ -174,16 +217,16 @@ export default function AuthPage() {
           <div style={{
             marginBottom: "16px",
             padding: "12px",
-            background: "#ffe7e7ff",
-            border: "1px solid #ff0000ff",
+            background: "#ffe7e7",
+            border: "1px solid #ff0000",
             borderRadius: "8px",
             fontSize: "0.85rem",
-            color: "#a10d0dff",
+            color: "#a10d0d",
             textAlign: "left"
           }}>
-            <strong>LINE 用戶提示</strong>
+            <strong>⚠️ LINE 用戶提示</strong>
             <p style={{ margin: "8px 0 0 0", lineHeight: "1.5" }}>
-              Line 用戶請使用外部瀏覽器(例：Safari, Google, Google Chrome...)，否則無法登入成功
+              Line 用戶請使用外部瀏覽器(例：Safari, Google Chrome...)，否則無法登入成功
             </p>
           </div>
         )}
@@ -199,28 +242,45 @@ export default function AuthPage() {
             cursor: isLoading ? 'not-allowed' : 'pointer'
           }}
         >
-          <svg
-            style={{ width: "20px", height: "20px", marginRight: "12px" }}
-            viewBox="0 0 48 48"
-          >
-            <path
-              d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
-              fill="#4285F4"
-            />
-            <path
-              d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
-              fill="#34A853"
-            />
-            <path
-              d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"
-              fill="#FBBC05"
-            />
-            <path
-              d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
-              fill="#EA4335"
-            />
-          </svg>
-          {isLoading ? "處理中..." : "Sign in with Google"}
+          {isLoading ? (
+            <>
+              <div style={{
+                width: "20px",
+                height: "20px",
+                border: "3px solid #f3f3f3",
+                borderTop: "3px solid #3c4043",
+                borderRadius: "50%",
+                marginRight: "12px",
+                animation: "spin 1s linear infinite"
+              }} />
+              處理中...
+            </>
+          ) : (
+            <>
+              <svg
+                style={{ width: "20px", height: "20px", marginRight: "12px" }}
+                viewBox="0 0 48 48"
+              >
+                <path
+                  d="M45.12 24.5c0-1.56-.14-3.06-.4-4.5H24v8.51h11.84c-.51 2.75-2.06 5.08-4.39 6.64v5.52h7.11c4.16-3.83 6.56-9.47 6.56-16.17z"
+                  fill="#4285F4"
+                />
+                <path
+                  d="M24 46c5.94 0 10.92-1.97 14.56-5.33l-7.11-5.52c-1.97 1.32-4.49 2.1-7.45 2.1-5.73 0-10.58-3.87-12.31-9.07H4.34v5.7C7.96 41.07 15.4 46 24 46z"
+                  fill="#34A853"
+                />
+                <path
+                  d="M11.69 28.18C11.25 26.86 11 25.45 11 24s.25-2.86.69-4.18v-5.7H4.34C2.85 17.09 2 20.45 2 24c0 3.55.85 6.91 2.34 9.88l7.35-5.7z"
+                  fill="#FBBC05"
+                />
+                <path
+                  d="M24 10.75c3.23 0 6.13 1.11 8.41 3.29l6.31-6.31C34.91 4.18 29.93 2 24 2 15.4 2 7.96 6.93 4.34 14.12l7.35 5.7c1.73-5.2 6.58-9.07 12.31-9.07z"
+                  fill="#EA4335"
+                />
+              </svg>
+              Sign in with Google
+            </>
+          )}
         </button>
 
         {/* 同意使用者條款 */}
@@ -241,6 +301,14 @@ export default function AuthPage() {
           我已閱讀並同意 <Link to="/rule" style={{ color: "#667eea", fontWeight: "bold" }}>使用者條款</Link>
         </label>
       </div>
+
+      {/* 載入動畫的 CSS */}
+      <style>{`
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
+        }
+      `}</style>
     </div>
   );
 }

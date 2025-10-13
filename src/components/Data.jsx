@@ -143,15 +143,3 @@ export const product4_2s = [
     { id: 4_9, no: 4, name: "帽踢B-XL", price: 650, orPrice: 850 },
     { id: 4_10, no: 4, name: "帽踢B-2L", price: 650, orPrice: 850 },
 ];
-
-export const adminEmails = [
-  "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
-  "chris20090731@gmail.com", //同上
-  "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
-  "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
-  "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
-  "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
-  "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
-  "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
-  "stud2@gl.ck.tp.edu.tw"//社團活動組楊蕙瑜組長
-]

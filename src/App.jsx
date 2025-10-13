@@ -1,12 +1,14 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter as Router, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { onAuthStateChanged, signOut } from "firebase/auth";
-import { auth } from "./firebase";
+import { doc, getDoc } from "firebase/firestore";
+import { auth, db } from "./firebase";
 import { IoMdMenu } from "react-icons/io";
 import { MdOutlineShoppingBag } from "react-icons/md";
 import { adminEmails } from "./components/Data";
 
 import AuthPage from "./components/AuthPage";
+import AccountPage from "./components/AccountPage";
 import HomePage from "./components/Home";
 import CartPage from "./components/CartPage";
 import OrdersPage from "./components/OrderPage";
@@ -19,6 +21,7 @@ import InformationPage from "./components/InformationPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 
 const InfoPage = InformationPage;
+
 function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -30,31 +33,51 @@ function App() {
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, async (currentUser) => {
       if (currentUser) {
-        adminEmails.map(email => email.toLowerCase());
+        try {
+          // 從 Firestore 讀取用戶資料和角色
+          const userRef = doc(db, "users", currentUser.uid);
+          const userDoc = await getDoc(userRef);
+          
+          let isAdmin = false;
+          
+          if (userDoc.exists()) {
+            const userData = userDoc.data();
+            // 優先使用資料庫中的 role
+            isAdmin = userData.role === "admin";
+          } else {
+            // 如果資料庫沒有資料，檢查 adminEmails（備用方案）
+            isAdmin = adminEmails.includes(currentUser.email?.toLowerCase());
+          }
 
-        const isAdmin = adminEmails.includes(currentUser.email.toLowerCase());
-
-        // const isAdmin = tokenResult.claims.admin === true;
-        setUser({ ...currentUser, isAdmin });
+          setUser({ ...currentUser, isAdmin });
+        } catch (error) {
+          console.error("Error fetching user role:", error);
+          // 發生錯誤時使用 adminEmails 作為備用
+          const isAdmin = adminEmails.includes(currentUser.email?.toLowerCase());
+          setUser({ ...currentUser, isAdmin });
+        }
       } else {
         setUser(null);
       }
       setLoading(false);
     });
+    
     return () => unsubscribe();
   }, []);
 
-  if (loading) return (
-    <div style={{
-      minHeight: "100vh",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      background: "linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%)"
-    }}>
-      <p style={{ fontSize: "1.2rem", color: "#333" }}>Loading...</p>
-    </div>
-  );
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        background: "linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%)"
+      }}>
+        <p style={{ fontSize: "1.2rem", color: "#333" }}>Loading...</p>
+      </div>
+    );
+  }
 
   const handleSignOut = async () => {
     await signOut(auth);
@@ -98,6 +121,7 @@ function App() {
             border: "none",
             fontSize: "1.5rem",
             background: "transparent",
+            cursor: "pointer",
           }}
         >
           <IoMdMenu />
@@ -111,10 +135,11 @@ function App() {
           <button
             onClick={() => navigate("/cart")}
             style={{
-            border: "none",
-            background: "transparent",
-            fontSize: "1.5rem",
-          }}
+              border: "none",
+              background: "transparent",
+              fontSize: "1.5rem",
+              cursor: "pointer",
+            }}
           >
             <MdOutlineShoppingBag />
           </button>
@@ -141,12 +166,13 @@ function App() {
         style={{
           position: "fixed",
           top: 0,
+          left: 0,
           width: "260px",
           height: "100%",
           background: "#fff",
           boxShadow: drawerOpen ? "2px 0 12px rgba(0,0,0,0.2)" : "none",
           padding: "20px",
-          display: drawerOpen ? "flex":"none",
+          display: drawerOpen ? "flex" : "none",
           flexDirection: "column",
           transition: "left 0.3s",
           zIndex: 1000,
@@ -175,7 +201,10 @@ function App() {
             <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
             <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
             {user.isAdmin && (
-              <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
+              <>
+                <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
+                <button onClick={() => { navigate("/account"); setDrawerOpen(false); }} style={drawerBtnStyle}>帳號管理</button>
+              </>
             )}
             <div style={{
               display: "flex",
@@ -266,6 +295,10 @@ function App() {
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 
+              />
+              <Route 
+                path="/account" 
+                element={user.isAdmin ? <AccountPage /> : <Navigate to="/" replace />} 
               />
               <Route path="*" element={<Navigate to="/" replace />} />
             </>

@@ -6,10 +6,11 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useToast } from "./ToastContext";
 
 export default function OrderdetailPage() {
-  const { id } = useParams(); // 從 /order/:id 拿到訂單ID
+  const { id } = useParams();
   const [order, setOrder] = useState(null);
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
+  const [checkingAdmin, setCheckingAdmin] = useState(true);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
@@ -17,79 +18,78 @@ export default function OrderdetailPage() {
   const [displayName, setDisplayName] = useState("");
 
   useEffect(() => {
-      if (!user) return;
-      const fetchName = async () => {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setDisplayName(userDoc.data().name || user.displayName || user.email);
-          } else {
-            setDisplayName(user.displayName || user.email);
-          }
-        } catch {
+    if (!user) return;
+    const fetchName = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setDisplayName(userDoc.data().name || user.displayName || user.email);
+        } else {
           setDisplayName(user.displayName || user.email);
         }
-      };
-      fetchName();
-    }, [user]);
+      } catch {
+        setDisplayName(user.displayName || user.email);
+      }
+    };
+    fetchName();
+  }, [user]);
 
   // 檢查管理員權限
   useEffect(() => {
-    const checkAdminPermission = () => {
+    const checkAdminStatus = async () => {
       if (!user) {
-        showToast("❌ 請先登入");
-        navigate("/login");
+        setIsAdmin(false);
+        setCheckingAdmin(false);
         return;
       }
 
-      const adminEmails = [
-        "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
-        "chris20090731@gmail.com", //同上
-        "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
-        "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
-        "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
-        "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
-        "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
-        "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
-        "stud2@gl.ck.tp.edu.tw"//社團活動組楊蕙瑜組長
-      ];
+      try {
+        const userRef = doc(db, "users", user.uid);
+        const userDoc = await getDoc(userRef);
         
-      if (adminEmails.includes(user.email)) {
-        setIsAdmin(true);
-      } else {
-        showToast("❌ 您沒有權限查看此頁面");
-        navigate("/");
-        return;
+        if (userDoc.exists()) {
+          const userData = userDoc.data();
+          // 僅檢查資料庫中的 role
+          setIsAdmin(userData.role === "admin");
+        } else {
+          setIsAdmin(false);
+        }
+      } catch (error) {
+        console.error("檢查管理員權限失敗:", error);
+        setIsAdmin(false);
+      } finally {
+        setCheckingAdmin(false);
       }
-      
-      setLoading(false);
     };
 
-    checkAdminPermission();
-  }, [user, navigate, showToast]);
+    checkAdminStatus();
+  }, [user]);
 
   // 取得訂單資料
   useEffect(() => {
-    if (!isAdmin) return;
+    if (!isAdmin || checkingAdmin) return;
 
     const fetchOrder = async () => {
       try {
+        setLoading(true);
         const docRef = doc(db, "orders", id);
         const snapshot = await getDoc(docRef);
         if (snapshot.exists()) {
           setOrder({ id: snapshot.id, ...snapshot.data() });
         } else {
           showToast("❌ 找不到這筆訂單");
-          navigate("/orders"); // 找不到回列表
+          navigate("/admin");
         }
       } catch (err) {
         console.error("取得訂單錯誤:", err);
         showToast("❌ 取得訂單失敗：" + err.message);
+      } finally {
+        setLoading(false);
       }
     };
 
     fetchOrder();
-  }, [id, isAdmin, navigate, showToast]);
+  }, [id, isAdmin, checkingAdmin, navigate, showToast]);
 
   // 更新交貨狀態
   const updateDeliveryStatus = async (delivered) => {
@@ -111,7 +111,7 @@ export default function OrderdetailPage() {
       setOrder(prev => ({
         ...prev,
         ...updateData,
-        deliveryUpdatedAt: new Date() // 用當前時間作為臨時顯示
+        deliveryUpdatedAt: new Date()
       }));
 
       showToast(delivered ? "✅ 已標記為已交貨" : "📋 已標記為未交貨");
@@ -123,20 +123,85 @@ export default function OrderdetailPage() {
     }
   };
 
-  if (loading) {
+  // 檢查中
+  if (checkingAdmin) {
     return (
-      <div style={{ textAlign: "center", marginTop: "40px" }}>
-        <p>檢查權限中...</p>
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "16px" }}>🔐</div>
+          <p style={{ color: "#666" }}>驗證權限中...</p>
+        </div>
       </div>
     );
   }
 
+  // 權限不足
   if (!isAdmin) {
-    return null; // 已在 useEffect 中處理重導向
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        flexDirection: "column",
+        padding: "20px"
+      }}>
+        <h2 style={{ color: "#d32f2f", marginBottom: "16px" }}>⚠️ 權限不足</h2>
+        <p style={{ color: "#666", marginBottom: "24px" }}>您沒有權限訪問此頁面</p>
+        <button
+          onClick={() => navigate("/")}
+          style={{
+            padding: "12px 28px",
+            background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+            color: "white",
+            border: "none",
+            borderRadius: "10px",
+            fontWeight: "bold",
+            cursor: "pointer"
+          }}
+        >
+          回到首頁
+        </button>
+      </div>
+    );
+  }
+
+  // 載入中
+  if (loading) {
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "16px" }}>⏳</div>
+          <p style={{ color: "#666" }}>載入訂單中...</p>
+        </div>
+      </div>
+    );
   }
 
   if (!order) {
-    return <p style={{ textAlign: "center", marginTop: "40px" }}>載入中...</p>;
+    return (
+      <div style={{
+        minHeight: "100vh",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center"
+      }}>
+        <div style={{ textAlign: "center" }}>
+          <div style={{ fontSize: "3rem", marginBottom: "16px" }}>📦</div>
+          <p style={{ color: "#666" }}>找不到訂單</p>
+        </div>
+      </div>
+    );
   }
 
   return (
