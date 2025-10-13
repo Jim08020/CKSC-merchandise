@@ -3,9 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 
 // 個別商品頁面，可以放在 ./products 資料夾
 import Product1 from "./products/Product1";
-import Product2 from "./products/Product2";
+import Product2_1 from "./products/Product2_1";
+import Product2_2 from "./products/Product2_2";
+import Product2_3 from "./products/Product2_3";
 import Product3 from "./products/Product3";
-import Product4 from "./products/Product4";
+import Product4_1 from "./products/Product4_1";
+import Product4_2 from "./products/Product4_2";
 import Product5 from "./products/Product5";
 import Product6 from "./products/Product6";
 import Product7 from "./products/Product7";
@@ -13,14 +16,18 @@ import Product8 from "./products/Product8";
 
 // id → 對應的商品 component
 const productMap = {
-  1: Product1,
-  2: Product2,
-  3: Product3,
-  4: Product4,
-  5: Product5,
-  6: Product6,
-  7: Product7,
-  8: Product8,
+  "1": Product1,
+  "2_1": Product2_1,
+  "2_2": Product2_2,
+  "2_3": Product2_3,
+  "3": Product3,
+  "4_1": Product4_1,
+  "4_2": Product4_2,
+  "5": Product5,
+  "6": Product6,
+  "7_1": Product7,
+  "7_2": Product7,
+  "8": Product8,
 };
 
 export default function ProductPage() {

@@ -1,58 +1,11 @@
 // Home.jsx
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { products, comboDeals } from "./Data";
 
 export default function Home() {
   const navigate = useNavigate();
   const [selectedItems] = useState(new Set());
-
-  const products = [
-    { id: 1, textid: "1", no: 1, name: "棒球外套", price: 700, orPrice: 900},
-    { id: 2, textid: "2", no: 2, name: "棉短踢", price: 300, orPrice: 500 },
-    { id: 3, textid: "3", no: 3, name: "真皮證件套", price: 200, orPrice: 400 },
-    { id: 4, textid: "4", no: 4, name: "帽踢", price: 650, orPrice: 850 },
-    { id: 5, textid: "5", no: 5, name: "毛巾", price: 200, orPrice: 400 },
-    { id: 6, textid: "6", no: 6, name: "包包", price: 750, orPrice: 950 },
-    { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈", category: "A", price: 50, orPrice: 70 },
-    { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈", category: "B", price: 50, orPrice: 70 },
-    { id: 8, textid: "8", no: 8, name: "徽章", price: 50, orPrice: 70 },
-  ];
-
-  // 套餐組合設定
-  const comboDeals = [
-    {
-      id: "combo1", //短踢+毛巾
-      name: "組合包A",
-      items: [2, 5],
-      originalPrice: 750,
-      comboPrice: 400,
-      discount: 350,
-    },
-    {
-      id: "combo2", //棒球外套+帽踢
-      name: "組合包B",
-      items: [1, 4], 
-      originalPrice: 1600,
-      comboPrice: 1250,
-      discount: 350,
-    },
-    {
-      id: "combo3", //棒球外套+帽踢+短踢
-      name: "組合包C",
-      items: [1, 2 ,4], 
-      originalPrice: 1900,
-      comboPrice: 1500,
-      discount: 400,
-    },
-    {
-      id: "combo4",
-      name: "全套組合包",
-      items: [1, 2, 3, 4, 5, 6, 7, 8], //All
-      originalPrice: 3000,
-      comboPrice: 2500,
-      discount: 500,
-    },
-  ];
 
   return (
     <div style={{ padding: "20px" }}>
@@ -178,7 +131,7 @@ export default function Home() {
                     transition: "all 0.2s",
                     minWidth: "70px",
                   }}
-                  onClick={() => navigate(`/product/${product.no}`)}
+                  onClick={() => navigate(`/product/${product.textid}`)}
                 >
                   查看
                 </button>

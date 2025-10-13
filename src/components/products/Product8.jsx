@@ -3,7 +3,7 @@ import { useNavigate, useParams } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useToast } from "../ToastContext";
 
-export default function ProductPage() {
+export default function Product8() {
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { showToast } = useToast();

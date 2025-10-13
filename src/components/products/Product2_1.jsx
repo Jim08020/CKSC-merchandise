@@ -2,17 +2,17 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useToast } from "../ToastContext";
-import { sizeData1 } from "../Data";
-import { product1s } from "../Data";
+import { sizeData2_1 } from "../Data";
+import { product2_1s } from "../Data";
 
-export default function Product1() {
+export default function Product2_1() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { showToast } = useToast();
-  
-  const products = product1s;
-  const sizeData = sizeData1;
+
+  const products = product2_1s;
+  const sizeData = sizeData2_1;
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -46,8 +46,8 @@ export default function Product1() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>棒球外套</h1>
-
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>棉短踢A</h1>
+        
         <div
           style={{
             fontSize: "1.5rem",
@@ -58,10 +58,10 @@ export default function Product1() {
           }}
         >
           <div style={{textDecoration: "line-through", opacity: 0.7}}>
-            NT$ 900 
+            NT$ 500 
           </div>
           早鳥優惠價：
-          NT$ 700
+          NT$ 300
         </div>
 
         {/* 商品圖片示意 */}

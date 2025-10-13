@@ -2,29 +2,17 @@ import React from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { useCart } from "../CartContext";
 import { useToast } from "../ToastContext";
+import { sizeData4_1 } from "../Data";
+import { product4_1s } from "../Data";
 
-export default function ProductPage() {
+export default function Product4() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { addToCart } = useCart();
   const { showToast } = useToast();
   
-  const products = [
-    { id: 2_1, no: 2, name: "棉短踢S", price: 300, orPrice: 500 },
-    { id: 2_2, no: 2, name: "棉短踢M", price: 300, orPrice: 500 },
-    { id: 2_3, no: 2, name: "棉短踢L", price: 300, orPrice: 500 },
-    { id: 2_4, no: 2, name: "棉短踢XL", price: 300, orPrice: 500 },
-    { id: 2_5, no: 2, name: "棉短踢2L", price: 390, orPrice: 500 },
-  ];
-
-  // 尺碼資料，包含對應的產品 ID
-  const sizeData = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 2_1 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 2_2 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 2_3 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 2_4 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 2_5 },
-  ];
+  const products = product4_1s;
+  const sizeData = sizeData4_1;
 
   const handleAddToCart = (product) => {
     addToCart(product);
@@ -58,8 +46,8 @@ export default function ProductPage() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>棉短踢</h1>
-        
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>帽踢A</h1>
+
         <div
           style={{
             fontSize: "1.5rem",
@@ -70,10 +58,10 @@ export default function ProductPage() {
           }}
         >
           <div style={{textDecoration: "line-through", opacity: 0.7}}>
-            NT$ 500 
+            NT$ 850 
           </div>
           早鳥優惠價：
-          NT$ 300
+          NT$ 650
         </div>
 
         {/* 商品圖片示意 */}

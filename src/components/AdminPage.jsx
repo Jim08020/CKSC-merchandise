@@ -6,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { saveAs } from "file-saver";
 import * as XLSX from "xlsx";
 import { useToast } from "./ToastContext";
+import { adminEmails } from "./Data";
 
 export default function AdminPage() {
   const [orders, setOrders] = useState([]);
@@ -56,17 +57,6 @@ export default function AdminPage() {
         navigate("/login");
         return;
       }                   
-      const adminEmails = [
-        "ck11300333@gl.ck.tp.edu.tw",
-        "chris20090731@gmail.com",
-        "ck11300329@gl.ck.tp.edu.tw",
-        "ck11300569@gl.ck.tp.edu.tw",
-        "ck11300110@gl.ck.tp.edu.tw",
-        "ck11300044@gl.ck.tp.edu.tw",
-        "ck11300307@gl.ck.tp.edu.tw",
-        "ck11300554@gl.ck.tp.edu.tw",
-        "stud2@gl.ck.tp.edu.tw",
-      ];
       
       if (adminEmails.includes(user.email)) {
         setIsAdmin(true);
