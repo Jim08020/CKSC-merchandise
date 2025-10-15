@@ -13,8 +13,8 @@ export default function Product3() {
     no: 6,
     id: 6,    
     name: "真皮證件套",
-    price: 400,
-    orPrice: 200,
+    price: 200,
+    orPrice: 400,
   };
 
   const handleAddToCart = () => {
