@@ -39,7 +39,7 @@ export default function Home() {
           backdropFilter: "blur(10px)",
           minWidth: "200px"}}>
           滿$1500即贈送徽章或鑰匙圈 1 個<br />
-          限時早鳥預購優惠，售完為止
+          限時早鳥預購優惠，只到12月5日
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", justifyContent: "center" }}>
           {comboDeals.map(combo => (
@@ -57,7 +57,7 @@ export default function Home() {
               <div style={{ marginTop: "8px" }}>
                 <span style={{ textDecoration: "line-through", opacity: 0.7 }}>${combo.originalPrice}</span>
                 <span style={{ marginLeft: "10px", fontWeight: "bold", fontSize: "1.1rem" }}>${combo.comboPrice}</span>
-                <span style={{ marginLeft: "10px", color: "#ffeb3b" }}>省${combo.discount}</span>
+                <span style={{ marginLeft: "10px", color: "#ffc400ff" }}>省${combo.discount}</span>
               </div>
             </div>
           ))}

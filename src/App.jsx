@@ -18,6 +18,7 @@ import AdminPage from "./components/AdminPage";
 import OrderdetailPage from "./components/OrderdetailPage";
 import InformationPage from "./components/InformationPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
+import ComingSoonPage from "./components/ComingoonPage";
 
 const InfoPage = InformationPage;
 

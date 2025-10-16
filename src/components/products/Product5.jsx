@@ -17,7 +17,6 @@ export default function Product5() {
     price: 250,
     specifications: {
       size: "100 x 30 cm",
-      material: "棉"
     }
   };
 
@@ -115,10 +114,6 @@ export default function Product5() {
             <tr style={{ background: "#fafafa" }}>
               <td style={{ padding: "12px", fontWeight: "bold", textAlign: "center" }}>尺寸</td>
               <td style={{ padding: "12px", textAlign: "center" }}>{product.specifications.size}</td>
-            </tr>
-            <tr>
-              <td style={{ padding: "12px", fontWeight: "bold", textAlign: "center" }}>材質</td>
-              <td style={{ padding: "12px", textAlign: "center" }}>{product.specifications.material}</td>
             </tr>
           </tbody>
         </table>

@@ -49,11 +49,11 @@ export const comboDeals = [
 ];
 
 export const sizeData1 = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 1_1 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 1_2 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 1_3 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 1_4 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 1_5 },
+    { size: "S", length: 65, sleeve: 19, chest: 49, shoulder: 42, productId: 1_1 },
+    { size: "M", length: 69, sleeve: 20, chest: 52, shoulder: 46, productId: 1_2 },
+    { size: "L", length: 73, sleeve: 22, chest: 55, shoulder: 50, productId: 1_3 },
+    { size: "XL", length: 77, sleeve: 24, chest: 58, shoulder: 54, productId: 1_4 },
+    { size: "XXL", length: 81, sleeve: 25, chest: 63, shoulder: 57, productId: 1_5 },
 ];
 
 export const sizeData2_1 = [
@@ -81,19 +81,19 @@ export const sizeData2_3 = [
 ];
 
 export const sizeData4_1 = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 4_1 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 4_2 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 4_3 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 4_4 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 4_5 },
+    { size: "S", length: 65, sleeve: 52, chest: 110, shoulder: 56, productId: 4_1 },
+    { size: "M", length: 67, sleeve: 53, chest: 114, shoulder: 58, productId: 4_2 },
+    { size: "L", length: 69, sleeve: 54, chest: 118, shoulder: 60, productId: 4_3 },
+    { size: "XL", length: 71, sleeve: 55, chest: 122, shoulder: 62, productId: 4_4 },
+    { size: "2L", length: 73, sleeve: 56, chest: 126, shoulder: 64, productId: 4_5 },
 ];
 
 export const sizeData4_2 = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 4_6 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 4_7 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 4_8 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 4_9 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 4_10 },
+    { size: "S", length: 65, sleeve: 52, chest: 110, shoulder: 56, productId: 4_6 },
+    { size: "M", length: 67, sleeve: 53, chest: 114, shoulder: 58, productId: 4_7 },
+    { size: "L", length: 69, sleeve: 54, chest: 118, shoulder: 60, productId: 4_8 },
+    { size: "XL", length: 71, sleeve: 55, chest: 122, shoulder: 62, productId: 4_9 },
+    { size: "2L", length: 73, sleeve: 56, chest: 126, shoulder: 64, productId: 4_10 },
 ];
 
 export const product1s = [

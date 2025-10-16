@@ -112,7 +112,7 @@ export default function Product1() {
               <th style={{ padding: "12px", textAlign: "center" }}>尺寸</th>
               <th style={{ padding: "12px", textAlign: "center" }}>衣長</th>
               <th style={{ padding: "12px", textAlign: "center" }}>袖長</th>
-              <th style={{ padding: "12px", textAlign: "center" }}>胸圍</th>
+              <th style={{ padding: "12px", textAlign: "center" }}>胸寬</th>
               <th style={{ padding: "12px", textAlign: "center" }}>肩寬</th>
               <th style={{ padding: "12px", textAlign: "center" }}>購買</th>
             </tr>
