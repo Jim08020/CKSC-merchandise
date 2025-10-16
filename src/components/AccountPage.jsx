@@ -419,7 +419,15 @@ export default function AdminAccountManagement() {
                     </span>
                   </td>
                   <td style={{ padding: "16px", textAlign: "center", color: "#666", fontSize: "0.9rem" }}>
-                    {user.updatedAt || "未知"}
+                    {user.updatedAt?.toDate 
+                      ? user.updatedAt.toDate().toLocaleDateString('zh-TW', {
+                          year: 'numeric',
+                          month: '2-digit',
+                          day: '2-digit',
+                          hour: '2-digit',
+                          minute: '2-digit'
+                        })
+                      : "未知"}
                   </td>
                   <td style={{ padding: "16px", textAlign: "center" }}>
                     <button
@@ -502,7 +510,15 @@ export default function AdminAccountManagement() {
                 <strong>電話:</strong> {selectedUser.phone || "未設定"}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>資料更新:</strong> {selectedUser.updatedAt || "未知"}
+                <strong>資料更新:</strong> {selectedUser.updatedAt?.toDate 
+                  ? selectedUser.updatedAt.toDate().toLocaleDateString('zh-TW', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      minute: '2-digit'
+                    })
+                  : "未知"}
               </div>
               <div style={{ marginBottom: "16px" }}>
                 <strong>當前角色:</strong> {selectedUser.role === "admin" ? "管理員" : "一般用戶"}
