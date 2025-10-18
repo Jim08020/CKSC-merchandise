@@ -17,13 +17,13 @@ export default function InformationPage() {
   const [originalData, setOriginalData] = useState(null); // 儲存原始資料
   const navigate = useNavigate();
   const { showToast } = useToast();
-  const [ckagree, setckAgree] = useState(false);
-  const [tfgagree, settfgAgree] = useState(false);
-  const [zsagree, setzsAgree] = useState(false);
-  const [jmagree, setjmAgree] = useState(false);
-  const [cgagree, setcgAgree] = useState(false);
-  const [hsnuagree, sethsnuAgree] = useState(false);
-  const [parentsagree, setparentsAgree] = useState(false);
+  const [ck, setck] = useState(false);
+  const [tfg, settfg] = useState(false);
+  const [zs, setzs] = useState(false);
+  const [jm, setjm] = useState(false);
+  const [cg, setcg] = useState(false);
+  const [hsnu, sethsnu] = useState(false);
+  const [parents, setparents] = useState(false);
 
   useEffect(() => {
     // 檢查使用者是否已登入
@@ -196,7 +196,93 @@ export default function InformationPage() {
       </div>
     );
   }
+  const setallfalse = () => {
+    setck(false);
+    settfg(false);
+    setzs(false);
+    setjm(false);
+    setcg(false);
+    sethsnu(false);
+    setparents(false);
+  };
 
+  const checkck = () => {
+    if (ck == false) {
+      setallfalse();
+      setck(true); 
+      setSchool("建國中學");
+    } else {
+      setck(false);
+      setSchool("");
+    }
+  };
+  
+  const checktfg = () => {
+    if (tfg == false) {
+      setallfalse();
+      settfg(true); 
+      setSchool("北一女中");
+    } else {
+      settfg(false);
+      setSchool("");
+    }
+  };
+
+  const checkzs = () => {
+    if (zs == false) {
+      setallfalse();
+      setzs(true);
+      setSchool("中山女高");
+    } else {
+      setzs(false);
+      setSchool("");
+    }
+  };
+
+  const checkjm = () => {
+    if (jm == false) {
+      setallfalse();
+      setjm(true);
+      setSchool("景美女中");
+    } else {
+      setjm(false);
+      setSchool("");
+    }
+  };
+
+  const checkcg = () => {
+    if (cg == false) {
+      setallfalse();
+      setcg(true);
+      setSchool("成功高中");
+    } else {
+      setcg(false);
+      setSchool("");
+    }
+  };
+
+  const checkhsnu = () => {
+    if ( hsnu == false) {
+      setallfalse();
+      sethsnu(true);
+      setSchool("師大附中");
+    } else {
+      sethsnu(false);
+      setSchool("");
+    }
+  };
+
+  const checkparents = () => {
+    if (parents == false) {
+      setallfalse();
+      setparents(true);
+      setSchool("建中家長會");
+    } else {
+      setparents(false);
+      setSchool("");
+    }
+  };
+  
   return (
     <div
       style={{
@@ -282,8 +368,8 @@ export default function InformationPage() {
             <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={ckagree} 
-                onChange={() => (setckAgree(!ckagree), setSchool("建國中學"))} 
+                checked={ck} 
+                onChange={() => ( checkck() )} 
                 style={{ marginRight: "8px" }}
               />
               建國中學
@@ -291,8 +377,8 @@ export default function InformationPage() {
             <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={tfgagree} 
-                onChange={() => (settfgAgree(!tfgagree), setSchool("北一女中"))} 
+                checked={tfg} 
+                onChange={() => ( checktfg() )} 
                 style={{ marginRight: "8px" }}
               />
               北一女中
@@ -300,8 +386,8 @@ export default function InformationPage() {
             <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={zsagree} 
-                onChange={() => (setzsAgree(!zsagree), setSchool("中山女高"))} 
+                checked={zs} 
+                onChange={() => ( checkzs() )} 
                 style={{ marginRight: "8px" }}
               />
               中山女高
@@ -309,8 +395,8 @@ export default function InformationPage() {
             <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={jmagree} 
-                onChange={() => (setjmAgree(!jmagree), setSchool("景美女中"))} 
+                checked={jm} 
+                onChange={() => ( checkjm() )} 
                 style={{ marginRight: "8px" }}
               />
               景美女中
@@ -318,8 +404,8 @@ export default function InformationPage() {
           <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={cgagree} 
-                onChange={() => (setcgAgree(!cgagree), setSchool("成功高中"))} 
+                checked={cg} 
+                onChange={() => ( checkcg() )} 
                 style={{ marginRight: "8px" }}
               />
               成功高中
@@ -327,8 +413,8 @@ export default function InformationPage() {
             <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={hsnuagree} 
-                onChange={() => (sethsnuAgree(!hsnuagree), setSchool("師大附中"))} 
+                checked={hsnu} 
+                onChange={() => ( checkhsnu() )} 
                 style={{ marginRight: "8px" }}
               />
               師大附中
@@ -336,8 +422,8 @@ export default function InformationPage() {
             <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
               <input 
                 type="checkbox" 
-                checked={parentsagree} 
-                onChange={() => (setparentsAgree(!parentsagree), setSchool("建中家長會"))} 
+                checked={parents} 
+                onChange={() => ( checkparents() )} 
                 style={{ marginRight: "8px" }}
               />
               建中家長會

@@ -12,7 +12,7 @@ import HomePage from "./components/Home";
 import CartPage from "./components/CartPage";
 import OrdersPage from "./components/OrderPage";
 import ProductPage from "./components/ProductPage"; 
-import RulePage from "./components/RulePage";
+import TermsPage from "./components/TermsPage";
 import AboutPage from "./components/AboutPage"; 
 import AdminPage from "./components/AdminPage";
 import OrderdetailPage from "./components/OrderdetailPage";
@@ -195,7 +195,7 @@ function App() {
             <button onClick={() => { navigate("/cart"); setDrawerOpen(false); }} style={drawerBtnStyle}>購物車</button>
             <button onClick={() => { navigate("/orders"); setDrawerOpen(false); }} style={drawerBtnStyle}>我的訂單</button>
             <button onClick={() => { navigate("/info"); setDrawerOpen(false); }} style={drawerBtnStyle}>修改資料</button>
-            <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/terms"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
             <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
             {user.isAdmin && (
               <>
@@ -249,7 +249,7 @@ function App() {
         ) : (
           <>
             <button onClick={() => { navigate("/auth"); setDrawerOpen(false); }} style={drawerBtnStyle}>登入 / 註冊</button>
-            <button onClick={() => { navigate("/rule"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/terms"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
             <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
           </>
         )}
@@ -274,7 +274,7 @@ function App() {
       <main style={{ maxWidth: "900px", margin: "16px auto 0", padding: "0 12px" }}>
         <Routes>
           <>
-            <Route path="/rule" element={<RulePage />} />
+            <Route path="/terms" element={<TermsPage />} />
             <Route path="/about" element={<AboutPage />} />
             <Route path="/info" element={<InfoPage />} />
           </>
