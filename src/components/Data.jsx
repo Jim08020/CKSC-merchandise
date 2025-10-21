@@ -1,15 +1,15 @@
 export const products = [
   { id: 1, textid: "1", no: 1, name: "棒球外套", price: 700, orPrice: 900 },
-  { id: 2_1, textid: "2_1", no: 2, name: "棉短踢", category: "A", price: 300, orPrice: 500 },
-  { id: 2_2, textid: "2_2", no: 2, name: "棉短踢", category: "B", price: 300, orPrice: 500 },
-  { id: 2_3, textid: "2_3", no: 2, name: "棉短踢", category: "C", price: 300, orPrice: 500 },
+  { id: 2_1, textid: "2_1", no: 2, name: "CKHS深藍短踢", price: 300, orPrice: 500 },
+  { id: 2_2, textid: "2_2", no: 2, name: "CKHS白短踢", price: 300, orPrice: 500 },
+  { id: 2_3, textid: "2_3", no: 2, name: "我沒有偷卷短踢", price: 300, orPrice: 500 },
   { id: 3, textid: "3", no: 3, name: "真皮證件套", price: 200, orPrice: 400 },
-  { id: 4_1, textid: "4_1", no: 4, name: "帽踢", category: "A", price: 650, orPrice: 850 },
-  { id: 4_2, textid: "4_2", no: 4, name: "帽踢", category: "B", price: 650, orPrice: 850 },
+  { id: 4_1, textid: "4_1", no: 4, name: "CKHS白帽踢", price: 650, orPrice: 850 },
+  { id: 4_2, textid: "4_2", no: 4, name: "CKHS黑帽踢", price: 650, orPrice: 850 },
   { id: 5, textid: "5", no: 5, name: "毛巾", price: 200, orPrice: 400 },
   { id: 6, textid: "6", no: 6, name: "包包", price: 750, orPrice: 950 },
-  { id: 7_1, textid: "7_1", no: 7, name: "鑰匙圈", category: "A", price: 50, orPrice: 70 },
-  { id: 7_2, textid: "7_2", no: 7, name: "鑰匙圈", category: "B", price: 50, orPrice: 70 },
+  { id: 7_1, textid: "7_1", no: 7, name: "不得外出鑰匙圈", price: 50, orPrice: 70 },
+  { id: 7_2, textid: "7_2", no: 7, name: "CKHS鑰匙圈", price: 50, orPrice: 70 },
   { id: 8, textid: "8", no: 8, name: "徽章", price: 50, orPrice: 70 },
 ];
 
@@ -105,41 +105,41 @@ export const product1s = [
 ];
 
 export const product2_1s = [
-    { id: 2_1, no: 2, name: "棉短踢A-S", price: 300, orPrice: 500 },
-    { id: 2_2, no: 2, name: "棉短踢A-M", price: 300, orPrice: 500 },
-    { id: 2_3, no: 2, name: "棉短踢A-L", price: 300, orPrice: 500 },
-    { id: 2_4, no: 2, name: "棉短踢A-XL", price: 300, orPrice: 500 },
-    { id: 2_5, no: 2, name: "棉短踢A-2L", price: 390, orPrice: 500 },
+    { id: 2_1, no: 2, name: "CKHS深藍短踢-S", price: 300, orPrice: 500 },
+    { id: 2_2, no: 2, name: "CKHS深藍短踢-M", price: 300, orPrice: 500 },
+    { id: 2_3, no: 2, name: "CKHS深藍短踢-L", price: 300, orPrice: 500 },
+    { id: 2_4, no: 2, name: "CKHS深藍短踢-XL", price: 300, orPrice: 500 },
+    { id: 2_5, no: 2, name: "CKHS深藍短踢-2L", price: 390, orPrice: 500 },
 ];
 
 export const product2_2s = [
-    { id: 2_6, no: 2, name: "棉短踢B-S", price: 300, orPrice: 500 },
-    { id: 2_7, no: 2, name: "棉短踢B-M", price: 300, orPrice: 500 },
-    { id: 2_8, no: 2, name: "棉短踢B-L", price: 300, orPrice: 500 },
-    { id: 2_9, no: 2, name: "棉短踢B-XL", price: 300, orPrice: 500 },
-    { id: 2_10, no: 2, name: "棉短踢B-2L", price: 390, orPrice: 500 },
+    { id: 2_6, no: 2, name: "CKHS白短踢-S", price: 300, orPrice: 500 },
+    { id: 2_7, no: 2, name: "CKHS白短踢-M", price: 300, orPrice: 500 },
+    { id: 2_8, no: 2, name: "CKHS白短踢-L", price: 300, orPrice: 500 },
+    { id: 2_9, no: 2, name: "CKHS白短踢-XL", price: 300, orPrice: 500 },
+    { id: 2_10, no: 2, name: "CKHS白短踢-2L", price: 390, orPrice: 500 },
 ];
 
 export const product2_3s = [
-    { id: 2_11, no: 2, name: "棉短踢C-S", price: 300, orPrice: 500 },
-    { id: 2_12, no: 2, name: "棉短踢C-M", price: 300, orPrice: 500 },
-    { id: 2_13, no: 2, name: "棉短踢C-L", price: 300, orPrice: 500 },
-    { id: 2_14, no: 2, name: "棉短踢C-XL", price: 300, orPrice: 500 },
-    { id: 2_15, no: 2, name: "棉短踢C-2L", price: 390, orPrice: 500 },
+    { id: 2_11, no: 2, name: "我沒有偷卷短踢-S", price: 300, orPrice: 500 },
+    { id: 2_12, no: 2, name: "我沒有偷卷短踢-M", price: 300, orPrice: 500 },
+    { id: 2_13, no: 2, name: "我沒有偷卷短踢-L", price: 300, orPrice: 500 },
+    { id: 2_14, no: 2, name: "我沒有偷卷短踢-XL", price: 300, orPrice: 500 },
+    { id: 2_15, no: 2, name: "我沒有偷卷短踢-2L", price: 390, orPrice: 500 },
 ];
 
 export const product4_1s = [
-    { id: 4_1, no: 4, name: "帽踢A-S", price: 650, orPrice: 850 },
-    { id: 4_2, no: 4, name: "帽踢A-M", price: 650, orPrice: 850 },
-    { id: 4_3, no: 4, name: "帽踢A-L", price: 650, orPrice: 850 },
-    { id: 4_4, no: 4, name: "帽踢A-XL", price: 650, orPrice: 850 },
-    { id: 4_5, no: 4, name: "帽踢A-2L", price: 650, orPrice: 850 },
+    { id: 4_1, no: 4, name: "CKHS白帽踢-S", price: 650, orPrice: 850 },
+    { id: 4_2, no: 4, name: "CKHS白帽踢-M", price: 650, orPrice: 850 },
+    { id: 4_3, no: 4, name: "CKHS白帽踢-L", price: 650, orPrice: 850 },
+    { id: 4_4, no: 4, name: "CKHS白帽踢-XL", price: 650, orPrice: 850 },
+    { id: 4_5, no: 4, name: "CKHS白帽踢-2L", price: 650, orPrice: 850 },
 ];
 
 export const product4_2s = [
-    { id: 4_6, no: 4, name: "帽踢B-S", price: 650, orPrice: 850 },
-    { id: 4_7, no: 4, name: "帽踢B-M", price: 650, orPrice: 850 },
-    { id: 4_8, no: 4, name: "帽踢B-L", price: 650, orPrice: 850 },
-    { id: 4_9, no: 4, name: "帽踢B-XL", price: 650, orPrice: 850 },
-    { id: 4_10, no: 4, name: "帽踢B-2L", price: 650, orPrice: 850 },
+    { id: 4_6, no: 4, name: "CKHS黑帽踢-S", price: 650, orPrice: 850 },
+    { id: 4_7, no: 4, name: "CKHS黑帽踢-M", price: 650, orPrice: 850 },
+    { id: 4_8, no: 4, name: "CKHS黑帽踢-L", price: 650, orPrice: 850 },
+    { id: 4_9, no: 4, name: "CKHS黑帽踢-XL", price: 650, orPrice: 850 },
+    { id: 4_10, no: 4, name: "CKHS黑帽踢-2L", price: 650, orPrice: 850 },
 ];

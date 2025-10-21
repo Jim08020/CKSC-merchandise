@@ -9,8 +9,8 @@ export default function Product7() {
   const { showToast } = useToast();
   
   const products = [
-    { id: "7_1", no: 7, name: "鑰匙圈A", price: 50, orPrice: 70 },
-    { id: "7_2", no: 7, name: "鑰匙圈B", price: 50, orPrice: 70 },
+    { id: "7_1", no: 7, name: "不得外出鑰匙圈", price: 50, orPrice: 70 },
+    { id: "7_2", no: 7, name: "CKHS鑰匙圈", price: 50, orPrice: 70 },
   ];
 
   const handleAddToCart = (product) => {

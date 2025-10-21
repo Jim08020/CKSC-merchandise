@@ -46,7 +46,7 @@ export default function Product2_1() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>棉短踢A</h1>
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>CKHS深藍短踢</h1>
         
         <div
           style={{
