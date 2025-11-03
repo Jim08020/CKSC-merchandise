@@ -5,6 +5,7 @@ import { auth, db } from "../firebase";
 import { collection, addDoc, serverTimestamp, doc, getDoc, setDoc } from "firebase/firestore";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { useToast } from "./ToastContext";
+import { comboDeals } from "./Data";
 
 export default function CartPage() {
   const { cartItems, removeFromCart, updateQuantity, setCartItems } = useCart();
@@ -111,40 +112,6 @@ export default function CartPage() {
     return () => clearTimeout(timeoutId);
   }, [cartItems, user]);
   
-  const comboDeals = [
-    {
-      id: "combo1", //短踢+毛巾
-      name: "組合包A",
-      items: [2, 5],
-      originalPrice: 750,
-      comboPrice: 400,
-      discount: 350,
-    },
-    {
-      id: "combo2", //棒球外套+帽踢
-      name: "組合包B",
-      items: [1, 4], 
-      originalPrice: 1600,
-      comboPrice: 1250,
-      discount: 350,
-    },
-    {
-      id: "combo3", //棒球外套+帽踢+短踢
-      name: "組合包C",
-      items: [1, 2 ,4], 
-      originalPrice: 1900,
-      comboPrice: 1500,
-      discount: 400,
-    },
-    {
-      id: "combo4",
-      name: "全套組合包",
-      items: [1, 2, 3, 4, 5, 6, 7, 8], //All
-      originalPrice: 3000,
-      comboPrice: 2500,
-      discount: 500,
-    },
-  ];
 
   // 管理員郵箱列表
   const adminEmails = [

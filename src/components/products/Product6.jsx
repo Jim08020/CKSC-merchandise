@@ -12,7 +12,7 @@ export default function Product6() {
   const product = {
     no: 6,
     id: 6,    
-    name: "包包",
+    name: "黑色側背包",
     price: 750,
     orPrice: 950,
   };

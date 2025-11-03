@@ -504,13 +504,13 @@ export default function AdminAccountManagement() {
                 )}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>姓名:</strong> {selectedUser.name || selectedUser.displayName || "未設定"}
+                <strong>姓名：</strong> {selectedUser.name || selectedUser.displayName || "未設定"}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>電話:</strong> {selectedUser.phone || "未設定"}
+                <strong>電話：</strong> {selectedUser.phone || "未設定"}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>資料更新:</strong> {selectedUser.updatedAt?.toDate 
+                <strong>資料更新：</strong> {selectedUser.updatedAt?.toDate 
                   ? selectedUser.updatedAt.toDate().toLocaleDateString('zh-TW', {
                       year: 'numeric',
                       month: '2-digit',
@@ -521,10 +521,13 @@ export default function AdminAccountManagement() {
                   : "未知"}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>當前角色:</strong> {selectedUser.role === "admin" ? "管理員" : "一般用戶"}
+                <strong>身分：</strong> {selectedUser.role === "admin" ? "管理員" : "一般用戶"}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>帳號狀態:</strong> {(selectedUser.status === "active" || !selectedUser.status) ? "正常" : "停用"}
+                <strong>使用者 ID：</strong> {selectedUser.id}
+              </div>
+              <div style={{ marginBottom: "16px" }}>
+                <strong>學校：</strong> {selectedUser.school || "未設定"}
               </div>
             </div>
 

@@ -203,6 +203,18 @@ function App() {
                 <button onClick={() => { navigate("/account"); setDrawerOpen(false); }} style={drawerBtnStyle}>帳號管理</button>
               </>
             )}
+            {/*<button onClick={() => { navigate("/terms"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
+            <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
+            {user.isAdmin && (
+              <>
+                <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
+                <button onClick={() => { navigate("/account"); setDrawerOpen(false); }} style={drawerBtnStyle}>帳號管理</button>
+                <button onClick={() => { navigate("/"); setDrawerOpen(false); }} style={drawerBtnStyle}>首頁</button>
+                <button onClick={() => { navigate("/cart"); setDrawerOpen(false); }} style={drawerBtnStyle}>購物車</button>
+                <button onClick={() => { navigate("/orders"); setDrawerOpen(false); }} style={drawerBtnStyle}>我的訂單</button>
+                <button onClick={() => { navigate("/info"); setDrawerOpen(false); }} style={drawerBtnStyle}>修改資料</button>
+              </>
+            )}*/}
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -289,6 +301,14 @@ function App() {
               <Route path="/cart" element={<CartPage />} />
               <Route path="/orders" element={<OrdersPage />} />
               <Route path="/orders/:id" element={<OrderdetailPage />} />
+              {/*<>
+                <Route path="/comingsoon" element={<ComingSoonPage />} />
+                <Route path="/" element={user.isAdmin ? <HomePage /> : <Navigate to="/comingsoon" replace />} />
+                <Route path="/product/:id" element={user.isAdmin ? <ProductPage /> : <Navigate to="/comingsoon" replace />} />
+                <Route path="/cart" element={user.isAdmin ? <CartPage /> : <Navigate to="/comingsoon" replace />} />
+                <Route path="/orders" element={user.isAdmin ? <OrdersPage /> : <Navigate to="/comingsoon" replace />} />
+                <Route path="/orders/:id" element={user.isAdmin ? <OrderdetailPage /> : <Navigate to="/comingsoon" replace />} />
+              </>*/}
               <Route 
                 path="/admin" 
                 element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />} 

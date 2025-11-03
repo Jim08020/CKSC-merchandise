@@ -349,7 +349,7 @@ export default function InformationPage() {
         <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column" }}>
           <input
             type="text"
-            placeholder="姓名 *"
+            placeholder="姓名 *(請務必填寫本名)"
             value={name}
             onChange={(e) => setName(e.target.value)}
             required

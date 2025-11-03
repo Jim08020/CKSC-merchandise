@@ -12,7 +12,7 @@ export default function Product8() {
   const product = {
     no: 8,
     id: 8,    
-    name: "徽章",
+    name: "圓形徽章",
     price: 50,
     orPrice: 70,
   };

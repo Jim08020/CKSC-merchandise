@@ -9,11 +9,10 @@ export default function Product5() {
   const { showToast } = useToast();
   const { id } = useParams();
   
-  // 座墊產品資料
   const product = {
     no: 5,
     id: 5,
-    name: "毛巾",
+    name: "雙色毛巾",
     price: 250,
     specifications: {
       size: "100 x 30 cm",

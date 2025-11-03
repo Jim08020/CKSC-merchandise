@@ -10,8 +10,8 @@ export default function Product3() {
   const { id } = useParams();
 
   const product = {
-    no: 6,
-    id: 6,    
+    no: 3,
+    id: 3,    
     name: "真皮證件套",
     price: 200,
     orPrice: 400,
@@ -57,7 +57,7 @@ export default function Product3() {
           }}
         >
           <div style={{textDecoration: "line-through", opacity: 0.7}}>
-            NT$ ${product.price}
+            NT$ 400
           </div>
           早鳥優惠價：
           NT$ 200

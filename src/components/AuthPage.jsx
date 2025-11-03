@@ -216,15 +216,71 @@ export default function AuthPage() {
             borderRadius: "8px",
             fontSize: "0.85rem",
             color: "#a10d0d",
-            textAlign: "left"
+            textAlign: "left",
+            alignItems: "center",
+            display: "flex",
+            flexDirection: "column"
           }}>
             <strong>⚠️ LINE 用戶提示</strong>
             <p style={{ margin: "8px 0 0 0", lineHeight: "1.5" }}>
               Line 用戶請使用外部瀏覽器(例：Safari, Google Chrome...)，否則無法登入成功
             </p>
+            <button 
+            onClick={() => {
+              window.open('souvenir.cksc.tw', '_blank');
+            }}
+            style={{
+              display: "flex",
+              marginTop: "8px",
+              padding: "8px 12px",
+              background: "#dd2476",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "0.85rem",
+              cursor: "pointer"
+            }}
+          >
+            開啟外部瀏覽器
+          </button>
           </div>
         )}
-        
+        <div style={{
+          marginBottom: "16px",
+          padding: "12px",
+          background: "#ffe7e7",
+          border: "1px solid #ff0000",
+          borderRadius: "8px",
+          fontSize: "0.85rem",
+          color: "#a10d0d",
+          textAlign: "left",
+          alignItems: "center",
+          display: "flex",
+          flexDirection: "column"
+        }}>
+          <strong>⚠️ CK APP 用戶提示</strong>
+          <p style={{ margin: "8px 0 0 0", lineHeight: "1.5" }}>
+            CK APP 用戶請使用外部瀏覽器(例：Safari, Google Chrome...)，否則無法登入成功
+          </p>
+          <button 
+            onClick={() => {
+              window.open('souvenir.cksc.tw', '_blank');
+            }}
+            style={{
+              display: "flex",
+              marginTop: "8px",
+              padding: "8px 12px",
+              background: "#dd2476",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "0.85rem",
+              cursor: "pointer"
+            }}
+          >
+            開啟外部瀏覽器
+          </button>
+        </div>
         {/* Google 登入按鈕 */}
         <button 
           type="button"
@@ -292,7 +348,7 @@ export default function AuthPage() {
             onChange={() => setAgree(!agree)} 
             style={{ marginRight: "8px", cursor: "pointer" }}
           />
-          我已閱讀並同意 <Link to="/rule" style={{ color: "#667eea", fontWeight: "bold" }}>使用者條款</Link>
+          我已閱讀並同意 <Link to="/terms" style={{ color: "#667eea", fontWeight: "bold" }}>使用者條款</Link>
         </label>
       </div>
 

@@ -121,7 +121,24 @@ export default function OrderPage() {
       alignItems: "center"
     }}>
       <h1 style={{ marginBottom: "30px", color: "#333" }}>我的訂單</h1>
-
+      <button
+        onClick={() => open("https://forms.gle/Grnk7FXfrXDQutE87", "_blank")}
+        style={{
+          marginTop: "30px",
+          padding: "12px 28px",
+          background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+          color: "white",
+          border: "none",
+          borderRadius: "10px",
+          fontWeight: "bold",
+          fontSize: "1rem",
+          cursor: "pointer",
+          boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
+          transition: "all 0.2s"
+        }}
+      >
+        使用者滿意度調查
+      </button><br />
       {orders.length === 0 && <p style={{ color: "#555" }}>你還沒有任何訂單</p>}
 
       {orders.length > 0 && (

@@ -46,7 +46,7 @@ export default function Product4() {
           alignItems: "center",
         }}
       >
-        <h1 style={{ marginBottom: "16px", color: "#333" }}>CKHS黑帽踢</h1>
+        <h1 style={{ marginBottom: "16px", color: "#333" }}>黑色帽踢</h1>
 
         <div
           style={{

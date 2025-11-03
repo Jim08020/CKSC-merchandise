@@ -20,7 +20,7 @@ export default function Home() {
         color: "black",
         boxShadow: "0 8px 32px rgba(0, 0, 0, 0.2)"
       }}>
-        <h2 style={{ margin: "0 0 15px 0", textAlign: "center" }}>🎁 組合包優惠</h2>
+        <h2 style={{ margin: "0 0 15px 0", textAlign: "center" }}>🎁 套餐優惠</h2>
         <p style={{ textAlign: "center", marginBottom: "20px", color: "#0000009f" }}>
           各品項加入購物車後將會自動計算最佳組合並折扣
         </p>
@@ -39,7 +39,7 @@ export default function Home() {
           backdropFilter: "blur(10px)",
           minWidth: "200px"}}>
           滿$1500即贈送徽章或鑰匙圈 1 個<br />
-          限時早鳥預購優惠，只到12月5日
+          限時優惠，只到12月5日
         </p>
         <div style={{ display: "flex", flexWrap: "wrap", gap: "15px", justifyContent: "center" }}>
           {comboDeals.map(combo => (
@@ -52,7 +52,7 @@ export default function Home() {
             }}>
               <div style={{ fontWeight: "bold", marginBottom: "5px" }}>{combo.name}</div>
               <div style={{ fontSize: "0.9rem", opacity: 0.9 }}>
-                包含： {combo.items.map(no => products.find(p => p.no === no)?.name).join(" + ")}
+                包含： {combo.items.map(no => products.find(p => p.no === no)?.category).join(" + ")}
               </div>
               <div style={{ marginTop: "8px" }}>
                 <span style={{ textDecoration: "line-through", opacity: 0.7 }}>${combo.originalPrice}</span>
@@ -88,7 +88,7 @@ export default function Home() {
                 }}
             > 
               <div style={{ fontSize: "1.2rem", fontWeight: "bold", marginBottom: "8px" }}>
-                {product.name}{product.category ? `${product.category}` : ""}
+                {product.name}{product.category ? "" : ""}
               </div>
               <div style={{ color: isSelected ? "#e8f5e8" : "#555", marginBottom: "12px" }}>
                 <div style={{textDecoration: "line-through", opacity: 0.7}}>
