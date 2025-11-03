@@ -43,6 +43,24 @@ export default function ProductPage() {
             </ul>
         </div>
         <br />
+        <button
+          onClick={() => open("https://forms.gle/Grnk7FXfrXDQutE87", "_blank")}
+          style={{
+            padding: "12px 28px",
+            background: "linear-gradient(90deg, #2f97ffff 0%, #7724ddff 100%)",
+            color: "white",
+            border: "none",
+            borderRadius: "10px",
+            fontWeight: "bold",
+            fontSize: "1rem",
+            cursor: "pointer",
+            boxShadow: "0 4px 12px rgba(36, 82, 221, 0.25)",
+            transition: "all 0.2s",
+            alignItems: "center",
+          }}
+          >
+            使用者滿意度調查
+          </button><br />
         {/* 回首頁按鈕 */}
         <button
           onClick={() => navigate("/")}
