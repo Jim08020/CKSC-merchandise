@@ -24,6 +24,7 @@ export default function InformationPage() {
   const [cg, setcg] = useState(false);
   const [hsnu, sethsnu] = useState(false);
   const [parents, setparents] = useState(false);
+  const [others, setothers] = useState(false);
 
   useEffect(() => {
     // 檢查使用者是否已登入
@@ -204,6 +205,7 @@ export default function InformationPage() {
     setcg(false);
     sethsnu(false);
     setparents(false);
+    setothers(false);
   };
 
   const checkck = () => {
@@ -279,6 +281,17 @@ export default function InformationPage() {
       setSchool("建中家長會");
     } else {
       setparents(false);
+      setSchool("");
+    }
+  };
+
+  const checkothers = () => {
+    if (others == false) {
+      setallfalse();
+      setothers(true);
+      setSchool("其他學校或社會人士");
+    } else {
+      setothers(false);
       setSchool("");
     }
   };
@@ -427,14 +440,24 @@ export default function InformationPage() {
                 style={{ marginRight: "8px" }}
               />
               建中家長會
+            </label>
+            <label style={{ marginTop: "20px", fontSize: "0.9rem", color: "#555", textAlign: "left", display: "block" }}>
+              <input 
+                type="checkbox" 
+                checked={others} 
+                onChange={() => ( checkothers() )} 
+                style={{ marginRight: "8px" }}
+              />
+              其他學校或社會人士
             </label><br />
           </div>
           <input
             type="text"
-            placeholder="學校（如為友校或本校學生請填寫）"
+            placeholder="學校 *"
             value={school}
             onChange={(e) => setSchool(e.target.value)}
             style={inputStyle}
+            required
           />
           <input
             type="text"
@@ -442,6 +465,7 @@ export default function InformationPage() {
             value={classandnumber}
             onChange={(e) => setClassandnumber(e.target.value)}
             style={inputStyle}
+            required={school === "建國中學" || school === "北一女中" || school === "中山女高" || school === "景美女中" || school === "成功高中" || school === "師大附中"}
           />
 
           <p style={{ 

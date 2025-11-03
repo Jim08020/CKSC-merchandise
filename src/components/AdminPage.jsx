@@ -30,6 +30,7 @@ export default function AdminPage() {
     "成功高中",
     "師大附中",
     "建中家長會",
+    "其他學校或社會人士"
   ];
 
   useEffect(() => {
