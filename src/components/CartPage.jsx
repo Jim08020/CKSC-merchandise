@@ -116,7 +116,6 @@ export default function CartPage() {
 
   const isAdmin = user?.email && adminEmails.includes(user.email);
 
-  // 修正後的套餐檢查邏輯 - 按照套餐中商品出現次數判斷
   const checkComboDeals = () => {
     const itemQuantities = {};
     cartItems.forEach(item => {
@@ -127,19 +126,16 @@ export default function CartPage() {
 
     const possibleCombos = [];
     comboDeals.forEach(combo => {
-      // 計算套餐中每個商品編號需要的數量
       const requiredQuantities = {};
       combo.items.forEach(itemNo => {
         requiredQuantities[itemNo] = (requiredQuantities[itemNo] || 0) + 1;
       });
 
-      // 檢查是否所有商品都滿足數量要求
       const hasAllItems = Object.entries(requiredQuantities).every(
         ([itemNo, requiredQty]) => itemQuantities[parseInt(itemNo)] >= requiredQty
       );
 
       if (hasAllItems) {
-        // 計算最多可以組成幾組套餐
         const maxPossibleCount = Math.min(
           ...Object.entries(requiredQuantities).map(
             ([itemNo, requiredQty]) => Math.floor(itemQuantities[parseInt(itemNo)] / requiredQty)
@@ -157,7 +153,6 @@ export default function CartPage() {
       let bestResult = { totalDiscount: 0, appliedCombos: [], remainingItems: quantities };
 
       combos.forEach(combo => {
-        // 檢查是否可以應用套餐
         const canApply = Object.entries(combo.requiredQuantities).every(
           ([itemNo, requiredQty]) => quantities[parseInt(itemNo)] >= requiredQty
         );
@@ -171,7 +166,6 @@ export default function CartPage() {
 
           for (let count = maxApplications; count >= 1; count--) {
             const newQuantities = { ...quantities };
-            // 按照需求數量扣除
             Object.entries(combo.requiredQuantities).forEach(([itemNo, requiredQty]) => {
               newQuantities[parseInt(itemNo)] -= requiredQty * count;
             });
@@ -205,15 +199,12 @@ export default function CartPage() {
     const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const comboResult = checkComboDeals();
     
-    // 計算購物車中徽章(8)和鑰匙圈(7)的總數量
     const giftItems = cartItems.filter(item => item.no === 7 || item.no === 8);
     const totalGiftQuantity = giftItems.reduce((sum, item) => sum + item.quantity, 0);
     
-    // 計算套餐C中使用的徽章數量
     const combo3Applied = comboResult.appliedCombos.find(combo => combo.id === "combo3");
     const giftUsedInCombo = combo3Applied ? combo3Applied.applicableCount : 0;
     
-    // 可用於滿額贈的徽章/鑰匙圈數量 = 總數量 - 套餐使用數量
     const availableGiftCount = totalGiftQuantity - giftUsedInCombo;
     const hasAvailableGift = availableGiftCount > 0;
     
@@ -231,37 +222,39 @@ export default function CartPage() {
         totalGiftQuantity: 0,
         giftUsedInCombo: 0,
         availableGiftCount: 0,
-        amountNeededForGift: 0
+        amountNeededForGift: 0,
+        reachedThreshold: false
       };
     }
     
-    // 計算不含贈品的商品總額
+    const totalAfterCombo = originalTotal - comboResult.totalDiscount;
+    
+    let giftDiscount = 0;
+    let qualifiesForGift = false;
+    
+    if (hasAvailableGift) {
+      const firstGiftItem = giftItems[0];
+      if (firstGiftItem) {
+        const totalAfterGiftDiscount = totalAfterCombo - firstGiftItem.price;
+        if (totalAfterGiftDiscount >= 1000) {
+          qualifiesForGift = true;
+          giftDiscount = firstGiftItem.price;
+        }
+      }
+    }
+    
+    const reachedThreshold = totalAfterCombo >= 1000;
+    
+    const amountNeededForGift = hasAvailableGift 
+      ? Math.max(0, 1000 - (totalAfterCombo - (giftItems[0]?.price || 0)))
+      : Math.max(0, 1000 - totalAfterCombo);
+    
     const totalWithoutGift = cartItems
       .filter(item => item.no !== 7 && item.no !== 8)
       .reduce((sum, item) => sum + item.price * item.quantity, 0);
-    
-    // 扣除套餐優惠後的總額（不含贈品）
     const totalWithoutGiftAfterCombo = totalWithoutGift - comboResult.totalDiscount;
     
-    // 判斷是否符合滿額資格 - 改為滿千送（1000元）
-    const qualifiesForGift = totalWithoutGiftAfterCombo >= 1000;
-    
-    // 計算還需要多少才能滿額
-    const amountNeededForGift = qualifiesForGift ? 0 : Math.max(0, 1000 - totalWithoutGiftAfterCombo);
-    
-    // 計算當前總額
-    let currentTotal = originalTotal - comboResult.totalDiscount;
-    let giftDiscount = 0;
-    
-    // 只有在符合滿額且有可用贈品時才扣除 - 最多贈送一個
-    if (hasAvailableGift && qualifiesForGift) {
-      // 只扣除一個贈品的價格
-      const firstGiftItem = giftItems[0];
-      if (firstGiftItem) {
-        giftDiscount = firstGiftItem.price;
-        currentTotal = currentTotal - giftDiscount;
-      }
-    }
+    const currentTotal = totalAfterCombo - giftDiscount;
 
     return {
       originalTotal,
@@ -278,7 +271,8 @@ export default function CartPage() {
       giftUsedInCombo,
       availableGiftCount,
       amountNeededForGift,
-      totalWithoutGiftAfterCombo
+      totalWithoutGiftAfterCombo,
+      reachedThreshold
     };
   };
 
@@ -295,7 +289,8 @@ export default function CartPage() {
     totalGiftQuantity,
     giftUsedInCombo,
     availableGiftCount,
-    amountNeededForGift
+    amountNeededForGift,
+    reachedThreshold
   } = calculatePricing();
 
   const handleQuantityChange = (itemId, change) => {
@@ -321,7 +316,6 @@ export default function CartPage() {
       return;
     }
 
-    // 檢查是否符合滿額資格
     if (totalGiftQuantity > 0 && !qualifiesForGift) {
       showToast(`購買金額未滿 NT$ 1000，無法領取贈品！(還差 NT$ ${amountNeededForGift})`);
       return;
@@ -401,26 +395,11 @@ export default function CartPage() {
         <div style={{ display: "flex", alignItems: "center", marginBottom: "24px", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
             {isAdmin && (
-              <span style={{ 
-                display: "flex",
-                alignItems: "center",
-                gap: "12px",
-                padding: "12px",
-                borderRadius: "12px",
-                boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
-                marginBottom: 0,
-              }}>
+              <span style={{ display: "flex", alignItems: "center", gap: "12px", padding: "12px", borderRadius: "12px", boxShadow: "0 2px 6px rgba(0,0,0,0.1)", marginBottom: 0 }}>
                 <img 
                   src={user.photoURL || "https://via.placeholder.com/48?text=👤"} 
                   alt="User Avatar"
-                  style={{
-                    width: "48px",
-                    height: "48px",
-                    borderRadius: "50%",
-                    objectFit: "cover",
-                    border: "2px solid #ddd",
-                    display: "flex"
-                  }}
+                  style={{ width: "48px", height: "48px", borderRadius: "50%", objectFit: "cover", border: "2px solid #ddd", display: "flex" }}
                 />
                 <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
                   Admin-{displayName || "未命名用戶"}
@@ -431,41 +410,20 @@ export default function CartPage() {
         </div>
 
         {!user && (
-          <div style={{ 
-            background: "#fff3cd", 
-            border: "1px solid #ffeaa7", 
-            borderRadius: "8px", 
-            padding: "12px", 
-            marginBottom: "20px",
-            textAlign: "center"
-          }}>
-            <span style={{ color: "#856404" }}>
-              請先登入以保存您的購物車內容
-            </span>
+          <div style={{ background: "#fff3cd", border: "1px solid #ffeaa7", borderRadius: "8px", padding: "12px", marginBottom: "20px", textAlign: "center" }}>
+            <span style={{ color: "#856404" }}>請先登入以保存您的購物車內容</span>
           </div>
         )}
 
         {isAdmin && cartItems.length > 0 && (
-          <div style={{ 
-            background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
-            border: "none",
-            borderRadius: "12px", 
-            padding: "16px", 
-            marginBottom: "20px",
-            color: "white"
-          }}>
+          <div style={{ background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", border: "none", borderRadius: "12px", padding: "16px", marginBottom: "20px", color: "white" }}>
             <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
               <div style={{ flex: 1 }}>
                 <div style={{ fontWeight: "bold", marginBottom: "4px" }}>管理員專用</div>
                 <div style={{ fontSize: "0.9rem", opacity: "0.9" }}>公關品 - 免除所有金額</div>
               </div>
               <label style={{ display: "flex", alignItems: "center", gap: "8px", cursor: "pointer" }}>
-                <input
-                  type="checkbox"
-                  checked={usePRPackage}
-                  onChange={(e) => setUsePRPackage(e.target.checked)}
-                  style={{ transform: "scale(1.2)" }}
-                />
+                <input type="checkbox" checked={usePRPackage} onChange={(e) => setUsePRPackage(e.target.checked)} style={{ transform: "scale(1.2)" }} />
                 <span style={{ fontWeight: "bold" }}>使用公關品</span>
               </label>
             </div>
@@ -496,9 +454,7 @@ export default function CartPage() {
 
             {prPackageApplied && (
               <div style={{ marginTop: "20px", padding: "16px", background: "linear-gradient(135deg, #667eea20 0%, #764ba220 100%)", borderRadius: "10px", border: "2px solid #667eea" }}>
-                <div style={{ color: "#667eea", fontWeight: "bold", fontSize: "1.1rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  公關品
-                </div>
+                <div style={{ color: "#667eea", fontWeight: "bold", fontSize: "1.1rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>公關品</div>
                 <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                   <span>僅限公關場合得使用，並應獲得主席之准許</span>
                 </div>
@@ -515,7 +471,6 @@ export default function CartPage() {
                   </div>
                 ))}
                 <div style={{ textAlign: "right", marginTop: "8px", fontWeight: "bold" }}>總共節省: NT$ {totalDiscount}</div>
-                
                 {giftUsedInCombo > 0 && (
                   <div style={{ marginTop: "12px", padding: "8px", background: "#fff3cd", borderRadius: "6px", fontSize: "0.9rem" }}>
                     💡 套餐C已使用 {giftUsedInCombo} 個徽章，如需滿額贈品請額外加入
@@ -526,58 +481,35 @@ export default function CartPage() {
 
             {!prPackageApplied && (
               <div style={{ 
-                marginTop: "20px", 
-                padding: "16px", 
-                background: qualifiesForGift && hasAvailableGift 
-                  ? "linear-gradient(135deg, #ffd89b 0%, #19547b 100%)" 
-                  : qualifiesForGift 
-                  ? "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)" 
-                  : "#fff8e1", 
+                marginTop: "20px", padding: "16px", 
+                background: qualifiesForGift && hasAvailableGift ? "linear-gradient(135deg, #ffd89b 0%, #19547b 100%)" : reachedThreshold ? "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)" : "#fff8e1", 
                 borderRadius: "10px", 
-                border: qualifiesForGift && hasAvailableGift 
-                  ? "2px solid #f57c00" 
-                  : qualifiesForGift 
-                  ? "2px solid #48c6ef" 
-                  : "1px solid #ffd54f",
+                border: qualifiesForGift && hasAvailableGift ? "2px solid #f57c00" : reachedThreshold ? "2px solid #48c6ef" : "1px solid #ffd54f",
                 color: qualifiesForGift && hasAvailableGift ? "white" : "#333"
               }}>
-                <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  🎁 滿千好禮
-                </div>
+                <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>🎁 滿千好禮</div>
                 <div style={{ fontSize: "0.95rem" }}>
                   {qualifiesForGift && hasAvailableGift ? (
                     <>
                       <div style={{ marginBottom: "4px" }}>🎊 恭喜！您已符合滿千贈禮資格！</div>
-                      <div>滿 NT$ 1000 即可獲得：<strong>徽章/鑰匙圈 免費 1 個</strong></div>
-                      <div style={{ marginTop: "4px" }}>
-                        已自動扣除贈品 NT$ {giftDiscount}
-                      </div>
+                      <div>扣除贈品後仍滿 NT$ 1000，可獲得：<strong>徽章/鑰匙圈 免費 1 個</strong></div>
+                      <div style={{ marginTop: "4px" }}>已自動扣除贈品 NT$ {giftDiscount}</div>
                     </>
-                  ) : qualifiesForGift ? (
+                  ) : reachedThreshold ? (
                     <>
-                      <div style={{ marginBottom: "4px" }}>🎊 恭喜！您已符合滿千贈禮資格！</div>
-                      <div>滿 NT$ 1000 即可獲得：<strong>徽章/鑰匙圈 免費 1 個</strong></div>
-                      {giftUsedInCombo > 0 ? (
-                        <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>
-                          * 套餐C已使用 {giftUsedInCombo} 個徽章，請加入徽章/鑰匙圈即可享 1 個免費優惠
-                        </div>
+                      <div style={{ marginBottom: "4px" }}>🎉 您已滿 NT$ 1000！</div>
+                      <div style={{ marginBottom: "4px" }}>活動規則：扣除贈品後仍需滿 NT$ 1000</div>
+                      {hasAvailableGift ? (
+                        <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>⚠️ 扣除贈品後未滿 NT$ 1000，還差 NT$ {amountNeededForGift}</div>
+                      ) : giftUsedInCombo > 0 ? (
+                        <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>💡 套餐C已使用 {giftUsedInCombo} 個徽章，請加入徽章/鑰匙圈即可享免費優惠</div>
                       ) : (
-                        <div style={{ marginTop: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
-                          請將徽章/鑰匙圈加入購物車，系統將自動扣除 1 個贈品金額
-                        </div>
+                        <div style={{ marginTop: "4px", fontSize: "0.85rem", opacity: 0.8 }}>請將徽章/鑰匙圈加入購物車，系統將自動判斷是否符合資格</div>
                       )}
                     </>
                   ) : (
                     <>
-                      <div>滿 NT$ 1000 即贈送 <strong>徽章/鑰匙圈 免費 1 個</strong></div>
-                      <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>
-                        還差 NT$ {amountNeededForGift} 即可獲得贈品！
-                      </div>
-                      {totalGiftQuantity > 0 && (
-                        <div style={{ marginTop: "4px", fontSize: "0.85rem", color: "#e65100" }}>
-                          ⚠️ 您的購物車有 {totalGiftQuantity} 個贈品，但未滿 NT$ 1000
-                        </div>
-                      )}
+                      <div>活動規則：扣除贈品後仍需滿 NT$ 1000，即贈送 <strong>徽章/鑰匙圈 免費 1 個</strong></div>
                     </>
                   )}
                 </div>
@@ -612,15 +544,10 @@ export default function CartPage() {
                   <hr style={{ borderTop: "1px solid #dee2e6", margin: "12px 0" }} />
                   <div style={{ display: "flex", justifyContent: "space-between" }}>
                     <strong style={{ fontSize: "1.2rem", color: "#333" }}>總金額：</strong>
-                    <strong style={{ fontSize: "1.3rem", color: prPackageApplied ? "#667eea" : "#ff512f" }}>
-                      NT$ {finalTotal}
-                    </strong>
+                    <strong style={{ fontSize: "1.3rem", color: prPackageApplied ? "#667eea" : "#ff512f" }}>NT$ {finalTotal}</strong>
                   </div>
                   <div style={{ textAlign: "right", color: prPackageApplied ? "#667eea" : "#28a745", fontSize: "0.9rem", marginTop: "4px" }}>
-                    {prPackageApplied 
-                      ? "公關品 - 全額免除" 
-                      : `您已節省 NT$ ${totalDiscount + giftDiscount}！`
-                    }
+                    {prPackageApplied ? "公關品 - 全額免除" : `您已節省 NT$ ${totalDiscount + giftDiscount}！`}
                   </div>
                 </>
               ) : (
@@ -633,20 +560,13 @@ export default function CartPage() {
 
             <button 
               style={{ 
-                ...gradientBtnStyle, 
-                marginTop: "30px", 
-                width: "100%", 
-                fontSize: "1.1rem", 
-                padding: "15px 20px",
-                background: prPackageApplied 
-                  ? "linear-gradient(90deg, #667eea 0%, #764ba2 100%)" 
-                  : "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)"
+                ...gradientBtnStyle, marginTop: "30px", width: "100%", fontSize: "1.1rem", padding: "15px 20px",
+                background: prPackageApplied ? "linear-gradient(90deg, #667eea 0%, #764ba2 100%)" : "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)"
               }} 
               onClick={placeOrder} 
               disabled={!user}
             >
-              {prPackageApplied 
-                ? `送出公關品` 
+              {prPackageApplied ? `送出公關品` 
                 : (totalDiscount > 0 || giftDiscount > 0)
                   ? `送出訂單 (已省 NT$ ${totalDiscount + giftDiscount})` 
                   : "送出訂單"
