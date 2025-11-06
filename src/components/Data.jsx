@@ -8,9 +8,9 @@ export const products = [
   { id: 4_2, textid: "4_2", no: 4, name: "黑色帽踢", price: 650, orPrice: 850, category: "帽踢" },
   { id: 5, textid: "5", no: 5, name: "雙色毛巾", price: 200, orPrice: 400, category: "毛巾" },
   { id: 6, textid: "6", no: 6, name: "黑色側背包", price: 750, orPrice: 950, category: "側背包" },
-  { id: 7_1, textid: "7_1", no: 7, name: "不得外出鑰匙圈", price: 50, orPrice: 70, category: "鑰匙圈" },
-  { id: 7_2, textid: "7_2", no: 7, name: "CKHS鑰匙圈", price: 50, orPrice: 70, category: "鑰匙圈" },
-  { id: 8, textid: "8", no: 8, name: "圓形徽章", price: 50, orPrice: 70, category: "徽章" },
+  { id: 7_1, textid: "7_1", no: 7, name: "不得外出鑰匙圈", price: 50, orprice: 50, category: "鑰匙圈" },
+  { id: 7_2, textid: "7_2", no: 7, name: "CKHS鑰匙圈", price: 50, orprice:50, category: "鑰匙圈" },
+  { id: 8, textid: "8", no: 8, name: "圓形徽章", price: 50, orprice:50, category: "徽章" },
 ];
 
 export const comboDeals = [
@@ -20,64 +20,61 @@ export const comboDeals = [
     items: [2, 5], // 短踢+毛巾
     originalPrice: 750,
     comboPrice: 400,
-    discount: 350,
+    showdiscount: 350,
+    discount: 100,
   },
   {
     id: "combo2",
     name: "套餐B",
-    items: [1, 2, 4], // 棒球外套+帽踢+短踢
-    originalPrice: 2250,
-    comboPrice: 1500,
-    discount: 750,
+    items: [1, 2, 2, 4], // 棒球外套+帽踢+短踢
+    originalPrice: 2750,
+    comboPrice: 1800,
+    showdiscount: 950,
+    discount: 150,
+    note: "需兩件短踢，款式不限"
   },
   {
     id: "combo3",
     name: "套餐C",
-    items: [1, 2, 3, 4, 5, 6, 8], //短踢+帽踢+棒球外套+證件套+毛巾+包包+徽章
-    originalPrice: 4070,
-    comboPrice: 2500,
-    discount: 1570,
-  },
-  {
-    id: "combo4",
-    name: "套餐D",
-    items: [1, 4], // 棒球外套+帽踢
-    originalPrice: 1900,
-    comboPrice: 1500,
-    discount: 400,
+    items: [1, 2, 2, 3, 4, 5, 6, 8], //短踢+帽踢+棒球外套+證件套+毛巾+包包+徽章
+    originalPrice: 4550, //3150
+    comboPrice: 2800,
+    showdiscount: 1750,
+    discount: 350,
+    note: "需兩件短踢，款式不限"
   },
 ];
 
 export const sizeData1 = [
-    { size: "S", length: 65, sleeve: 19, chest: 49, shoulder: 42, productId: 1_1 },
-    { size: "M", length: 69, sleeve: 20, chest: 52, shoulder: 46, productId: 1_2 },
-    { size: "L", length: 73, sleeve: 22, chest: 55, shoulder: 50, productId: 1_3 },
-    { size: "XL", length: 77, sleeve: 24, chest: 58, shoulder: 54, productId: 1_4 },
-    { size: "XXL", length: 81, sleeve: 25, chest: 63, shoulder: 57, productId: 1_5 },
+    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 1_1 },
+    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 1_2 },
+    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 1_3 },
+    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 1_4 },
+    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 1_5 },
 ];
 
 export const sizeData2_1 = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 2_1 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 2_2 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 2_3 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 2_4 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 2_5 },
+    { size: "S", length: 65, sleeve: 19, chest: 49, shoulder: 42, productId: 2_1 },
+    { size: "M", length: 69, sleeve: 20, chest: 52, shoulder: 46, productId: 2_2 },
+    { size: "L", length: 73, sleeve: 22, chest: 55, shoulder: 50, productId: 2_3 },
+    { size: "XL", length: 77, sleeve: 24, chest: 58, shoulder: 54, productId: 2_4 },
+    { size: "2L", length: 81, sleeve: 25, chest: 63, shoulder: 57, productId: 2_5 },
 ];
 
 export const sizeData2_2 = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 2_6 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 2_7 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 2_8 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 2_9 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 2_10 },
+    { size: "S", length: 65, sleeve: 19, chest: 49, shoulder: 42, productId: 2_6},
+    { size: "M", length: 69, sleeve: 20, chest: 52, shoulder: 46, productId: 2_7 },
+    { size: "L", length: 73, sleeve: 22, chest: 55, shoulder: 50, productId: 2_8 },
+    { size: "XL", length: 77, sleeve: 24, chest: 58, shoulder: 54, productId: 2_9 },
+    { size: "2L", length: 81, sleeve: 25, chest: 63, shoulder: 57, productId: 2_10 },
 ];
 
 export const sizeData2_3 = [
-    { size: "S", length: 64, sleeve: 51, chest: 114, shoulder: 50, productId: 2_11 },
-    { size: "M", length: 66, sleeve: 53, chest: 118, shoulder: 52, productId: 2_12 },
-    { size: "L", length: 68, sleeve: 55, chest: 122, shoulder: 54, productId: 2_13 },
-    { size: "XL", length: 70, sleeve: 57, chest: 126, shoulder: 56, productId: 2_14 },
-    { size: "2L", length: 72, sleeve: 59, chest: 130, shoulder: 58, productId: 2_15 },
+    { size: "S", length: 65, sleeve: 19, chest: 49, shoulder: 42, productId: 2_11 },
+    { size: "M", length: 69, sleeve: 20, chest: 52, shoulder: 46, productId: 2_12 },
+    { size: "L", length: 73, sleeve: 22, chest: 55, shoulder: 50, productId: 2_13 },
+    { size: "XL", length: 77, sleeve: 24, chest: 58, shoulder: 54, productId: 2_14 },
+    { size: "2L", length: 81, sleeve: 25, chest: 63, shoulder: 57, productId: 2_15 },
 ];
 
 export const sizeData4_1 = [
@@ -109,7 +106,7 @@ export const product2_1s = [
     { id: 2_2, no: 2, name: "深藍色短踢-M", price: 300, orPrice: 500 },
     { id: 2_3, no: 2, name: "深藍色短踢-L", price: 300, orPrice: 500 },
     { id: 2_4, no: 2, name: "深藍色短踢-XL", price: 300, orPrice: 500 },
-    { id: 2_5, no: 2, name: "深藍色短踢-2L", price: 390, orPrice: 500 },
+    { id: 2_5, no: 2, name: "深藍色短踢-2L", price: 300, orPrice: 500 },
 ];
 
 export const product2_2s = [
@@ -117,7 +114,7 @@ export const product2_2s = [
     { id: 2_7, no: 2, name: "白色短踢-M", price: 300, orPrice: 500 },
     { id: 2_8, no: 2, name: "白色短踢-L", price: 300, orPrice: 500 },
     { id: 2_9, no: 2, name: "白色短踢-XL", price: 300, orPrice: 500 },
-    { id: 2_10, no: 2, name: "白色短踢-2L", price: 390, orPrice: 500 },
+    { id: 2_10, no: 2, name: "白色短踢-2L", price: 300, orPrice: 500 },
 ];
 
 export const product2_3s = [
@@ -125,7 +122,7 @@ export const product2_3s = [
     { id: 2_12, no: 2, name: "黑色短踢-M", price: 300, orPrice: 500 },
     { id: 2_13, no: 2, name: "黑色短踢-L", price: 300, orPrice: 500 },
     { id: 2_14, no: 2, name: "黑色短踢-XL", price: 300, orPrice: 500 },
-    { id: 2_15, no: 2, name: "黑色短踢-2L", price: 390, orPrice: 500 },
+    { id: 2_15, no: 2, name: "黑色短踢-2L", price: 300, orPrice: 500 },
 ];
 
 export const product4_1s = [

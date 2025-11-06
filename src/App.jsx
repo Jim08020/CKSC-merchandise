@@ -22,7 +22,7 @@ import ComingSoonPage from "./components/ComingoonPage";
 
 const InfoPage = InformationPage;
 
-const starttime = new Date("2025-11-04T12:00:00+08:00");
+const starttime = new Date("2025-11-05T12:00:00+08:00");
 const now = new Date();
 const isAfterStartTime = now >= starttime;
 
@@ -299,7 +299,7 @@ function App() {
                 <Route path="/comingsoon" element={<ComingSoonPage />} />
                 <Route
                   path="/"
-                  element={user.isAdmin ? <HomePage /> : <Navigate to="/comingsoon" replace />}
+                  element={user.isAdmin ? <HomePage /> : <Navigate to="/info" replace />}
                 />
                 <Route
                   path="/product/:id"

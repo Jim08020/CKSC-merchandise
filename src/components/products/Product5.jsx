@@ -13,7 +13,7 @@ export default function Product5() {
     no: 5,
     id: 5,
     name: "雙色毛巾",
-    price: 250,
+    price: 200,
     specifications: {
       size: "100 x 30 cm",
     }

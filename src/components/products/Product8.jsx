@@ -14,7 +14,7 @@ export default function Product8() {
     id: 8,    
     name: "圓形徽章",
     price: 50,
-    orPrice: 70,
+    orPrice: 50,
   };
 
   const handleAddToCart = () => {
@@ -56,10 +56,6 @@ export default function Product8() {
             textAlign: "center",
           }}
         >
-          <div style={{textDecoration: "line-through", opacity: 0.7}}>
-            NT$ 70
-          </div>
-          早鳥優惠價：
           NT$ 50
         </div>
 

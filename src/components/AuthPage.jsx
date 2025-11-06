@@ -86,6 +86,14 @@ export default function AuthPage() {
       const isNewUser = await initializeUserData(user);
       const profileCompleted = await checkUserProfileCompleted(user);
       
+      if (!profileCompleted) {
+          showToast("請完成個人資料填寫");
+          navigate("/info");
+        } else {
+          showToast("登入成功！");
+          navigate("/");
+        }
+        
       if (isNewUser || !profileCompleted) {
         showToast("Google 認證成功！請完成註冊資料");
         navigate("/info");

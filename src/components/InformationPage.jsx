@@ -51,7 +51,7 @@ export default function InformationPage() {
       if (userDoc.exists()) {
         const userData = userDoc.data();
         // 設定表單資料
-        setName(userData.name || currentUser.displayName || "");
+        setName(userData.name || "");
         setPhone(userData.phone || "");
         setSchool(userData.school || "");
         setClassandnumber(userData.classandnumber || "");
@@ -61,7 +61,7 @@ export default function InformationPage() {
         setIsEditMode(true); // 設定為編輯模式
       } else {
         // 新用戶，使用Google資料作為預設值
-        setName(currentUser.displayName || "");
+        setName("");
         setIsEditMode(false); // 設定為新註冊模式
       }
     } catch (error) {

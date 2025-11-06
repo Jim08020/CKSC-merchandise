@@ -18,26 +18,25 @@ export default function CartPage() {
   const { showToast } = useToast();
   const [displayName, setDisplayName] = useState("");
   
-    useEffect(() => {
-      if (!user) return;
-      const fetchName = async () => {
-        try {
-          const userDoc = await getDoc(doc(db, "users", user.uid));
-          if (userDoc.exists()) {
-            setDisplayName(userDoc.data().name || user.displayName || user.email);
-          } else {
-            setDisplayName(user.displayName || user.email);
-          }
-        } catch {
+  useEffect(() => {
+    if (!user) return;
+    const fetchName = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, "users", user.uid));
+        if (userDoc.exists()) {
+          setDisplayName(userDoc.data().name || user.displayName || user.email);
+        } else {
           setDisplayName(user.displayName || user.email);
         }
-      };
-      fetchName();
-    }, [user]);
-  // 從 Firebase 載入用戶資料
+      } catch {
+        setDisplayName(user.displayName || user.email);
+      }
+    };
+    fetchName();
+  }, [user]);
+
   const loadUserProfile = async (userId) => {
     if (!userId) return;
-    
     try {
       const userRef = doc(db, "users", userId);
       const userSnap = await getDoc(userRef);
@@ -52,15 +51,12 @@ export default function CartPage() {
     return null;
   };
 
-  // 從 Firebase 載入用戶的購物車
   const loadUserCart = async (userId) => {
     if (!userId) return;
-    
     try {
       setIsLoading(true);
       const cartRef = doc(db, "carts", userId);
       const cartSnap = await getDoc(cartRef);
-      
       if (cartSnap.exists()) {
         const cartData = cartSnap.data();
         if (cartData.items && Array.isArray(cartData.items)) {
@@ -75,10 +71,8 @@ export default function CartPage() {
     }
   };
 
-  // 儲存購物車到 Firebase
   const saveUserCart = async (userId, items) => {
     if (!userId || isSyncing) return;
-    
     try {
       setIsSyncing(true);
       const cartRef = doc(db, "carts", userId);
@@ -93,7 +87,6 @@ export default function CartPage() {
     }
   };
 
-  // 用戶登入時載入購物車和用戶資料
   useEffect(() => {
     if (user?.uid) {
       loadUserCart(user.uid);
@@ -101,34 +94,29 @@ export default function CartPage() {
     }
   }, [user]);
 
-  // 購物車變化時自動儲存（防抖動）
   useEffect(() => {
     if (!user?.uid) return;
-
     const timeoutId = setTimeout(() => {
       saveUserCart(user.uid, cartItems);
-    }, 1000); // 1秒後儲存
-
+    }, 1000);
     return () => clearTimeout(timeoutId);
   }, [cartItems, user]);
-  
 
-  // 管理員郵箱列表
   const adminEmails = [
-    "ck11300333@gl.ck.tp.edu.tw", //80-1主席，網站管理員
-    "chris20090731@gmail.com", //同上
-    "ck11300329@gl.ck.tp.edu.tw", //80-1資訊長，網站管理員
-    "ck11300569@gl.ck.tp.edu.tw", //80-1服務長
-    "ck11300110@gl.ck.tp.edu.tw", //80-1副主席
-    "ck11300044@gl.ck.tp.edu.tw", //80-1服務執行王猷巽
-    "ck11300307@gl.ck.tp.edu.tw", //80-1服務執行洪鈵椉
-    "ck11300554@gl.ck.tp.edu.tw", //80-1服務執行陳謙行
-    "stud2@gl.ck.tp.edu.tw",//社團活動組楊蕙瑜組長
+    "ck11300333@gl.ck.tp.edu.tw",
+    "chris20090731@gmail.com",
+    "ck11300329@gl.ck.tp.edu.tw",
+    "ck11300569@gl.ck.tp.edu.tw",
+    "ck11300110@gl.ck.tp.edu.tw",
+    "ck11300044@gl.ck.tp.edu.tw",
+    "ck11300307@gl.ck.tp.edu.tw",
+    "ck11300554@gl.ck.tp.edu.tw",
+    "stud2@gl.ck.tp.edu.tw",
   ];
 
-  // 檢查是否為管理員 (使用郵箱檢查)
   const isAdmin = user?.email && adminEmails.includes(user.email);
 
+  // 修正後的套餐檢查邏輯 - 按照套餐中商品出現次數判斷
   const checkComboDeals = () => {
     const itemQuantities = {};
     cartItems.forEach(item => {
@@ -139,25 +127,54 @@ export default function CartPage() {
 
     const possibleCombos = [];
     comboDeals.forEach(combo => {
-      const hasAllItems = combo.items.every(itemNo => itemQuantities[itemNo] >= 1);
+      // 計算套餐中每個商品編號需要的數量
+      const requiredQuantities = {};
+      combo.items.forEach(itemNo => {
+        requiredQuantities[itemNo] = (requiredQuantities[itemNo] || 0) + 1;
+      });
+
+      // 檢查是否所有商品都滿足數量要求
+      const hasAllItems = Object.entries(requiredQuantities).every(
+        ([itemNo, requiredQty]) => itemQuantities[parseInt(itemNo)] >= requiredQty
+      );
+
       if (hasAllItems) {
-        const maxPossibleCount = Math.min(...combo.items.map(itemNo => itemQuantities[itemNo]));
-        possibleCombos.push({ ...combo, maxCount: maxPossibleCount });
+        // 計算最多可以組成幾組套餐
+        const maxPossibleCount = Math.min(
+          ...Object.entries(requiredQuantities).map(
+            ([itemNo, requiredQty]) => Math.floor(itemQuantities[parseInt(itemNo)] / requiredQty)
+          )
+        );
+        possibleCombos.push({ ...combo, maxCount: maxPossibleCount, requiredQuantities });
       }
     });
 
-    if (possibleCombos.length === 0) return { appliedCombos: [], remainingItems: itemQuantities, totalDiscount: 0 };
+    if (possibleCombos.length === 0) {
+      return { appliedCombos: [], remainingItems: itemQuantities, totalDiscount: 0 };
+    }
 
     const findOptimalCombination = (combos, quantities) => {
       let bestResult = { totalDiscount: 0, appliedCombos: [], remainingItems: quantities };
 
       combos.forEach(combo => {
-        const canApply = combo.items.every(itemNo => quantities[itemNo] >= 1);
+        // 檢查是否可以應用套餐
+        const canApply = Object.entries(combo.requiredQuantities).every(
+          ([itemNo, requiredQty]) => quantities[parseInt(itemNo)] >= requiredQty
+        );
+
         if (canApply) {
-          const maxApplications = Math.min(...combo.items.map(itemNo => quantities[itemNo]));
+          const maxApplications = Math.min(
+            ...Object.entries(combo.requiredQuantities).map(
+              ([itemNo, requiredQty]) => Math.floor(quantities[parseInt(itemNo)] / requiredQty)
+            )
+          );
+
           for (let count = maxApplications; count >= 1; count--) {
             const newQuantities = { ...quantities };
-            combo.items.forEach(itemNo => { newQuantities[itemNo] -= count; });
+            // 按照需求數量扣除
+            Object.entries(combo.requiredQuantities).forEach(([itemNo, requiredQty]) => {
+              newQuantities[parseInt(itemNo)] -= requiredQty * count;
+            });
 
             const currentDiscount = combo.discount * count;
             const remainingCombos = combos.filter(c => c.id !== combo.id);
@@ -188,11 +205,18 @@ export default function CartPage() {
     const originalTotal = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
     const comboResult = checkComboDeals();
     
-    // 檢查購物車中是否有徽章(8)或鑰匙圈(7)
+    // 計算購物車中徽章(8)和鑰匙圈(7)的總數量
     const giftItems = cartItems.filter(item => item.no === 7 || item.no === 8);
-    const hasGiftItem = giftItems.length > 0;
+    const totalGiftQuantity = giftItems.reduce((sum, item) => sum + item.quantity, 0);
     
-    // 如果是管理員且選擇使用公關品組合包，則免除所有金額
+    // 計算套餐C中使用的徽章數量
+    const combo3Applied = comboResult.appliedCombos.find(combo => combo.id === "combo3");
+    const giftUsedInCombo = combo3Applied ? combo3Applied.applicableCount : 0;
+    
+    // 可用於滿額贈的徽章/鑰匙圈數量 = 總數量 - 套餐使用數量
+    const availableGiftCount = totalGiftQuantity - giftUsedInCombo;
+    const hasAvailableGift = availableGiftCount > 0;
+    
     if (isAdmin && usePRPackage) {
       return {
         originalTotal,
@@ -203,21 +227,40 @@ export default function CartPage() {
         prPackageDiscount: originalTotal,
         qualifiesForGift: false,
         giftDiscount: 0,
-        hasGiftItem: false
+        hasAvailableGift: false,
+        totalGiftQuantity: 0,
+        giftUsedInCombo: 0,
+        availableGiftCount: 0,
+        amountNeededForGift: 0
       };
     }
     
-    // 先計算扣除組合優惠後的總額
+    // 計算不含贈品的商品總額
+    const totalWithoutGift = cartItems
+      .filter(item => item.no !== 7 && item.no !== 8)
+      .reduce((sum, item) => sum + item.price * item.quantity, 0);
+    
+    // 扣除套餐優惠後的總額（不含贈品）
+    const totalWithoutGiftAfterCombo = totalWithoutGift - comboResult.totalDiscount;
+    
+    // 判斷是否符合滿額資格 - 改為滿千送（1000元）
+    const qualifiesForGift = totalWithoutGiftAfterCombo >= 1000;
+    
+    // 計算還需要多少才能滿額
+    const amountNeededForGift = qualifiesForGift ? 0 : Math.max(0, 1000 - totalWithoutGiftAfterCombo);
+    
+    // 計算當前總額
     let currentTotal = originalTotal - comboResult.totalDiscount;
     let giftDiscount = 0;
     
-    // 判斷是否符合滿額資格：當前總額（包含贈品） >= 1500
-    const qualifiesForGift = currentTotal >= 1500;
-    
-    // 如果符合資格且購物車有贈品，則扣除一個贈品的價格
-    if (hasGiftItem && qualifiesForGift) {
-      giftDiscount = giftItems[0].price;
-      currentTotal = currentTotal - giftDiscount;
+    // 只有在符合滿額且有可用贈品時才扣除 - 最多贈送一個
+    if (hasAvailableGift && qualifiesForGift) {
+      // 只扣除一個贈品的價格
+      const firstGiftItem = giftItems[0];
+      if (firstGiftItem) {
+        giftDiscount = firstGiftItem.price;
+        currentTotal = currentTotal - giftDiscount;
+      }
     }
 
     return {
@@ -230,21 +273,42 @@ export default function CartPage() {
       prPackageDiscount: 0,
       qualifiesForGift,
       giftDiscount,
-      hasGiftItem
+      hasAvailableGift,
+      totalGiftQuantity,
+      giftUsedInCombo,
+      availableGiftCount,
+      amountNeededForGift,
+      totalWithoutGiftAfterCombo
     };
   };
 
-  const { originalTotal, finalTotal, totalDiscount, appliedCombos, prPackageApplied, prPackageDiscount, qualifiesForGift, giftDiscount, hasGiftItem } = calculatePricing();
+  const { 
+    originalTotal, 
+    finalTotal, 
+    totalDiscount, 
+    appliedCombos, 
+    prPackageApplied, 
+    prPackageDiscount, 
+    qualifiesForGift, 
+    giftDiscount, 
+    hasAvailableGift,
+    totalGiftQuantity,
+    giftUsedInCombo,
+    availableGiftCount,
+    amountNeededForGift
+  } = calculatePricing();
 
   const handleQuantityChange = (itemId, change) => {
     const currentItem = cartItems.find(item => item.id === itemId);
     const newQuantity = currentItem.quantity + change;
+    
     if (newQuantity <= 0) {
       removeFromCart(itemId);
       showToast("商品已從購物車移除");
-    } else {
-      updateQuantity(itemId, change);
+      return;
     }
+    
+    updateQuantity(itemId, change);
   };
 
   const placeOrder = async () => {
@@ -257,9 +321,14 @@ export default function CartPage() {
       return;
     }
 
+    // 檢查是否符合滿額資格
+    if (totalGiftQuantity > 0 && !qualifiesForGift) {
+      showToast(`購買金額未滿 NT$ 1000，無法領取贈品！(還差 NT$ ${amountNeededForGift})`);
+      return;
+    }
+
     try {
       const ordersRef = collection(db, "orders");
-
       let profile = userProfile || {};
       if (!profile.name) {
         try {
@@ -275,7 +344,6 @@ export default function CartPage() {
         originalTotal,
         finalTotal,
         totalDiscount: prPackageApplied ? prPackageDiscount : (totalDiscount + giftDiscount),
-        // 如果使用公關品，則在 appliedCombos 中記錄公關品
         appliedCombos: prPackageApplied 
           ? [{ name: "公關品" }]
           : appliedCombos.map(combo => ({
@@ -291,7 +359,10 @@ export default function CartPage() {
         isAdminOrder: isAdmin,
         qualifiesForGift: qualifiesForGift && !prPackageApplied,
         giftDiscount: giftDiscount,
-        hasGiftItem: hasGiftItem,
+        hasAvailableGift: hasAvailableGift,
+        totalGiftQuantity: totalGiftQuantity,
+        giftUsedInCombo: giftUsedInCombo,
+        availableGiftCount: availableGiftCount,
         createdAt: serverTimestamp(),
         customerName: profile.name || "",
         customerPhone: profile.phone || "",
@@ -301,12 +372,9 @@ export default function CartPage() {
       };
 
       await addDoc(ordersRef, orderData);
-
-      // 清空購物車並同步到 Firebase
       setCartItems([]);
       await saveUserCart(user.uid, []);
-      setUsePRPackage(false); // 重置公關品選項
-
+      setUsePRPackage(false);
       showToast("訂單已送出！");
       navigate("/orders");
     } catch (err) {
@@ -329,7 +397,7 @@ export default function CartPage() {
   return (
     <div style={{ minHeight: "100vh", padding: "40px 20px", display: "flex", justifyContent: "center", alignItems: "flex-start" }}>
       <div style={{ width: "100%", maxWidth: "800px", background: "white", borderRadius: "12px", boxShadow: "0 8px 24px rgba(0,0,0,0.1)", padding: "30px" }}>
-        <h1 style={{ color: "#333", margin: 0 , textAlign: "center" }}>購物車</h1><br />
+        <h1 style={{ color: "#333", margin: 0, textAlign: "center" }}>購物車</h1><br />
         <div style={{ display: "flex", alignItems: "center", marginBottom: "24px", justifyContent: "center" }}>
           <div style={{ display: "flex", alignItems: "center", gap: "10px", justifyContent: "center" }}>
             {isAdmin && (
@@ -377,7 +445,6 @@ export default function CartPage() {
           </div>
         )}
 
-        {/* 管理員公關品組合包選項 */}
         {isAdmin && cartItems.length > 0 && (
           <div style={{ 
             background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
@@ -427,7 +494,6 @@ export default function CartPage() {
               ))}
             </div>
 
-            {/* 公關品組合包折扣顯示 */}
             {prPackageApplied && (
               <div style={{ marginTop: "20px", padding: "16px", background: "linear-gradient(135deg, #667eea20 0%, #764ba220 100%)", borderRadius: "10px", border: "2px solid #667eea" }}>
                 <div style={{ color: "#667eea", fontWeight: "bold", fontSize: "1.1rem", marginBottom: "12px", display: "flex", alignItems: "center", gap: "8px" }}>
@@ -439,50 +505,79 @@ export default function CartPage() {
               </div>
             )}
 
-            {/* 一般組合包折扣顯示 */}
             {!prPackageApplied && appliedCombos.length > 0 && (
               <div style={{ marginTop: "20px", padding: "16px", background: "#fff0f6", borderRadius: "10px", border: "1px solid #f9c2d3" }}>
                 <div style={{ color: "#d63384", fontWeight: "bold", fontSize: "1.1rem", marginBottom: "12px" }}>🎉 套餐折扣</div>
-                {appliedCombos.map((combo, index) => (
+                {appliedCombos.map((combo) => (
                   <div key={combo.id} style={{ display: "flex", justifyContent: "space-between", marginBottom: "6px" }}>
                     <span>{combo.name} x {combo.applicableCount}</span>
                     <span>- NT$ {combo.discount * combo.applicableCount}</span>
                   </div>
                 ))}
                 <div style={{ textAlign: "right", marginTop: "8px", fontWeight: "bold" }}>總共節省: NT$ {totalDiscount}</div>
+                
+                {giftUsedInCombo > 0 && (
+                  <div style={{ marginTop: "12px", padding: "8px", background: "#fff3cd", borderRadius: "6px", fontSize: "0.9rem" }}>
+                    💡 套餐C已使用 {giftUsedInCombo} 個徽章，如需滿額贈品請額外加入
+                  </div>
+                )}
               </div>
             )}
 
-            {/* 滿額贈品提示 */}
             {!prPackageApplied && (
               <div style={{ 
                 marginTop: "20px", 
                 padding: "16px", 
-                background: qualifiesForGift && hasGiftItem ? "linear-gradient(135deg, #ffd89b 0%, #19547b 100%)" : qualifiesForGift ? "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)" : "#fff8e1", 
+                background: qualifiesForGift && hasAvailableGift 
+                  ? "linear-gradient(135deg, #ffd89b 0%, #19547b 100%)" 
+                  : qualifiesForGift 
+                  ? "linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)" 
+                  : "#fff8e1", 
                 borderRadius: "10px", 
-                border: qualifiesForGift && hasGiftItem ? "2px solid #f57c00" : qualifiesForGift ? "2px solid #48c6ef" : "1px solid #ffd54f",
-                color: qualifiesForGift && hasGiftItem ? "white" : qualifiesForGift ? "#333" : "#333"
+                border: qualifiesForGift && hasAvailableGift 
+                  ? "2px solid #f57c00" 
+                  : qualifiesForGift 
+                  ? "2px solid #48c6ef" 
+                  : "1px solid #ffd54f",
+                color: qualifiesForGift && hasAvailableGift ? "white" : "#333"
               }}>
                 <div style={{ fontWeight: "bold", fontSize: "1.1rem", marginBottom: "8px", display: "flex", alignItems: "center", gap: "8px" }}>
-                  🎁 滿額好禮
+                  🎁 滿千好禮
                 </div>
                 <div style={{ fontSize: "0.95rem" }}>
-                  {qualifiesForGift && hasGiftItem ? (
+                  {qualifiesForGift && hasAvailableGift ? (
                     <>
-                      <div style={{ marginBottom: "4px" }}>🎊 恭喜！您已符合滿額贈禮資格！</div>
-                      <div>滿 NT$ 1500 即可獲得：<strong>徽章 或 鑰匙圈</strong> 免費 (已自動扣除一個贈品 NT$ {giftDiscount})</div>
+                      <div style={{ marginBottom: "4px" }}>🎊 恭喜！您已符合滿千贈禮資格！</div>
+                      <div>滿 NT$ 1000 即可獲得：<strong>徽章/鑰匙圈 免費 1 個</strong></div>
+                      <div style={{ marginTop: "4px" }}>
+                        已自動扣除贈品 NT$ {giftDiscount}
+                      </div>
                     </>
                   ) : qualifiesForGift ? (
                     <>
-                      <div style={{ marginBottom: "4px" }}>🎊 恭喜！您已符合滿額贈禮資格！</div>
-                      <div>滿 NT$ 1500 即可獲得：<strong>徽章 或 鑰匙圈</strong> 乙份 (請將贈品加入購物車，系統將自動扣除一個贈品的金額)</div>
+                      <div style={{ marginBottom: "4px" }}>🎊 恭喜！您已符合滿千贈禮資格！</div>
+                      <div>滿 NT$ 1000 即可獲得：<strong>徽章/鑰匙圈 免費 1 個</strong></div>
+                      {giftUsedInCombo > 0 ? (
+                        <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>
+                          * 套餐C已使用 {giftUsedInCombo} 個徽章，請加入徽章/鑰匙圈即可享 1 個免費優惠
+                        </div>
+                      ) : (
+                        <div style={{ marginTop: "4px", fontSize: "0.85rem", opacity: 0.8 }}>
+                          請將徽章/鑰匙圈加入購物車，系統將自動扣除 1 個贈品金額
+                        </div>
+                      )}
                     </>
                   ) : (
                     <>
-                      <div>滿 NT$ 1500 即贈送 <strong>徽章 或 鑰匙圈</strong> 乙份</div>
+                      <div>滿 NT$ 1000 即贈送 <strong>徽章/鑰匙圈 免費 1 個</strong></div>
                       <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>
-                        還差 NT$ {1500 - (cartItems.filter(item => item.no !== 7 && item.no !== 8).reduce((sum, item) => sum + item.price * item.quantity, 0) - totalDiscount)} 即可獲得贈品！
+                        還差 NT$ {amountNeededForGift} 即可獲得贈品！
                       </div>
+                      {totalGiftQuantity > 0 && (
+                        <div style={{ marginTop: "4px", fontSize: "0.85rem", color: "#e65100" }}>
+                          ⚠️ 您的購物車有 {totalGiftQuantity} 個贈品，但未滿 NT$ 1000
+                        </div>
+                      )}
                     </>
                   )}
                 </div>
@@ -504,7 +599,7 @@ export default function CartPage() {
                   )}
                   {giftDiscount > 0 && !prPackageApplied && (
                     <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "8px" }}>
-                      <span style={{ color: "#ff9800" }}>滿額贈品：</span>
+                      <span style={{ color: "#ff9800" }}>滿千贈品：</span>
                       <span style={{ color: "#ff9800", fontWeight: "bold" }}>- NT$ {giftDiscount}</span>
                     </div>
                   )}
@@ -588,7 +683,7 @@ const removeBtnStyle = {
   padding: "6px 12px",
   borderRadius: "6px",
   border: "none",
-  background: "#ff6b6b",
+  background: "rgba(255, 107, 107, 1)",
   color: "white",
   fontWeight: "bold",
   cursor: "pointer",
