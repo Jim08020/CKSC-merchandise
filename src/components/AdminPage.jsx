@@ -10,6 +10,7 @@ import { useToast } from "./ToastContext";
 export default function AdminPage() {
   const [orders, setOrders] = useState([]);
   const [deliveredOrders, setDeliveredOrders] = useState([]);
+  const [paidOrders, setPaidOrders] = useState([]);
   
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
@@ -65,7 +66,6 @@ export default function AdminPage() {
         
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          // 僅檢查資料庫中的 role
           setIsAdmin(userData.role === "admin");
         } else {
           setIsAdmin(false);
@@ -177,6 +177,9 @@ export default function AdminPage() {
         const delivered = allOrders.filter(order => order.delivered);
         setDeliveredOrders(delivered);
 
+        const paid = allOrders.filter(order => order.paid);
+        setPaidOrders(paid);
+
       } catch (err) {
         console.error("取得訂單錯誤:", err);
         showToast("獲取訂單失敗");
@@ -213,6 +216,35 @@ export default function AdminPage() {
       
     } catch (err) {
       console.error("更新交貨狀態錯誤:", err);
+      showToast("❌ 更新失敗：" + err.message);
+    }
+  };
+
+  // 修正：更新付款狀態
+  const updatePaymentStatus = async (orderId, paid) => {
+    try {
+      const orderRef = doc(db, "orders", orderId);
+      const updateData = {
+        paid,
+        paymentUpdatedAt: serverTimestamp(),
+        paymentUpdatedBy: displayName,
+        paymentUpdatedByName: displayName || user.email || "管理員"
+      };
+      await updateDoc(orderRef, updateData);
+      
+      const updatedOrders = orders.map(order => 
+        order.id === orderId ? { ...order, ...updateData, paymentUpdatedAt: new Date() } : order
+      );
+      
+      setOrders(updatedOrders);
+      
+      const paid_updated = updatedOrders.filter(order => order.paid);
+      setPaidOrders(paid_updated);
+      
+      showToast(paid ? "✅ 已標記為已付款" : "📋 已標記為未付款");
+      
+    } catch (err) {
+      console.error("更新付款狀態錯誤:", err);
       showToast("❌ 更新失敗：" + err.message);
     }
   };
@@ -285,13 +317,15 @@ export default function AdminPage() {
       const deliveryTime = order.deliveryUpdatedAt?.toDate ? order.deliveryUpdatedAt.toDate().toLocaleString() : "";
       const deliveryBy = order.deliveryUpdatedByName || "";
       const deliveryStatus = order.delivered ? "已交貨" : "未交貨";
-
+      const paymentTime = order.paymentUpdatedAt?.toDate ? order.paymentUpdatedAt.toDate().toLocaleString() : "";
+      const paymentBy = order.paymentUpdatedByName || "";
+      const paymentStatus = order.paid ? "已付款" : "未付款";
       const orderItemCount = order.items.length;
       const startRow = currentRow;
       const endRow = currentRow + orderItemCount - 1;
 
       if (orderItemCount > 1) {
-        const mergeColumns = Array.from({ length: 15 }, (_, i) => i);
+        const mergeColumns = Array.from({ length: 18 }, (_, i) => i);
         mergeColumns.forEach(colIndex => {
           merges.push({ s:{r:startRow,c:colIndex}, e:{r:endRow,c:colIndex} });
         });
@@ -307,7 +341,10 @@ export default function AdminPage() {
           訂單總金額: itemIndex === 0 ? order.finalTotal : "",
           交貨狀態: itemIndex === 0 ? deliveryStatus : "",
           交貨更新時間: itemIndex === 0 ? deliveryTime : "",
-          更新者: itemIndex === 0 ? deliveryBy : "",
+          交貨更新者: itemIndex === 0 ? deliveryBy : "",
+          付款狀態: itemIndex === 0 ? paymentStatus : "",
+          付款更新時間: itemIndex === 0 ? paymentTime : "",
+          付款更新者: itemIndex === 0 ? paymentBy : "",
           客戶姓名: itemIndex === 0 ? order.customerName || "" : "",
           電話: itemIndex === 0 ? order.customerPhone || "" : "",
           Email: itemIndex === 0 ? order.customerEmail || "" : "",
@@ -327,8 +364,9 @@ export default function AdminPage() {
 
     ordersSheet['!cols'] = [
       { wch: 15 }, { wch: 20 }, { wch: 12 }, { wch: 20 }, { wch: 12 }, { wch: 12 },
-      { wch: 10 }, { wch: 20 }, { wch: 12 }, { wch: 12 }, { wch: 15 }, { wch: 25 },
-      { wch: 15 }, { wch: 12 }, { wch: 15 }, { wch: 8 }, { wch: 8 }, { wch: 10 }
+      { wch: 10 }, { wch: 20 }, { wch: 12 }, { wch: 10 }, { wch: 20 }, { wch: 12 },
+      { wch: 12 }, { wch: 15 }, { wch: 25 }, { wch: 15 }, { wch: 12 }, { wch: 15 },
+      { wch: 8 }, { wch: 8 }, { wch: 10 }
     ];
     productSheet['!cols'] = [{ wch: 20 }, { wch: 10 }, { wch: 12 }, { wch: 10 }];
 
@@ -531,51 +569,122 @@ export default function AdminPage() {
 
       <div style={{ width: "100%", maxWidth: "1000px", display: "flex", flexDirection: "column", gap: "20px" }}>
         {/* 匯出與總覽卡片 */}
-        <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "16px" }}>
-          <div>
+        <div style={{ background: "white", borderRadius: "12px", boxShadow: "0 8px 20px rgba(0,0,0,0.08)", padding: "20px", display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "16px" }}>
+          <div style={{ flex: "1", minWidth: "280px" }}>
             <h2 style={{ margin: 0, color: "#333" }}>
               {selectedSchool !== "all" && `${selectedSchool} - `}
               {activeTab === "delivered" ? "已交貨統計與匯出" : "匯出與總覽"}
             </h2>
-            <p style={{ margin: "6px 0 8px", color: "#666", fontSize: "0.95rem" }}>
+            <p style={{ margin: "6px 0 12px", color: "#666", fontSize: "0.95rem" }}>
               {activeTab === "delivered" ? "已完成交貨的訂單統計" : "匯出商品統計與所有訂單明細"}
             </p>
-            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap" }}>
-              <div style={{ background: "#f9fafb", border: "1px solid #eee", borderRadius: "10px", padding: "10px 14px" }}>
-                <div style={{ color: "#666", fontSize: "0.9rem" }}>
-                  {activeTab === "delivered" ? "已交貨數" : "訂單數"}
+            
+            {/* 第一行統計 */}
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "12px" }}>
+              <div style={{ background: "#f9fafb", border: "1px solid #eee", borderRadius: "10px", padding: "10px 14px", minWidth: "120px" }}>
+                <div style={{ color: "#666", fontSize: "0.85rem" }}>
+                  {activeTab === "delivered" ? "已交貨數" : "訂單總數"}
                 </div>
-                <div style={{ color: "#111", fontWeight: 700, fontSize: "1.1rem" }}>{currentOrders.length}</div>
+                <div style={{ color: "#111", fontWeight: 700, fontSize: "1.2rem" }}>{currentOrders.length}</div>
               </div>
-              <div style={{ background: "#f0f9ff", border: "1px solid #e0f2fe", borderRadius: "10px", padding: "10px 14px" }}>
-                <div style={{ color: "#0369a1", fontSize: "0.9rem" }}>
-                  {activeTab === "delivered" ? "已交貨營收" : "總營收"}
+              <div style={{ background: "#f0f9ff", border: "1px solid #e0f2fe", borderRadius: "10px", padding: "10px 14px", minWidth: "140px" }}>
+                <div style={{ color: "#0369a1", fontSize: "0.85rem" }}>總營收</div>
+                <div style={{ color: "#0c4a6e", fontWeight: 700, fontSize: "1.2rem" }}>NT$ {currentStats.totalRevenue.toLocaleString()}</div>
+              </div>
+              <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: "10px", padding: "10px 14px", minWidth: "140px" }}>
+                <div style={{ color: "#92400e", fontSize: "0.85rem" }}>訂單原價</div>
+                <div style={{ color: "#78350f", fontWeight: 700, fontSize: "1.2rem" }}>
+                  NT$ {currentOrders.reduce((sum, o) => sum + (Number(o.originalTotal) || 0), 0).toLocaleString()}
                 </div>
-                <div style={{ color: "#0c4a6e", fontWeight: 700, fontSize: "1.1rem" }}>NT$ {currentStats.totalRevenue}</div>
               </div>
-              <div style={{ background: "#fff1f2", border: "1px solid #ffe4e6", borderRadius: "10px", padding: "10px 14px" }}>
-                <div style={{ color: "#be123c", fontSize: "0.9rem" }}>折扣總額</div>
-                <div style={{ color: "#9f1239", fontWeight: 700, fontSize: "1.1rem" }}>NT$ {currentStats.totalDiscount}</div>
+              <div style={{ background: "#fff1f2", border: "1px solid #ffe4e6", borderRadius: "10px", padding: "10px 14px", minWidth: "140px" }}>
+                <div style={{ color: "#be123c", fontSize: "0.85rem" }}>折扣總額</div>
+                <div style={{ color: "#9f1239", fontWeight: 700, fontSize: "1.2rem" }}>NT$ {currentStats.totalDiscount.toLocaleString()}</div>
               </div>
+            </div>
+            
+            {/* 第二行統計 */}
+            <div style={{ display: "flex", gap: "12px", flexWrap: "wrap", marginBottom: "12px" }}>
               {activeTab === "all" && (
                 <>
-                  <div style={{ background: "#dcfce7", border: "1px solid #bbf7d0", borderRadius: "10px", padding: "10px 14px" }}>
-                    <div style={{ color: "#166534", fontSize: "0.9rem" }}>已交貨</div>
-                    <div style={{ color: "#14532d", fontWeight: 700, fontSize: "1.1rem" }}>{currentOrders.filter(o => o.delivered).length}</div>
+                  <div style={{ background: "#dcfce7", border: "1px solid #bbf7d0", borderRadius: "10px", padding: "10px 14px", minWidth: "110px" }}>
+                    <div style={{ color: "#166534", fontSize: "0.85rem" }}>已交貨</div>
+                    <div style={{ color: "#14532d", fontWeight: 700, fontSize: "1.2rem" }}>
+                      {currentOrders.filter(o => o.delivered).length}
+                    </div>
                   </div>
-                  <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: "10px", padding: "10px 14px" }}>
-                    <div style={{ color: "#92400e", fontSize: "0.9rem" }}>未交貨</div>
-                    <div style={{ color: "#78350f", fontWeight: 700, fontSize: "1.1rem" }}>{currentOrders.filter(o => !o.delivered).length}</div>
+                  <div style={{ background: "#fef3c7", border: "1px solid #fde68a", borderRadius: "10px", padding: "10px 14px", minWidth: "110px" }}>
+                    <div style={{ color: "#92400e", fontSize: "0.85rem" }}>未交貨</div>
+                    <div style={{ color: "#78350f", fontWeight: 700, fontSize: "1.2rem" }}>
+                      {currentOrders.filter(o => !o.delivered).length}
+                    </div>
+                  </div>
+                  <div style={{ background: "#d1fae5", border: "1px solid #a7f3d0", borderRadius: "10px", padding: "10px 14px", minWidth: "110px" }}>
+                    <div style={{ color: "#065f46", fontSize: "0.85rem" }}>已付款</div>
+                    <div style={{ color: "#064e3b", fontWeight: 700, fontSize: "1.2rem" }}>
+                      {currentOrders.filter(o => o.paid).length}
+                    </div>
+                  </div>
+                  <div style={{ background: "#fed7aa", border: "1px solid #fdba74", borderRadius: "10px", padding: "10px 14px", minWidth: "110px" }}>
+                    <div style={{ color: "#9a3412", fontSize: "0.85rem" }}>未付款</div>
+                    <div style={{ color: "#7c2d12", fontWeight: 700, fontSize: "1.2rem" }}>
+                      {currentOrders.filter(o => !o.paid).length}
+                    </div>
                   </div>
                 </>
               )}
+              <div style={{ background: "#e0e7ff", border: "1px solid #c7d2fe", borderRadius: "10px", padding: "10px 14px", minWidth: "140px" }}>
+                <div style={{ color: "#4338ca", fontSize: "0.85rem" }}>商品總件數</div>
+                <div style={{ color: "#3730a3", fontWeight: 700, fontSize: "1.2rem" }}>
+                  {currentOrders.reduce((sum, o) => sum + o.items.reduce((s, i) => s + i.quantity, 0), 0)}
+                </div>
+              </div>
+              <div style={{ background: "#fce7f3", border: "1px solid #fbcfe8", borderRadius: "10px", padding: "10px 14px", minWidth: "140px" }}>
+                <div style={{ color: "#9f1239", fontSize: "0.85rem" }}>平均訂單金額</div>
+                <div style={{ color: "#881337", fontWeight: 700, fontSize: "1.2rem" }}>
+                  NT$ {currentOrders.length > 0 ? Math.round(currentStats.totalRevenue / currentOrders.length).toLocaleString() : 0}
+                </div>
+              </div>
             </div>
+            
+            {/* 折扣率 */}
+            {currentOrders.length > 0 && (
+              <div style={{ 
+                background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)", 
+                borderRadius: "10px", 
+                padding: "12px 16px",
+                color: "white",
+                display: "inline-block"
+              }}>
+                <div style={{ fontSize: "0.85rem", opacity: 0.9 }}>平均折扣率</div>
+                <div style={{ fontWeight: 700, fontSize: "1.3rem" }}>
+                  {(() => {
+                    const totalOriginal = currentOrders.reduce((sum, o) => sum + (Number(o.originalTotal) || 0), 0);
+                    const discountRate = totalOriginal > 0 ? ((currentStats.totalDiscount / totalOriginal) * 100).toFixed(1) : 0;
+                    return `${discountRate}%`;
+                  })()}
+                </div>
+              </div>
+            )}
           </div>
+          
           <button
             onClick={() => exportToExcel(activeTab === "delivered")}
-            style={{ padding: "12px 24px", background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)", color: "white", border: "none", borderRadius: "10px", fontWeight: "bold", fontSize: "1rem", cursor: "pointer", boxShadow: "0 4px 12px rgba(221,36,118,0.25)" }}
+            style={{ 
+              padding: "14px 28px", 
+              background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)", 
+              color: "white", 
+              border: "none", 
+              borderRadius: "10px", 
+              fontWeight: "bold", 
+              fontSize: "1rem", 
+              cursor: "pointer", 
+              boxShadow: "0 4px 12px rgba(221,36,118,0.25)",
+              alignSelf: "flex-start",
+              whiteSpace: "nowrap"
+            }}
           >
-            匯出 {selectedSchool !== "all" && selectedSchool} {activeTab === "delivered" ? "已交貨" : "全部"} Excel
+            📊 匯出 Excel
           </button>
         </div>
 
@@ -653,6 +762,28 @@ export default function AdminPage() {
                     </div>
                   )}
                 </div>
+                
+                {/* 付款狀態顯示 */}
+                <div style={{ background: order.paid ? "#dcfce7" : "#fef3c7", border: `1px solid ${order.paid ? "#16a34a" : "#f59e0b"}`, borderRadius: "8px", padding: "12px", display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "12px" }}>
+                  <div>
+                    <div style={{ fontWeight: "bold" }}>
+                      付款狀態：
+                      <span style={{ color: order.paid ? "#16a34a" : "#f59e0b", marginLeft: "8px" }}>
+                        {order.paid ? "✅ 已付款" : "⏳ 未付款"}
+                      </span>
+                    </div>
+                    {order.paymentUpdatedAt && <div style={{ fontSize: "0.85rem", color: "#666", marginTop: "4px" }}>
+                      最後更新：{order.paymentUpdatedAt.toDate ? order.paymentUpdatedAt.toDate().toLocaleString() : order.paymentUpdatedAt.toLocaleString()} {order.paymentUpdatedByName && `(${order.paymentUpdatedByName})`}
+                    </div>}
+                  </div>
+                  {activeTab === "all" && (
+                    <div style={{ display: "flex", gap: "8px" }}>
+                      <button onClick={() => updatePaymentStatus(order.id, true)} disabled={order.paid} style={{ padding: "6px 12px", borderRadius: "4px", border: "none", background: order.paid ? "#94a3b8" : "#16a34a", color: "white", fontSize: "0.85rem", fontWeight: "bold", cursor: order.paid ? "not-allowed" : "pointer" }}>標記已付款</button>
+                      <button onClick={() => updatePaymentStatus(order.id, false)} disabled={!order.paid} style={{ padding: "6px 12px", borderRadius: "4px", border: "none", background: !order.paid ? "#94a3b8" : "#f59e0b", color: "white", fontSize: "0.85rem", fontWeight: "bold", cursor: !order.paid ? "not-allowed" : "pointer" }}>標記未付款</button>
+                    </div>
+                  )}
+                </div>
+                
                 <p><strong>訂單ID:</strong> {order.id}</p>
                 <p><strong>折扣後金額:</strong> NT$ {order.finalTotal}</p>
                 <p><strong>購買時間:</strong> {order.createdAt?.toDate().toLocaleString()}</p>
@@ -700,6 +831,7 @@ export default function AdminPage() {
                         await deleteDoc(doc(db, "orders", order.id));
                         setOrders(prev => prev.filter(o => o.id !== order.id));
                         setDeliveredOrders(prev => prev.filter(o => o.id !== order.id));
+                        setPaidOrders(prev => prev.filter(o => o.id !== order.id));
                         showToast("✅ 訂單已刪除");
                       } catch (e) {
                         console.error("刪除訂單失敗", e);

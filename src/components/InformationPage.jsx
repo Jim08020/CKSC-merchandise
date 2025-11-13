@@ -13,8 +13,8 @@ export default function InformationPage() {
   const [classandnumber, setClassandnumber] = useState("");
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingUserData, setIsLoadingUserData] = useState(true);
-  const [isEditMode, setIsEditMode] = useState(false); // 是否為編輯模式
-  const [originalData, setOriginalData] = useState(null); // 儲存原始資料
+  const [isEditMode, setIsEditMode] = useState(false);
+  const [originalData, setOriginalData] = useState(null);
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [ck, setck] = useState(false);
@@ -27,13 +27,11 @@ export default function InformationPage() {
   const [others, setothers] = useState(false);
 
   useEffect(() => {
-    // 檢查使用者是否已登入
     const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
       if (currentUser) {
         setUser(currentUser);
         await loadUserData(currentUser);
       } else {
-        // 如果沒有登入，重定向到登入頁
         navigate("/auth");
       }
     });
@@ -41,7 +39,6 @@ export default function InformationPage() {
     return () => unsubscribe();
   }, [navigate]);
 
-  // 載入使用者資料
   const loadUserData = async (currentUser) => {
     try {
       setIsLoadingUserData(true);
@@ -50,19 +47,16 @@ export default function InformationPage() {
       
       if (userDoc.exists()) {
         const userData = userDoc.data();
-        // 設定表單資料
         setName(userData.name || "");
         setPhone(userData.phone || "");
         setSchool(userData.school || "");
         setClassandnumber(userData.classandnumber || "");
         
-        // 儲存原始資料
         setOriginalData(userData);
-        setIsEditMode(true); // 設定為編輯模式
+        setIsEditMode(true);
       } else {
-        // 新用戶，使用Google資料作為預設值
         setName("");
-        setIsEditMode(false); // 設定為新註冊模式
+        setIsEditMode(false);
       }
     } catch (error) {
       console.error("Error loading user data:", error);
@@ -73,7 +67,6 @@ export default function InformationPage() {
     }
   };
 
-  // 儲存使用者完整資料
   const saveCompleteUserData = async (user, additionalData, isUpdate = false) => {
     try {
       const userRef = doc(db, "users", user.uid);
@@ -91,12 +84,11 @@ export default function InformationPage() {
         updatedAt: new Date()
       };
 
-      // 如果是新註冊，加上創建時間
       if (!isUpdate) {
         userData.createdAt = new Date();
       }
       
-      await setDoc(userRef, userData, { merge: true }); // 使用merge避免覆蓋其他欄位
+      await setDoc(userRef, userData, { merge: true });
       
       return true;
     } catch (error) {
@@ -105,7 +97,6 @@ export default function InformationPage() {
     }
   };
 
-  // 完成註冊或更新資料
   const handleSubmit = async (e) => {
     e.preventDefault();
     
@@ -127,7 +118,6 @@ export default function InformationPage() {
       if (success) {
         if (isEditMode) {
           showToast("資料更新成功！");
-          // 更新原始資料
           setOriginalData({
             ...originalData,
             name: name.trim(),
@@ -137,7 +127,9 @@ export default function InformationPage() {
           });
         } else {
           showToast("註冊完成！歡迎使用");
-          navigate("/");
+          setTimeout(() => {
+            navigate("/");
+          }, 1000);
         }
       } else {
         showToast(isEditMode ? "更新資料失敗，請重試" : "儲存資料失敗，請重試");
@@ -150,7 +142,6 @@ export default function InformationPage() {
     }
   };
 
-  // 取消編輯，恢復原始資料
   const handleCancelEdit = () => {
     if (originalData) {
       setName(originalData.name || "");
@@ -174,12 +165,10 @@ export default function InformationPage() {
     }
   };
 
-  // 返回首頁
   const handleGoHome = () => {
     navigate("/");
   };
 
-  // 如果還沒有用戶資訊或正在載入用戶資料，顯示載入狀態
   if (!user || isLoadingUserData) {
     return (
       <div style={{ 
@@ -197,6 +186,7 @@ export default function InformationPage() {
       </div>
     );
   }
+
   const setallfalse = () => {
     setck(false);
     settfg(false);
@@ -326,7 +316,6 @@ export default function InformationPage() {
           {isEditMode ? "修改您的個人資料" : "請填寫以下資料完成註冊"}
         </p>
         
-        {/* 顯示 Google 使用者資訊 */}
         <div style={{ 
           marginBottom: "24px", 
           padding: "16px", 
@@ -477,6 +466,13 @@ export default function InformationPage() {
             * 為必填欄位
           </p>
 
+          <p style={{
+            margin: "16px 0 8px", 
+            fontSize: "0.85rem", 
+            color: "#ff0000ff",
+            textAlign: "left"
+          }}>需填寫完所有資料才能前往首頁</p>
+
           <div style={{ display: "flex", gap: "12px", marginTop: "8px", flexWrap: "wrap" }}>
             <button 
               type="submit" 
@@ -508,7 +504,7 @@ export default function InformationPage() {
                   type="button"
                   onClick={handleGoHome}
                   style={{...homeBtnStyle, flex: "1 1 48%"}}
-                  disabled={isLoading}
+                  disabled={isLoading || name.trim() === "" || phone.trim() === "" || school.trim() === ""}
                 >
                   返回首頁
                 </button>
@@ -526,7 +522,6 @@ export default function InformationPage() {
           </div>
         </form>
 
-        {/* 安全提示 */}
         <div style={{ 
           marginTop: "20px", 
           padding: "12px", 
@@ -540,7 +535,6 @@ export default function InformationPage() {
           <div style={{textAlign: "center"}}>您的資料將安全儲存，僅用於系統功能，不會外洩給第三方</div>
         </div>
 
-        {/* 如果是編輯模式，顯示最後更新時間 */}
         {isEditMode && originalData && originalData.updatedAt && (
           <div style={{ 
             marginTop: "12px", 
@@ -556,7 +550,6 @@ export default function InformationPage() {
   );
 }
 
-// 樣式定義
 const inputStyle = {
   padding: "12px 16px",
   margin: "6px 0",

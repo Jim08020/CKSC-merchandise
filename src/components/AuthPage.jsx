@@ -93,7 +93,7 @@ export default function AuthPage() {
           showToast("登入成功！");
           navigate("/");
         }
-        
+
       if (isNewUser || !profileCompleted) {
         showToast("Google 認證成功！請完成註冊資料");
         navigate("/info");
@@ -231,7 +231,7 @@ export default function AuthPage() {
           }}>
             <strong>⚠️ LINE 用戶提示</strong>
             <p style={{ margin: "8px 0 0 0", lineHeight: "1.5" }}>
-              Line 用戶請使用外部瀏覽器(例：Safari, Google Chrome...)，否則無法登入成功
+              Line 用戶請使用外部瀏覽器(例：Safari, Google...)，否則無法登入成功
             </p>
             <button 
             onClick={() => {
@@ -266,9 +266,9 @@ export default function AuthPage() {
           display: "flex",
           flexDirection: "column"
         }}>
-          <strong>⚠️ CK APP 用戶提示</strong>
+          <strong>⚠️ CK APP, Instagram 用戶提示</strong>
           <p style={{ margin: "8px 0 0 0", lineHeight: "1.5" }}>
-            CK APP 用戶請使用外部瀏覽器(例：Safari, Google Chrome...)，否則無法登入成功
+            CK APP 或是 Instagram 用戶請使用外部瀏覽器(例：Safari, Google...)，否則無法登入成功
           </p>
           <button 
             onClick={() => {
@@ -287,6 +287,26 @@ export default function AuthPage() {
             }}
           >
             開啟外部瀏覽器
+          </button><br />
+            （若無法開啟，請手動複製網址到外部瀏覽器）
+          <button 
+            onClick={() => {
+              navigator.clipboard.writeText('souvenir.cksc.tw');
+              showToast("已複製網址到剪貼簿");
+            }}
+            style={{
+              display: "flex",
+              marginTop: "8px",
+              padding: "8px 12px",
+              background: "#667eea",
+              color: "white",
+              border: "none",
+              borderRadius: "6px",
+              fontSize: "0.85rem",
+              cursor: "pointer"
+            }}
+          >
+            複製網址
           </button>
         </div>
         {/* Google 登入按鈕 */}

@@ -272,7 +272,7 @@ export default function CartPage() {
       availableGiftCount,
       amountNeededForGift,
       totalWithoutGiftAfterCombo,
-      reachedThreshold
+      reachedThreshold,
     };
   };
 
@@ -289,7 +289,6 @@ export default function CartPage() {
     totalGiftQuantity,
     giftUsedInCombo,
     availableGiftCount,
-    amountNeededForGift,
     reachedThreshold
   } = calculatePricing();
 
@@ -313,11 +312,6 @@ export default function CartPage() {
     }
     if (cartItems.length === 0) {
       showToast("購物車是空的！");
-      return;
-    }
-
-    if (totalGiftQuantity > 0 && !qualifiesForGift) {
-      showToast(`購買金額未滿 NT$ 1000，無法領取贈品！(還差 NT$ ${amountNeededForGift})`);
       return;
     }
 
@@ -362,7 +356,7 @@ export default function CartPage() {
         customerPhone: profile.phone || "",
         customerEmail: user.email || profile.email || "",
         school: profile.school || "",
-        classNumber: profile.classNumber || "",
+        classNumber: profile.classandnumber || "",
       };
 
       await addDoc(ordersRef, orderData);
@@ -500,7 +494,7 @@ export default function CartPage() {
                       <div style={{ marginBottom: "4px" }}>🎉 您已滿 NT$ 1000！</div>
                       <div style={{ marginBottom: "4px" }}>活動規則：扣除贈品後仍需滿 NT$ 1000</div>
                       {hasAvailableGift ? (
-                        <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>⚠️ 扣除贈品後未滿 NT$ 1000，還差 NT$ {amountNeededForGift}</div>
+                        <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>請將一個贈品加入購物車</div>
                       ) : giftUsedInCombo > 0 ? (
                         <div style={{ marginTop: "4px", fontSize: "0.9rem", opacity: 0.8 }}>💡 套餐C已使用 {giftUsedInCombo} 個徽章，請加入徽章/鑰匙圈即可享免費優惠</div>
                       ) : (

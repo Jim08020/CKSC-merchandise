@@ -10,12 +10,14 @@ export default function OrderdetailPage() {
   const [order, setOrder] = useState(null);
   const [user] = useAuthState(auth);
   const [isAdmin, setIsAdmin] = useState(false);
-  const [checkingAdmin, setCheckingAdmin] = useState(true);
+  const [isManager, setIsManager] = useState(false);
+  const [checkingPermission, setCheckingPermission] = useState(true);
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState(false);
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [displayName, setDisplayName] = useState("");
+  const [userRole, setUserRole] = useState("");
 
   useEffect(() => {
     if (!user) return;
@@ -34,12 +36,13 @@ export default function OrderdetailPage() {
     fetchName();
   }, [user]);
 
-  // 檢查管理員權限
+  // 檢查管理員和 Manager 權限
   useEffect(() => {
-    const checkAdminStatus = async () => {
+    const checkPermission = async () => {
       if (!user) {
         setIsAdmin(false);
-        setCheckingAdmin(false);
+        setIsManager(false);
+        setCheckingPermission(false);
         return;
       }
 
@@ -49,25 +52,32 @@ export default function OrderdetailPage() {
         
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          // 僅檢查資料庫中的 role
-          setIsAdmin(userData.role === "admin");
+          const role = userData.role;
+          setUserRole(role);
+          
+          // 檢查是否為 admin 或 manager
+          setIsAdmin(role === "admin");
+          setIsManager(role === "manager");
         } else {
           setIsAdmin(false);
+          setIsManager(false);
         }
       } catch (error) {
-        console.error("檢查管理員權限失敗:", error);
+        console.error("檢查權限失敗:", error);
         setIsAdmin(false);
+        setIsManager(false);
       } finally {
-        setCheckingAdmin(false);
+        setCheckingPermission(false);
       }
     };
 
-    checkAdminStatus();
+    checkPermission();
   }, [user]);
 
   // 取得訂單資料
   useEffect(() => {
-    if (!isAdmin || checkingAdmin) return;
+    // Admin 或 Manager 都可以訪問
+    if ((!isAdmin && !isManager) || checkingPermission) return;
 
     const fetchOrder = async () => {
       try {
@@ -89,7 +99,7 @@ export default function OrderdetailPage() {
     };
 
     fetchOrder();
-  }, [id, isAdmin, checkingAdmin, navigate, showToast]);
+  }, [id, isAdmin, isManager, checkingPermission, navigate, showToast]);
 
   // 更新交貨狀態
   const updateDeliveryStatus = async (delivered) => {
@@ -98,21 +108,18 @@ export default function OrderdetailPage() {
     setUpdating(true);
     try {
       const orderRef = doc(db, "orders", order.id);
-      const updateData = {
+      await updateDoc(orderRef, {
         delivered,
         deliveryUpdatedAt: serverTimestamp(),
         deliveryUpdatedBy: displayName,
         deliveryUpdatedByName: displayName || user.email || "管理員"
-      };
-
-      await updateDoc(orderRef, updateData);
+      });
       
-      // 更新本地狀態
-      setOrder(prev => ({
-        ...prev,
-        ...updateData,
-        deliveryUpdatedAt: new Date()
-      }));
+      // 重新從資料庫獲取最新資料，避免時間戳格式不一致
+      const updatedDoc = await getDoc(orderRef);
+      if (updatedDoc.exists()) {
+        setOrder({ id: updatedDoc.id, ...updatedDoc.data() });
+      }
 
       showToast(delivered ? "✅ 已標記為已交貨" : "📋 已標記為未交貨");
     } catch (err) {
@@ -123,8 +130,36 @@ export default function OrderdetailPage() {
     }
   };
 
+  const updatePaymentStatus = async (paid) => {
+    if (!order) return;
+    
+    setUpdating(true);
+    try {
+      const orderRef = doc(db, "orders", order.id);
+      await updateDoc(orderRef, {
+        paid,
+        paymentUpdatedAt: serverTimestamp(),
+        paymentUpdatedBy: displayName,
+        paymentUpdatedByName: displayName || user.email || "管理員"
+      });
+      
+      // 重新從資料庫獲取最新資料，避免時間戳格式不一致
+      const updatedDoc = await getDoc(orderRef);
+      if (updatedDoc.exists()) {
+        setOrder({ id: updatedDoc.id, ...updatedDoc.data() });
+      }
+
+      showToast(paid ? "✅ 已標記為已付款" : "📋 已標記為未付款");
+    } catch (err) {
+      console.error("更新付款狀態錯誤:", err);
+      showToast("❌ 更新失敗：" + err.message);
+    } finally {
+      setUpdating(false);
+    }
+  };
+
   // 檢查中
-  if (checkingAdmin) {
+  if (checkingPermission) {
     return (
       <div style={{
         minHeight: "100vh",
@@ -140,8 +175,8 @@ export default function OrderdetailPage() {
     );
   }
 
-  // 權限不足
-  if (!isAdmin) {
+  // 權限不足 (既不是 admin 也不是 manager)
+  if (!isAdmin && !isManager) {
     return (
       <div style={{
         minHeight: "100vh",
@@ -204,6 +239,10 @@ export default function OrderdetailPage() {
     );
   }
 
+  // 根據角色顯示不同的標識
+  const roleDisplay = isAdmin ? "Admin" : "Manager";
+  const roleColor = isAdmin ? "#dd2476" : "#0891b2";
+
   return (
     <div
       style={{
@@ -228,7 +267,7 @@ export default function OrderdetailPage() {
           boxSizing: "border-box",
         }}
       >
-        {/* 管理員標識 */}
+        {/* 用戶標識 (Admin 或 Manager) */}
         <div style={{
           display: "flex",
           alignItems: "center",
@@ -237,6 +276,8 @@ export default function OrderdetailPage() {
           borderRadius: "12px",
           boxShadow: "0 2px 6px rgba(0,0,0,0.1)",
           marginBottom: 0,
+          background: `linear-gradient(135deg, ${roleColor}15 0%, ${roleColor}05 100%)`,
+          border: `1px solid ${roleColor}30`
         }}>
           <img 
             src={user.photoURL || "https://via.placeholder.com/48?text=👤"} 
@@ -246,12 +287,22 @@ export default function OrderdetailPage() {
               height: "48px",
               borderRadius: "50%",
               objectFit: "cover",
-              border: "2px solid #ddd"
+              border: `2px solid ${roleColor}`
             }}
           />
           <div>
             <p style={{ margin: 0, fontWeight: "bold", fontSize: "1rem", color: "#333" }}>
-              Admin-{displayName || "未命名用戶"}
+              <span style={{ 
+                color: roleColor,
+                background: `${roleColor}20`,
+                padding: "2px 8px",
+                borderRadius: "4px",
+                marginRight: "8px",
+                fontSize: "0.85rem"
+              }}>
+                {roleDisplay}
+              </span>
+              {displayName || "未命名用戶"}
             </p>
             <p style={{ margin: 0, fontSize: "0.85rem", color: "#666" }}>
               {user.email}
@@ -277,6 +328,7 @@ export default function OrderdetailPage() {
             flexWrap: "wrap",
             gap: "12px"
           }}>
+            
             <div>
               <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
                 交貨狀態：
@@ -331,6 +383,81 @@ export default function OrderdetailPage() {
                 }}
               >
                 {updating ? "更新中..." : "標記未交貨"}
+              </button>
+            </div>
+          </div>
+        </div>
+
+        {/* 付款狀態區域 */}
+        <div style={{
+          background: order.paid ? "#dcfce7" : "#fef3c7",
+          border: `1px solid ${order.paid ? "#16a34a" : "#f59e0b"}`,
+          borderRadius: "10px",
+          padding: "16px",
+          marginBottom: "8px"
+        }}>
+          <div style={{ 
+            display: "flex", 
+            justifyContent: "space-between", 
+            alignItems: "center", 
+            flexWrap: "wrap",
+            gap: "12px"
+          }}>
+            
+            <div>
+              <div style={{ fontWeight: "bold", marginBottom: "4px" }}>
+                付款狀態：
+                <span style={{ 
+                  color: order.paid ? "#16a34a" : "#f59e0b",
+                  marginLeft: "8px"
+                }}>
+                  {order.paid ? "✅ 已付款" : "⏳ 未付款"}
+                </span>
+              </div>
+              {order.paymentUpdatedAt && (
+                <div style={{ fontSize: "0.85rem", color: "#666" }}>
+                  最後更新：{order.paymentUpdatedAt.toDate ? 
+                    order.paymentUpdatedAt.toDate().toLocaleString() : 
+                    order.paymentUpdatedAt.toLocaleString()
+                  }
+                  {order.paymentUpdatedByName && ` (${order.paymentUpdatedByName})`}
+                </div>
+              )}
+            </div>
+            
+            <div style={{ display: "flex", gap: "8px" }}>
+              <button
+                onClick={() => updatePaymentStatus(true)}
+                disabled={updating || order.paid}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: order.paid ? "#94a3b8" : "#16a34a",
+                  color: "white",
+                  fontWeight: "bold",
+                  cursor: order.paid || updating ? "not-allowed" : "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                {updating ? "更新中..." : "標記已付款"}
+              </button>
+              
+              <button
+                onClick={() => updatePaymentStatus(false)}
+                disabled={updating || !order.paid}
+                style={{
+                  padding: "8px 16px",
+                  borderRadius: "6px",
+                  border: "none",
+                  background: !order.paid ? "#94a3b8" : "#f59e0b",
+                  color: "white",
+                  fontWeight: "bold",
+                  cursor: !order.paid || updating ? "not-allowed" : "pointer",
+                  transition: "all 0.2s",
+                }}
+              >
+                {updating ? "更新中..." : "標記未付款"}
               </button>
             </div>
           </div>

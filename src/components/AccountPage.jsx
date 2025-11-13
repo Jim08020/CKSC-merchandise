@@ -34,7 +34,6 @@ export default function AdminAccountManagement() {
         
         if (userDoc.exists()) {
           const userData = userDoc.data();
-          // 僅檢查資料庫中的 role
           setIsAdmin(userData.role === "admin");
         } else {
           setIsAdmin(false);
@@ -50,7 +49,6 @@ export default function AdminAccountManagement() {
     checkAdminStatus();
   }, [currentUser]);
 
-  // 從 Firebase 獲取使用者資料
   useEffect(() => {
     const fetchUsers = async () => {
       try {
@@ -81,7 +79,6 @@ export default function AdminAccountManagement() {
     }
   }, [isAdmin, checkingAdmin]);
 
-  // 篩選使用者
   const filteredUsers = users.filter(user => {
     const matchesSearch = 
       user.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -91,27 +88,24 @@ export default function AdminAccountManagement() {
     return matchesSearch && matchesRole;
   });
 
-  // 切換管理員權限（直接更新 Firestore）
-  const toggleAdminRole = async (userId) => {
+  // 切換角色 (admin/manager/user)
+  const changeUserRole = async (userId, newRole) => {
     const user = users.find(u => u.id === userId);
-    
+
     // 防止移除自己的管理員權限
-    if (userId === currentUser.uid && user.role === "admin") {
+    if (userId === currentUser.uid && user.role === "admin" && newRole !== "admin") {
       showToast("無法移除自己的管理員權限");
       return;
     }
 
     // 檢查是否為最後一個管理員
     const adminCount = users.filter(u => u.role === "admin").length;
-    if (adminCount === 1 && user.role === "admin") {
+    if (adminCount === 1 && user.role === "admin" && newRole !== "admin") {
       showToast("至少需要保留一位管理員");
       return;
     }
 
     try {
-      const newRole = user.role === "admin" ? "user" : "admin";
-
-      // 直接更新 Firestore 中的 role 欄位
       const userRef = doc(db, "users", userId);
       await updateDoc(userRef, {
         role: newRole,
@@ -125,14 +119,20 @@ export default function AdminAccountManagement() {
           : u
       ));
 
-      showToast(`已${newRole === "admin" ? "授予" : "移除"}管理員權限，該用戶需重新整理頁面後生效`);
+      const roleNames = {
+        admin: "管理員",
+        manager: "友校管理員",
+        user: "一般用戶"
+      };
+
+      showToast(`已將用戶角色更改為 ${roleNames[newRole]}，該用戶需重新整理頁面後生效`);
       
       // 如果在彈窗中，也更新選中的用戶
       if (selectedUser && selectedUser.id === userId) {
         setSelectedUser({...selectedUser, role: newRole});
       }
     } catch (error) {
-      console.error("更新管理員權限失敗:", error);
+      console.error("更新權限失敗:", error);
       showToast("更新權限失敗");
     }
   };
@@ -174,6 +174,16 @@ export default function AdminAccountManagement() {
   const openUserModal = (user) => {
     setSelectedUser(user);
     setShowModal(true);
+  };
+
+  // 取得角色顯示資訊
+  const getRoleInfo = (role) => {
+    const roleMap = {
+      admin: { label: "管理員", color: "#1976d2", icon: "👑" },
+      manager: { label: "友校管理員", color: "#f57c00", icon: "🔑" },
+      user: { label: "一般用戶", color: "#7b1fa2", icon: "👤" }
+    };
+    return roleMap[role] || roleMap.user;
   };
 
   // 檢查中
@@ -278,7 +288,7 @@ export default function AdminAccountManagement() {
         {/* 統計卡片 */}
         <div style={{
           display: "grid",
-          gridTemplateColumns: "repeat(auto-fit, minmax(200px, 1fr))",
+          gridTemplateColumns: "repeat(auto-fit, minmax(180px, 1fr))",
           gap: "20px",
           marginBottom: "30px"
         }}>
@@ -302,7 +312,7 @@ export default function AdminAccountManagement() {
             <div style={{ fontSize: "2rem", fontWeight: "bold", color: "#2196F3" }}>
               {users.filter(u => u.role === "admin").length}
             </div>
-            <div style={{ color: "#666", marginTop: "8px" }}>管理員</div>
+            <div style={{ color: "#666", marginTop: "8px" }}>👑 管理員</div>
           </div>
           <div style={{
             background: "white",
@@ -311,9 +321,20 @@ export default function AdminAccountManagement() {
             boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
           }}>
             <div style={{ fontSize: "2rem", fontWeight: "bold", color: "#FF9800" }}>
-              {users.filter(u => u.status === "active" || !u.status).length}
+              {users.filter(u => u.role === "manager").length}
             </div>
-            <div style={{ color: "#666", marginTop: "8px" }}>活躍用戶</div>
+            <div style={{ color: "#666", marginTop: "8px" }}>🔑 友校管理員</div>
+          </div>
+          <div style={{
+            background: "white",
+            padding: "20px",
+            borderRadius: "12px",
+            boxShadow: "0 2px 8px rgba(0,0,0,0.1)"
+          }}>
+            <div style={{ fontSize: "2rem", fontWeight: "bold", color: "#9C27B0" }}>
+              {users.filter(u => u.role === "user" || !u.role).length}
+            </div>
+            <div style={{ color: "#666", marginTop: "8px" }}>👤 一般用戶</div>
           </div>
         </div>
 
@@ -356,8 +377,9 @@ export default function AdminAccountManagement() {
               }}
             >
               <option value="all">全部角色</option>
-              <option value="admin">管理員</option>
-              <option value="user">一般用戶</option>
+              <option value="admin">👑 管理員</option>
+              <option value="manager">🔑 友校管理員</option>
+              <option value="user">👤 一般用戶</option>
             </select>
           </div>
         </div>
@@ -379,75 +401,94 @@ export default function AdminAccountManagement() {
                 <th style={{ padding: "16px", textAlign: "left", fontWeight: "bold" }}>Email</th>
                 <th style={{ padding: "16px", textAlign: "left", fontWeight: "bold" }}>姓名</th>
                 <th style={{ padding: "16px", textAlign: "center", fontWeight: "bold" }}>角色</th>
+                <th style={{ padding: "16px", textAlign: "center", fontWeight: "bold" }}>學校</th>
                 <th style={{ padding: "16px", textAlign: "center", fontWeight: "bold" }}>資料更新</th>
                 <th style={{ padding: "16px", textAlign: "center", fontWeight: "bold" }}>操作</th>
               </tr>
             </thead>
             <tbody>
-              {filteredUsers.map((user, index) => (
-                <tr 
-                  key={user.id}
-                  style={{
-                    borderBottom: "1px solid #eee",
-                    background: index % 2 === 0 ? "white" : "#fafafa",
-                    transition: "background 0.2s"
-                  }}
-                  onMouseEnter={(e) => e.currentTarget.style.background = "#f0f0f0"}
-                  onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? "white" : "#fafafa"}
-                >
-                  <td style={{ padding: "16px", fontSize: "0.9rem" }}>
-                    {user.email}
-                    {user.id === currentUser.uid && (
-                      <span style={{ 
-                        marginLeft: "8px", 
-                        fontSize: "0.75rem", 
-                        color: "#2196F3",
-                        fontWeight: "bold"
+              {filteredUsers.map((user, index) => {
+                const roleInfo = getRoleInfo(user.role);
+                return (
+                  <tr 
+                    key={user.id}
+                    style={{
+                      borderBottom: "1px solid #eee",
+                      background: index % 2 === 0 ? "white" : "#fafafa",
+                      transition: "background 0.2s"
+                    }}
+                    onMouseEnter={(e) => e.currentTarget.style.background = "#f0f0f0"}
+                    onMouseLeave={(e) => e.currentTarget.style.background = index % 2 === 0 ? "white" : "#fafafa"}
+                  >
+                    <td style={{ padding: "16px", fontSize: "0.9rem" }}>
+                      {user.email}
+                      {user.id === currentUser.uid && (
+                        <span style={{ 
+                          marginLeft: "8px", 
+                          fontSize: "0.75rem", 
+                          color: "#2196F3",
+                          fontWeight: "bold"
+                        }}>
+                          (您)
+                        </span>
+                      )}
+                    </td>
+                    <td style={{ padding: "16px" }}>{user.name || user.displayName || "未設定"}</td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <span style={{
+                        fontSize: "0.85rem",
+                        fontWeight: "bold",
+                        color: roleInfo.color,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px"
                       }}>
-                        (您)
+                        {roleInfo.icon} {roleInfo.label}
                       </span>
-                    )}
-                  </td>
-                  <td style={{ padding: "16px" }}>{user.name || user.displayName || "未設定"}</td>
-                  <td style={{ padding: "16px", textAlign: "center" }}>
-                    <span style={{
-                      fontSize: "0.85rem",
-                      fontWeight: "bold",
-                      color: user.role === "admin" ? "#1976d2" : "#7b1fa2"
-                    }}>
-                      {user.role === "admin" ? "管理員" : "一般用戶"}
-                    </span>
-                  </td>
-                  <td style={{ padding: "16px", textAlign: "center", color: "#666", fontSize: "0.9rem" }}>
-                    {user.updatedAt?.toDate 
-                      ? user.updatedAt.toDate().toLocaleDateString('zh-TW', {
-                          year: 'numeric',
-                          month: '2-digit',
-                          day: '2-digit',
-                          hour: '2-digit',
-                          minute: '2-digit'
-                        })
-                      : "未知"}
-                  </td>
-                  <td style={{ padding: "16px", textAlign: "center" }}>
-                    <button
-                      onClick={() => openUserModal(user)}
-                      style={{
-                        padding: "8px 16px",
-                        background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
-                        color: "white",
-                        border: "none",
-                        borderRadius: "6px",
-                        cursor: "pointer",
-                        fontSize: "0.9rem",
-                        fontWeight: "bold"
-                      }}
-                    >
-                      管理
-                    </button>
-                  </td>
-                </tr>
-              ))}
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <span style={{
+                        fontSize: "0.85rem",
+                        fontWeight: "bold",
+                        color: roleInfo.color,
+                        display: "inline-flex",
+                        alignItems: "center",
+                        gap: "4px"
+                      }}>
+                        {user.school}
+                      </span>
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center", color: "#666", fontSize: "0.9rem" }}>
+                      {user.updatedAt?.toDate 
+                        ? user.updatedAt.toDate().toLocaleDateString('zh-TW', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit',
+                            hour: '2-digit',
+                            minute: '2-digit'
+                          })
+                        : "未知"}
+                    </td>
+                    <td style={{ padding: "16px", textAlign: "center" }}>
+                      <button
+                        onClick={() => openUserModal(user)}
+                        style={{
+                          padding: "8px 16px",
+                          background: "linear-gradient(90deg, #ff512f 0%, #dd2476 100%)",
+                          color: "white",
+                          border: "none",
+                          borderRadius: "6px",
+                          cursor: "pointer",
+                          fontSize: "0.9rem",
+                          fontWeight: "bold"
+                        }}
+                      >
+                        管理
+                      </button>
+                    </td>
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
 
@@ -507,6 +548,9 @@ export default function AdminAccountManagement() {
                 <strong>姓名：</strong> {selectedUser.name || selectedUser.displayName || "未設定"}
               </div>
               <div style={{ marginBottom: "16px" }}>
+                <strong>班級座號：</strong> {selectedUser.classandnumber || "未設定"}
+              </div>
+              <div style={{ marginBottom: "16px" }}>
                 <strong>電話：</strong> {selectedUser.phone || "未設定"}
               </div>
               <div style={{ marginBottom: "16px" }}>
@@ -521,10 +565,10 @@ export default function AdminAccountManagement() {
                   : "未知"}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>身分：</strong> {selectedUser.role === "admin" ? "管理員" : "一般用戶"}
+                <strong>身分：</strong> {getRoleInfo(selectedUser.role).icon} {getRoleInfo(selectedUser.role).label}
               </div>
               <div style={{ marginBottom: "16px" }}>
-                <strong>使用者 ID：</strong> {selectedUser.id}
+                <strong>使用者 ID：</strong> <span style={{ fontSize: "0.85rem", color: "#666" }}>{selectedUser.id}</span>
               </div>
               <div style={{ marginBottom: "16px" }}>
                 <strong>學校：</strong> {selectedUser.school || "未設定"}
@@ -536,24 +580,64 @@ export default function AdminAccountManagement() {
               flexDirection: "column",
               gap: "12px"
             }}>
+              {/* 設為管理員 */}
               <button
-                onClick={() => toggleAdminRole(selectedUser.id)}
-                disabled={selectedUser.id === currentUser.uid && selectedUser.role === "admin"}
+                onClick={() => changeUserRole(selectedUser.id, "admin")}
+                disabled={selectedUser.role === "admin"}
                 style={{
                   padding: "12px",
-                  background: selectedUser.role === "admin" ? "#ff9800" : "#4CAF50",
+                  background: selectedUser.role === "admin" ? "#ccc" : "#2196F3",
                   color: "white",
                   border: "none",
                   borderRadius: "8px",
                   fontWeight: "bold",
-                  cursor: selectedUser.id === currentUser.uid && selectedUser.role === "admin" ? "not-allowed" : "pointer",
+                  cursor: selectedUser.role === "admin" ? "not-allowed" : "pointer",
                   fontSize: "1rem",
-                  opacity: selectedUser.id === currentUser.uid && selectedUser.role === "admin" ? 0.5 : 1
+                  opacity: selectedUser.role === "admin" ? 0.5 : 1
                 }}
               >
-                {selectedUser.role === "admin" ? "🔽 移除管理員權限" : "🔼 授予管理員權限"}
+                👑 {selectedUser.role === "admin" ? "已是管理員" : "設為管理員"}
               </button>
 
+              {/* 設為友校管理員 */}
+              <button
+                onClick={() => changeUserRole(selectedUser.id, "manager")}
+                disabled={selectedUser.role === "manager" || (selectedUser.id === currentUser.uid && selectedUser.role === "admin")}
+                style={{
+                  padding: "12px",
+                  background: selectedUser.role === "manager" ? "#ccc" : "#FF9800",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                  cursor: (selectedUser.role === "manager" || (selectedUser.id === currentUser.uid && selectedUser.role === "admin")) ? "not-allowed" : "pointer",
+                  fontSize: "1rem",
+                  opacity: (selectedUser.role === "manager" || (selectedUser.id === currentUser.uid && selectedUser.role === "admin")) ? 0.5 : 1
+                }}
+              >
+                🔑 {selectedUser.role === "manager" ? "已是友校管理員" : "設為友校管理員"}
+              </button>
+
+              {/* 設為一般用戶 */}
+              <button
+                onClick={() => changeUserRole(selectedUser.id, "user")}
+                disabled={selectedUser.role === "user" || (selectedUser.id === currentUser.uid && selectedUser.role === "admin")}
+                style={{
+                  padding: "12px",
+                  background: selectedUser.role === "user" ? "#ccc" : "#9C27B0",
+                  color: "white",
+                  border: "none",
+                  borderRadius: "8px",
+                  fontWeight: "bold",
+                  cursor: (selectedUser.role === "user" || (selectedUser.id === currentUser.uid && selectedUser.role === "admin")) ? "not-allowed" : "pointer",
+                  fontSize: "1rem",
+                  opacity: (selectedUser.role === "user" || (selectedUser.id === currentUser.uid && selectedUser.role === "admin")) ? 0.5 : 1
+                }}
+              >
+                👤 {selectedUser.role === "user" ? "已是一般用戶" : "設為一般用戶"}
+              </button>
+
+              {/* 刪除使用者 */}
               <button
                 onClick={() => deleteUser(selectedUser.id)}
                 disabled={selectedUser.id === currentUser.uid || selectedUser.role === "admin"}
@@ -572,6 +656,7 @@ export default function AdminAccountManagement() {
                 🗑️ 刪除使用者
               </button>
 
+              {/* 取消按鈕 */}
               <button
                 onClick={() => {
                   setShowModal(false);

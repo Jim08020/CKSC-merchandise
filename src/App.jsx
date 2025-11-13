@@ -19,12 +19,15 @@ import OrderdetailPage from "./components/OrderdetailPage";
 import InformationPage from "./components/InformationPage";
 import ToastProvider, { useToast } from "./components/ToastContext";
 import ComingSoonPage from "./components/ComingoonPage";
+import ToolPage from "./components/ToolPage";
+import UpdatePage from "./components/UpdatePage";
 
 const InfoPage = InformationPage;
 
 const starttime = new Date("2025-11-05T12:00:00+08:00");
 const now = new Date();
 const isAfterStartTime = now >= starttime;
+const isinfoPage = window.location.pathname === "/info";
 
 function App() {
   const [user, setUser] = useState(null);
@@ -43,19 +46,29 @@ function App() {
           const userDoc = await getDoc(userRef);
           
           let isAdmin = false;
+          let isManager = false;
           
           if (userDoc.exists()) {
             const userData = userDoc.data();
             // 使用 Firestore 中的 role 欄位判斷
             isAdmin = userData.role === "admin";
+            isManager = userData.role === "manager";
           }
-          // 移除 adminEmails 的備用判斷邏輯
-
-          setUser({ ...currentUser, isAdmin });
+          
+          // 正確設定用戶狀態,包含所有屬性
+          setUser({ 
+            ...currentUser, 
+            isAdmin, 
+            isManager 
+          });
         } catch (error) {
           console.error("Error fetching user role:", error);
-          // 發生錯誤時預設為非管理員
-          setUser({ ...currentUser, isAdmin: false });
+          // 發生錯誤時預設為非管理員/管理者
+          setUser({ 
+            ...currentUser, 
+            isAdmin: false, 
+            isManager: false 
+          });
         }
       } else {
         setUser(null);
@@ -100,6 +113,9 @@ function App() {
     textAlign: "left",
   };
 
+  // 判斷是否有管理權限 (admin 或 manager)
+  const hasManagePermission = user && (user.isAdmin || user.isManager);
+
   return (
     <div style={{ minHeight: "100vh", background: "linear-gradient(120deg, #e0eafc 0%, #cfdef3 100%)" }}>
       {/* Header */}
@@ -117,6 +133,7 @@ function App() {
       >
         {/* 左側漢堡菜單 */}
         <button
+          disabled={isinfoPage}
           onClick={() => setDrawerOpen(true)}
           style={{
             border: "none",
@@ -134,6 +151,7 @@ function App() {
 
         {user ? (
           <button
+            disabled={isinfoPage}
             onClick={() => navigate("/cart")}
             style={{
               border: "none",
@@ -201,12 +219,17 @@ function App() {
             <button onClick={() => { navigate("/info"); setDrawerOpen(false); }} style={drawerBtnStyle}>修改資料</button>
             <button onClick={() => { navigate("/terms"); setDrawerOpen(false); }} style={drawerBtnStyle}>使用者條款</button>
             <button onClick={() => { navigate("/about"); setDrawerOpen(false); }} style={drawerBtnStyle}>關於</button>
+            
+            {/* 管理員專屬功能 */}
             {user.isAdmin && (
               <>
                 <button onClick={() => { navigate("/admin"); setDrawerOpen(false); }} style={drawerBtnStyle}>後台管理</button>
                 <button onClick={() => { navigate("/account"); setDrawerOpen(false); }} style={drawerBtnStyle}>帳號管理</button>
+                <button onClick={() => { navigate("/tool"); setDrawerOpen(false); }} style={drawerBtnStyle}>工具</button>
+                <button onClick={() => { navigate("/update"); setDrawerOpen(false); }} style={drawerBtnStyle}>更新</button>
               </>
             )}
+            
             <div style={{
               display: "flex",
               alignItems: "center",
@@ -276,61 +299,64 @@ function App() {
 
       {/* Main Content */}
       <main style={{ maxWidth: "900px", margin: "16px auto 0", padding: "0 12px" }}>
-      <Routes>
-        <Route path="/terms" element={<TermsPage />} />
-        <Route path="/about" element={<AboutPage />} />
-        <Route path="/info" element={<InfoPage />} />
-        {!user ? (
-          <>
-            <Route path="*" element={<AuthPage />} />
-          </>
-        ) : (
-          <>
-            {isAfterStartTime ? (
-              <>
-                <Route path="/" element={<HomePage />} />
-                <Route path="/product/:id" element={<ProductPage />} />
-                <Route path="/cart" element={<CartPage />} />
-                <Route path="/orders" element={<OrdersPage />} />
-                <Route path="/orders/:id" element={<OrderdetailPage />} />
-              </>
-            ) : (
-              <>
-                <Route path="/comingsoon" element={<ComingSoonPage />} />
-                <Route
-                  path="/"
-                  element={user.isAdmin ? <HomePage /> : <Navigate to="/info" replace />}
-                />
-                <Route
-                  path="/product/:id"
-                  element={user.isAdmin ? <ProductPage /> : <Navigate to="/comingsoon" replace />}
-                />
-                <Route
-                  path="/cart"
-                  element={user.isAdmin ? <CartPage /> : <Navigate to="/comingsoon" replace />}
-                />
-                <Route
-                  path="/orders"
-                  element={user.isAdmin ? <OrdersPage /> : <Navigate to="/comingsoon" replace />}
-                />
-                <Route
-                  path="/orders/:id"
-                  element={user.isAdmin ? <OrderdetailPage /> : <Navigate to="/comingsoon" replace />}
-                />
-              </>
-            )}
-            <Route
-              path="/admin"
-              element={user.isAdmin ? <AdminPage /> : <Navigate to="/" replace />}
-            />
-            <Route
-              path="/account"
-              element={user.isAdmin ? <AccountPage /> : <Navigate to="/" replace />}
-            />
-            <Route path="*" element={<Navigate to="/" replace />} />
-          </>
-        )}
-      </Routes>
+        <Routes>
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/about" element={<AboutPage />} />
+          <Route path="/info" element={<InfoPage />} />
+          {!user ? (
+            <>
+              <Route path="*" element={<AuthPage />} />
+            </>
+          ) : (
+            <>
+              {isAfterStartTime ? (
+                <>
+                  <Route path="/" element={<HomePage />} />
+                  <Route path="/product/:id" element={<ProductPage />} />
+                  <Route path="/cart" element={<CartPage />} />
+                  <Route path="/orders" element={<OrdersPage />} />
+                  <Route path="/orders/:id" element={<OrderdetailPage />} />
+                  <Route path="/tool" element={<ToolPage />} />
+                  <Route path="/update" element={<UpdatePage />} />
+                </>
+              ) : (
+                <>
+                  <Route path="/comingsoon" element={<ComingSoonPage />} />
+                  <Route
+                    path="/"
+                    element={hasManagePermission ? <HomePage /> : <Navigate to="/info" replace />}
+                  />
+                  <Route
+                    path="/product/:id"
+                    element={hasManagePermission ? <ProductPage /> : <Navigate to="/comingsoon" replace />}
+                  />
+                  <Route
+                    path="/cart"
+                    element={hasManagePermission ? <CartPage /> : <Navigate to="/comingsoon" replace />}
+                  />
+                  <Route
+                    path="/orders"
+                    element={hasManagePermission ? <OrdersPage /> : <Navigate to="/comingsoon" replace />}
+                  />
+                  <Route
+                    path="/orders/:id"
+                    element={hasManagePermission ? <OrderdetailPage /> : <Navigate to="/comingsoon" replace />}
+                  />
+                </>
+              )}
+              {/* 管理員專屬頁面 */}
+              <Route
+                path="/admin"
+                element={hasManagePermission ? <AdminPage /> : <Navigate to="/" replace />}
+              />
+              <Route
+                path="/account"
+                element={user.isAdmin ? <AccountPage /> : <Navigate to="/" replace />}
+              />
+              <Route path="*" element={<Navigate to="/" replace />} />
+            </>
+          )}
+        </Routes>
       </main>
     </div>
   );
